@@ -93,7 +93,7 @@ public class main extends JavaPlugin {
 		} catch (IOException e1) {
 			getLogger().info("Error parsing lang file!");
 		}
-		//Load the colour scheme from config
+		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),
 				config.getString("colorScheme.error"),
 				config.getString("colorScheme.info"),

@@ -1,0 +1,12 @@
+name: uCarsTrade
+main: net.stormdev.ucars.trade.main
+version: 1
+softdepend: [Vault]
+depend: [uCars]
+commands:
+   ucarsTrade:
+        description: This is the admin commands
+        usage: /<command>
+        permission: ucarstrade.admin
+        permission-message: You don't have access to this command
+        default: op

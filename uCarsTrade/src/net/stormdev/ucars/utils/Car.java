@@ -34,6 +34,10 @@ public class Car implements Serializable {
 	public UUID getId(){
 		return this.id;
 	}
+	public void setId(UUID newId){
+		this.id = newId;
+		return;
+	}
 	public Minecart getCar(Minecart base){
 		for(String statName:stats.keySet()){
 			base.setMetadata(statName, new StatValue(stats.get(statName).getValue(), main.plugin));

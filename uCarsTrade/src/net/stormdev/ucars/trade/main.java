@@ -37,6 +37,7 @@ public class main extends JavaPlugin {
 	public static UTradeListener listener = null;
 	public static Random random = new Random();
 	public CarSaver carSaver = null;
+	public CarCalculations carCals = null;
 	
 	public void onEnable(){
 		plugin = this;
@@ -180,6 +181,7 @@ public class main extends JavaPlugin {
 		}
 		this.carSaver = new CarSaver(carSaveFile);
 		this.carSaver.load();
+		this.carCals = new CarCalculations();
 		logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

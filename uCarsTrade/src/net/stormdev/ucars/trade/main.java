@@ -5,21 +5,25 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
+import net.stormdev.ucars.utils.ItemRename;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.useful.ucars.Colors;
-import com.useful.ucars.uCarsCommandExecutor;
-import com.useful.ucars.uCarsListener;
 import com.useful.ucars.ucars;
 
 public class main extends JavaPlugin {
@@ -31,6 +35,8 @@ public class main extends JavaPlugin {
 	public static ucars ucars = null;
 	public static UTradeCommandExecutor cmdExecutor = null;
 	public static UTradeListener listener = null;
+	public static Random random = new Random();
+	public CarSaver carSaver = null;
 	
 	public void onEnable(){
 		plugin = this;
@@ -68,6 +74,25 @@ public class main extends JavaPlugin {
         try {
         	if (!config.contains("general.logger.colour")) {
 				config.set("general.logger.colour", true);
+			}
+        	if (!config.contains("general.cars.names")) {
+        		ArrayList<String> names = new ArrayList<String>();
+            	names.add("Car");
+            	names.add("Peugot");
+            	names.add("Ferrari");
+            	names.add("Lotus");
+            	names.add("Pagani");
+            	names.add("SmartCar");
+            	names.add("Maclaren");
+            	names.add("PimpMobile");
+            	names.add("SwagMobile");
+            	names.add("Ford");
+            	names.add("Koinsegg");
+            	names.add("ArielAtom");
+            	names.add("TravelWagon");
+            	names.add("GeneralMotor");
+            	names.add("ValueCar");
+				config.set("general.cars.names", names);
 			}
         	//Setup the colour scheme
         	if (!config.contains("colorScheme.success")) {
@@ -131,6 +156,30 @@ public class main extends JavaPlugin {
 		main.listener = new UTradeListener(this);
 		getServer().getPluginManager().registerEvents(main.listener,
 				this);
+		ItemStack car = new ItemStack(Material.MINECART);
+		car = ItemRename.rename(car, "Car");
+		ShapedRecipe carRecipe = new ShapedRecipe(car);
+		carRecipe.shape("012","345","678");
+		carRecipe.setIngredient('0', Material.REDSTONE);
+		carRecipe.setIngredient('1', Material.LEVER);
+		carRecipe.setIngredient('2', Material.REDSTONE);
+		carRecipe.setIngredient('3', Material.IRON_INGOT);
+		carRecipe.setIngredient('4', Material.REDSTONE);
+		carRecipe.setIngredient('5', Material.IRON_INGOT);
+		carRecipe.setIngredient('6', Material.IRON_INGOT);
+		carRecipe.setIngredient('7', Material.IRON_INGOT);
+		carRecipe.setIngredient('8', Material.IRON_INGOT);
+		getServer().addRecipe(carRecipe);
+		File carSaveFile = new File(getDataFolder()+File.separator+".carData");
+		if(carSaveFile.length() < 1 || !carSaveFile.exists()){
+			try {
+				carSaveFile.createNewFile();
+			} catch (IOException e) {
+				main.logger.info(colors.getError()+"Failed to create new car data file!");
+			}
+		}
+		this.carSaver = new CarSaver(carSaveFile);
+		this.carSaver.load();
 		logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

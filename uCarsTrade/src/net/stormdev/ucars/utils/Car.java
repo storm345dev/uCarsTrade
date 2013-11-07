@@ -4,10 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.HealthStat;
+import net.stormdev.ucars.stats.NameStat;
 import net.stormdev.ucars.stats.SpeedStat;
+import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
 
 import org.bukkit.Material;
@@ -21,15 +24,19 @@ import com.useful.ucarsCommon.StatValue;
 public class Car implements Serializable {
 	private static final long serialVersionUID = -4379501444781549934L;
 	public Boolean isPlaced = false;
-	public HashMap<String, StatValue> stats = new HashMap<String, StatValue>();
-	public Car(Boolean isPlaced, HashMap<String, StatValue> stats){
+	public UUID id = null;
+	public HashMap<String, Stat> stats = new HashMap<String, Stat>();
+	public Car(Boolean isPlaced, HashMap<String, Stat> stats){
 		this.isPlaced = isPlaced;
 		this.stats = stats;
+		this.id = UUID.randomUUID();
+	}
+	public UUID getId(){
+		return this.id;
 	}
 	public Minecart getCar(Minecart base){
-		//TODO Create item off of stats
 		for(String statName:stats.keySet()){
-			base.setMetadata(statName, stats.get(statName));
+			base.setMetadata(statName, new StatValue(stats.get(statName).getValue(), main.plugin));
 		}
 		return base;
 	}
@@ -37,11 +44,13 @@ public class Car implements Serializable {
 		ItemStack stack = new ItemStack(Material.MINECART);
 		ItemMeta meta = stack.getItemMeta();
 		List<String> lore = new ArrayList<String>();
+		lore.clear();
 		String health = "Undamaged";
 		String handling = "Undamaged";
 		String speed = "30.0";
+		String name = "Car";
 		List<String> extra = new ArrayList<String>();
-		for(StatValue stat:stats.values()){
+		for(Stat stat:stats.values()){
 			if(stat instanceof SpeedStat){
 				speed = ""+stat.getValue();
 			}
@@ -54,25 +63,29 @@ public class Car implements Serializable {
 			else if(stat instanceof HealthStat){
 				health = ""+stat.getValue();
 			}
+			else if(stat instanceof NameStat){
+				name = ""+stat.getValue();
+			}
 			else{
 				extra.add("-"+stat.getValue());
-			}
-			lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed);
-			double max = ucars.config.getDouble("general.cars.health.max");
-			lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);
-			lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+handling);
-			for(String x:extra){
-				lore.add(main.colors.getInfo()+x);
-			}
+			}	
+		}
+		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed);
+		double max = ucars.config.getDouble("general.cars.health.max");
+		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);
+		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+handling);
+		for(String x:extra){
+			lore.add(main.colors.getInfo()+x);
 		}
 		meta.setLore(lore);
 		stack.setItemMeta(meta);
+		stack = ItemRename.rename(stack, name);
 		return stack;
 	}
-	public HashMap<String, StatValue> getStats(){
+	public HashMap<String, Stat> getStats(){
 		return this.stats;
 	}
-	public void setStats(HashMap<String, StatValue> stats){
+	public void setStats(HashMap<String, Stat> stats){
 		this.stats = stats;
 		return;
 	}

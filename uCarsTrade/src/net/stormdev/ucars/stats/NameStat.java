@@ -4,22 +4,22 @@ import java.io.Serializable;
 
 import org.bukkit.plugin.Plugin;
 
-public class HandlingDamagedStat extends Stat implements Serializable{
-	private static final long serialVersionUID = -3043496785688659505L;
+public class NameStat extends Stat implements Serializable {
+	private static final long serialVersionUID = -3699118953150138669L;
 	Boolean overrideDefaults = true;
-	public HandlingDamagedStat(Boolean value, Plugin plugin) {
+	public NameStat(String value, Plugin plugin) {
 		super(value, plugin);
 		this.val = value;
 	}
-	public Boolean getDamagedHandling(){
+	public String getName(){
 		try {
-			return (Boolean) this.val;
+			return (String) this.val;
 		} catch (Exception e) {
-			return false;
+			return "Car";
 		}
 	}
-	public void setDamagedHandling(Boolean damaged){
-		this.val = damaged;
+	public void setName(String name){
+		this.val = name;
 		return;
 	}
     public Boolean getOverrideDefaults(){
@@ -30,6 +30,6 @@ public class HandlingDamagedStat extends Stat implements Serializable{
     	return;
     }
     public StatType getType(){
-    	return StatType.HANDLING_DAMAGED;
+    	return StatType.NAME;
     }
 }

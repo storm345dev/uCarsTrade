@@ -89,10 +89,30 @@ public class UTradeListener implements Listener {
 								+ Lang.get("lang.messages.noPlaceHere"));
 				return;
 			}
+			List<String> lore = inHand.getItemMeta().getLore();
+			Car c = null;
+			if(lore.size() > 0){
+			UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+			if(!plugin.carSaver.cars.containsKey(carId)){
+				return;
+			}
+			c = plugin.carSaver.cars.get(carId);
+			}
+			else{
+				return;
+			}
+			HashMap<String, Stat> stats = c.getStats();
 			Location loc = block.getLocation().add(0, 1.5, 0);
 			loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
 			final Entity car = event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
 			double health = ucars.config.getDouble("general.cars.health.default");
+			if(stats.containsKey("trade.health")){
+				try {
+					health = (Double) stats.get("trade.health").getValue();
+				} catch (Exception e) {
+					//Leave health to default
+				}
+			}
 			Runnable onDeath = new Runnable(){
 				//@Override
 				public void run(){
@@ -106,24 +126,12 @@ public class UTradeListener implements Listener {
 			 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
 			 * car.setVelocity(new Vector(0,0,0));
 			 */
+			UUID id = car.getUniqueId();
+			car.setMetadata("trade.car", new StatValue(true, plugin));
 				ItemStack placed = event.getPlayer().getItemInHand();
 				placed.setAmount(0);
 				event.getPlayer().getInventory().setItemInHand(placed);
 			event.setCancelled(true);
-			UUID id = car.getUniqueId();
-			List<String> lore = inHand.getItemMeta().getLore();
-			Car c = null;
-			car.setMetadata("trade.car", new StatValue(true, plugin));
-			if(lore.size() > 0){
-			UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-			if(!plugin.carSaver.cars.containsKey(carId)){
-				return;
-			}
-			c = plugin.carSaver.cars.get(carId);
-			}
-			else{
-				return;
-			}
 			while(plugin.carSaver.cars.containsKey(id)){
 				Car cr = plugin.carSaver.cars.get(id);
 				plugin.carSaver.cars.remove(id);
@@ -138,7 +146,6 @@ public class UTradeListener implements Listener {
 			c.isPlaced = true;
 			plugin.carSaver.cars.put(id, c);
 			plugin.carSaver.save();
-			HashMap<String, Stat> stats = c.getStats();
 			String name = "Unnamed";
 			if(stats.containsKey("trade.name")){
 				name = stats.get("trade.name").getValue().toString();

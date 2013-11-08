@@ -3,6 +3,7 @@ package net.stormdev.ucars.trade;
 import java.util.HashMap;
 import java.util.UUID;
 
+import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
 
@@ -30,7 +31,26 @@ public class CarCalculations {
 			}
 			current = current.multiply(mod);			
 		}
-		
+		if(stats.containsKey("trade.handling")){
+			HandlingDamagedStat stat = (HandlingDamagedStat) stats.get("trade.handling");
+			if(stat.getDamagedHandling()){
+				double x = current.getX();
+				double z = current.getZ();
+				if(!main.random.nextBoolean()){
+					if(main.random.nextBoolean()){
+						//Change x
+						x = x*currentMult/3;
+					}
+					else{
+						//Change z
+						z = z*currentMult/3;
+						
+					}
+					current.setX(x);
+					current.setZ(z);
+				}
+			}
+		}
 		//TODO
 		return current;
 	}

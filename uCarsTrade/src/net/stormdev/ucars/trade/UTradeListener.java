@@ -16,12 +16,16 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.AnvilInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.useful.ucars.CarHealthData;
@@ -41,12 +45,123 @@ public class UTradeListener implements Listener {
 		if(event.isCancelled()){
 			return;
 		}
+		ItemStack recipe = event.getCurrentItem();
+		if(!(recipe.getType() == Material.MINECART)){
+			return;
+		}
+		if(recipe.getDurability() < 20){
+			return;
+		}
 		Car car = CarGenerator.gen();
         event.setCurrentItem(car.getItem());
         main.plugin.carSaver.cars.put(car.getId(), car);
         main.plugin.carSaver.save();
 		return;
 	}
+	@EventHandler (priority = EventPriority.HIGH)
+	void carUpgradeAnvil(InventoryClickEvent event){
+		Player player = (Player) event.getWhoClicked();
+		Inventory inv = event.getInventory();
+		if(!(inv instanceof AnvilInventory)){
+			return;
+		}
+		AnvilInventory i = (AnvilInventory) inv;
+		main.logger.info("Action: "+event.getAction().name());
+		return;
+	}
+	/*
+	@SuppressWarnings("deprecation")
+	@EventHandler(priority = EventPriority.HIGHEST)
+	void carUpgradeRecipes(InventoryClickEvent event){
+		Inventory inv = event.getInventory();
+		if(!(inv instanceof CraftingInventory)){
+			return;
+		}
+		ItemStack[] items = inv.getContents().clone();
+		ArrayList<ItemStack> upgradeItems = new ArrayList<ItemStack>();
+		Boolean isUpgrade = false;
+		ItemStack car = null;
+		for(ItemStack item:items){
+			if(item.getType().equals(Material.MINECART)){
+				if(item.getDurability() > 19){
+					isUpgrade  = true;
+					car = item;
+				}
+			}
+			upgradeItems.add(item);
+		}
+		if(!isUpgrade){
+			return;
+		}
+		ItemMeta meta = car.getItemMeta();
+		List<String> lore = meta.getLore();
+		UUID id;
+		try {
+			if(lore.size() < 1){
+				return;
+			}
+			id = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		} catch (Exception e) {
+			return;
+		}
+		Car c = null;
+		if(!plugin.carSaver.cars.containsKey(id)){
+			return;
+		}
+		c = plugin.carSaver.cars.get(id);
+		HashMap<String, Stat> stats = c.getStats();
+		upgradeItems.add(event.getCurrentItem());
+		for(ItemStack upgrade:upgradeItems){
+			if(upgrade.getType() == Material.MINECART || upgrade.getType() == Material.AIR){
+				//Allowed
+			}
+			else if(upgrade.getType() == Material.IRON_BLOCK){
+				//Health upgrade
+				double health = ucars.config.getDouble("general.cars.health.default");
+				double maxHealth = ucars.config.getDouble("general.cars.health.max");
+				HealthStat stat = new HealthStat(health, plugin);
+				if(stats.containsKey("trade.health")){
+					stat = (HealthStat) stats.get("trade.health");
+				}
+				health = health + (9*upgrade.getAmount()); //Add 9 to health stat
+				if(health > maxHealth){
+					health = maxHealth;
+				}
+				upgrade.setAmount(0);
+				stat.setHealth(health);
+				stats.put("trade.health", stat);
+			}
+			else if(upgrade.getType() == Material.IRON_INGOT){
+				//Health upgrade
+				double health = ucars.config.getDouble("general.cars.health.default");
+				double maxHealth = ucars.config.getDouble("general.cars.health.max");
+				HealthStat stat = new HealthStat(health, plugin);
+				if(stats.containsKey("trade.health")){
+					stat = (HealthStat) stats.get("trade.health");
+				}
+				health = health + (1*upgrade.getAmount()); //Add 1 to health stat
+				if(health > maxHealth){
+					health = maxHealth;
+				}
+				upgrade.setAmount(0);
+				stat.setHealth(health);
+				stats.put("trade.health", stat);
+			}
+			else{
+				//Invalid item
+				return;
+			}
+		}
+		c.setStats(stats);
+	    CraftingInventory ci = (CraftingInventory) inv;
+	    ci.clear();
+	    ((Player)event.getView().getPlayer()).getInventory().addItem(c.getItem());
+	    ((Player)event.getView().getPlayer()).updateInventory();
+	    plugin.carSaver.cars.put(id, c);
+	    plugin.carSaver.save();
+		return;
+	}
+	*/
 	@EventHandler(priority = EventPriority.LOW)
 	void carPlace(PlayerInteractEvent event){
 		if(event.isCancelled()){

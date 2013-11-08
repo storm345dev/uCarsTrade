@@ -27,10 +27,10 @@ public class CarGenerator {
 		if(health < 1){
 			health = 1;
 		}
-		int rand = main.random.nextInt(25-5)+5; //5 -- 15
+		int rand = main.random.nextInt(19-2)+2; //5 -- 15
 		speed = rand;
-		if(speed < 5){
-			speed = 5;
+		if(speed < 2){
+			speed = 2;
 		}
 		double speeD = speed/10;
 		if(rand == 10){ //1 in 10 chance

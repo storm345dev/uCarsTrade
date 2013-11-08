@@ -19,6 +19,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,6 +39,7 @@ public class main extends JavaPlugin {
 	public static Random random = new Random();
 	public CarSaver carSaver = null;
 	public CarCalculations carCals = null;
+	public ShapedRecipe carRecipe = null;
 	
 	public void onEnable(){
 		plugin = this;
@@ -162,8 +164,9 @@ public class main extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(main.listener,
 				this);
 		ItemStack car = new ItemStack(Material.MINECART);
+		car.setDurability((short) 20);
 		car = ItemRename.rename(car, "Car");
-		ShapedRecipe carRecipe = new ShapedRecipe(car);
+		this.carRecipe = new ShapedRecipe(car);
 		carRecipe.shape("012","345","678");
 		carRecipe.setIngredient('0', Material.REDSTONE);
 		carRecipe.setIngredient('1', Material.LEVER);

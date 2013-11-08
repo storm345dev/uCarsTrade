@@ -54,6 +54,9 @@ public class main extends JavaPlugin {
 		}
 		try {
 			lang.load(langFile);
+			if(!lang.contains("general.place.msg")){
+				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
+			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
@@ -140,6 +143,7 @@ public class main extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 		}
 		ucars.hookPlugin(this);
+		com.useful.ucars.ucars.plugin.ucarsTrade = true;
 		logger.info("uCars found and hooked!");
 		PluginDescriptionFile pldesc = plugin.getDescription();
 		Map<String, Map<String, Object>> commands = pldesc.getCommands();

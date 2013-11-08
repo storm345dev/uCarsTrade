@@ -46,12 +46,13 @@ public class Car implements Serializable {
 	}
 	public ItemStack getItem(){
 		ItemStack stack = new ItemStack(Material.MINECART);
+		stack.setDurability((short) 20);
 		ItemMeta meta = stack.getItemMeta();
 		List<String> lore = new ArrayList<String>();
 		lore.clear();
 		String health = "Undamaged";
 		String handling = "Undamaged";
-		String speed = "30.0";
+		String speed = "+15.0";
 		String name = "Car";
 		List<String> extra = new ArrayList<String>();
 		for(Stat stat:stats.values()){
@@ -74,7 +75,8 @@ public class Car implements Serializable {
 				extra.add("-"+stat.getValue());
 			}	
 		}
-		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed);
+		lore.add(main.colors.getTitle()+this.id);
+		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed+"x");
 		double max = ucars.config.getDouble("general.cars.health.max");
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);
 		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+handling);

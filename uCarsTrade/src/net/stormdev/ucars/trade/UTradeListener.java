@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import net.stormdev.ucars.stats.HandlingDamagedStat;
+import net.stormdev.ucars.stats.HealthStat;
+import net.stormdev.ucars.stats.NameStat;
+import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
@@ -22,11 +26,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.Lang;
@@ -58,16 +65,203 @@ public class UTradeListener implements Listener {
         main.plugin.carSaver.save();
 		return;
 	}
-	@EventHandler (priority = EventPriority.HIGH)
+	@EventHandler (priority = EventPriority.MONITOR)
 	void carUpgradeAnvil(InventoryClickEvent event){
-		Player player = (Player) event.getWhoClicked();
-		Inventory inv = event.getInventory();
-		if(!(inv instanceof AnvilInventory)){
+		if(event.getAction()==InventoryAction.CLONE_STACK){ //Don't work but left here until bukkit fixes
+			ItemStack cloned = event.getCursor();
+			if(cloned.getType() == Material.MINECART && cloned.getDurability()>19){
+				event.setCancelled(true);
+			}
 			return;
 		}
-		AnvilInventory i = (AnvilInventory) inv;
-		main.logger.info("Action: "+event.getAction().name());
+		final Player player = (Player) event.getWhoClicked();
+		InventoryView view = event.getView();
+		final Inventory i = event.getInventory();
+		if(!(i instanceof AnvilInventory)){
+			return;
+		}
+		int slotNumber = event.getRawSlot();
+		if(!(slotNumber == view.convertSlot(slotNumber))){
+			//Not clicking in the anvil
+			return;
+		}
+		//AnvilInventory i = (AnvilInventory) inv;
+		Boolean update = true;
+		Boolean save = false;
+		Boolean pickup = false;
+		if(event.getAction() == InventoryAction.PICKUP_ALL || event.getAction() == InventoryAction.PICKUP_HALF || event.getAction() == InventoryAction.PICKUP_ONE || event.getAction() == InventoryAction.PICKUP_SOME){
+			update = false;
+			pickup = true;
+			if(slotNumber == 2){ //Result slot
+				save = true;
+			}
+		}
+		ItemStack carItem = null;
+		try {
+			carItem = i.getItem(0);
+		} catch (Exception e) {
+			return;
+		}
+		if(carItem == null){
+			return;
+		}
+		if(!(carItem.getType() == Material.MINECART) || !(carItem.getDurability() > 19)){
+			return; //Not a car
+		}
+		//Anvil contains a car in first slot.
+		ItemMeta meta = carItem.getItemMeta();
+		List<String> lore = meta.getLore();
+		final UUID id;
+		try {
+			if(lore.size() < 1){
+				return;
+			}
+			id = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		} catch (Exception e) {
+			return;
+		}
+		Car car = null;
+		if(!plugin.carSaver.cars.containsKey(id)){
+			return;
+		}
+		car = plugin.carSaver.cars.get(id);
+		final HashMap<String, Stat> stats = car.getStats();
+        if(save && slotNumber ==2){
+			//They are renaming it
+        	ItemStack result = event.getCurrentItem();
+        	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+        	stats.put("trade.name", new NameStat(name, plugin));
+        	car.setStats(stats);
+        	plugin.carSaver.cars.remove(id);
+        	plugin.carSaver.cars.put(id, car);
+        	plugin.carSaver.save();
+        	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed car to: '"+name+"'");
+        	return;
+		}
+		InventoryAction a = event.getAction();
+		ItemStack upgrade = null;
+		Boolean set = false;
+		final ItemStack up = upgrade;
+		final Boolean updat = update;
+		final Boolean sav = save;
+		final Car ca = car;
+		if(slotNumber == 1 && (a==InventoryAction.PLACE_ALL || a==InventoryAction.PLACE_ONE || a==InventoryAction.PLACE_SOME) && event.getCursor().getType()!=Material.AIR){
+			//upgrade = event.getCursor().clone();
+			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
+
+				public void run() {
+					ItemStack upgrade = up;
+					try {
+						upgrade = i.getItem(1); //Upgrade slot
+					} catch (Exception e) {
+						return;
+					}
+					if(upgrade == null){
+						return;
+					}
+					//A dirty trick to get the inventory to look correct on the client
+					applyUpgrades(upgrade, stats, ca, updat, sav, player, i, id);
+					return;
+				}}, 1l);
+			set = true;
+			return;
+		}
+		if(!set){
+		    try {
+				upgrade = i.getItem(1); //Upgrade slot
+			} catch (Exception e) {
+				return;
+			}
+		}
+		if(upgrade == null){
+			return;
+		}
+		main.logger.info("Upgrade item: "+upgrade.getType().name());
+		if(pickup && slotNumber == 1){
+			return; //Don't bother tracking and updating, etc...
+		} 
+		applyUpgrades(upgrade, stats, car, update, save, player, i, id);
 		return;
+	}
+	@SuppressWarnings("deprecation")
+	public void applyUpgrades(ItemStack upgrade, HashMap<String, Stat> stats, Car car, Boolean update, Boolean save, Player player, Inventory i, UUID carId){
+		   if(upgrade.getType() == Material.IRON_BLOCK){
+				//Health upgrade
+				double health = ucars.config.getDouble("general.cars.health.default");
+				double maxHealth = ucars.config.getDouble("general.cars.health.max");
+				HealthStat stat = new HealthStat(health, plugin);
+				if(stats.containsKey("trade.health")){
+					stat = (HealthStat) stats.get("trade.health");
+					health = stat.getHealth();
+				}
+				double bonus = (9*upgrade.getAmount());
+				player.sendMessage(main.colors.getSuccess()+"+"+bonus+main.colors.getInfo()+" health! (Max: "+maxHealth+")");
+				health = health + bonus; //Add 9 to health stat
+				if(health > maxHealth){
+					health = maxHealth;
+				}
+				upgrade.setAmount(0);
+				stat.setHealth(health);
+				stats.put("trade.health", stat);
+			}
+			else if(upgrade.getType() == Material.IRON_INGOT){
+				//Health upgrade
+				double health = ucars.config.getDouble("general.cars.health.default");
+				double maxHealth = ucars.config.getDouble("general.cars.health.max");
+				HealthStat stat = new HealthStat(health, plugin);
+				if(stats.containsKey("trade.health")){
+					stat = (HealthStat) stats.get("trade.health");
+					health = stat.getHealth();
+				}
+				double bonus = 1*upgrade.getAmount();
+				health = health + bonus; //Add 1 to health stat
+				player.sendMessage(main.colors.getSuccess()+"+"+bonus+main.colors.getInfo()+" health! (Max: "+maxHealth+")");
+				if(health > maxHealth){
+					health = maxHealth;
+				}
+				upgrade.setAmount(0);
+				stat.setHealth(health);
+				stats.put("trade.health", stat);
+			}
+			else if(upgrade.getType() == Material.LEVER){
+				stats.remove("trade.handling"); //Fix handling if broken
+				player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Fixed any damage to the car!");
+				upgrade.setAmount(0);
+			}
+			else if(upgrade.getType() == Material.REDSTONE){
+				//Increment speed
+				double speed = 1;
+				SpeedStat speedStat = new SpeedStat(speed, plugin);
+				if(stats.containsKey("trade.speed")){
+					speedStat = (SpeedStat) stats.get("trade.speed");
+					speed = speedStat.getSpeedMultiplier();
+				}
+				speed = speed + (0.05*upgrade.getAmount());
+				speed = speed * 100; //0.05 -> 5
+				speed = Math.round(speed);
+				speed = speed / 100; //5 -> 0.05
+				if(speed > 5){
+					speed = 5;
+				}
+				speedStat.setSpeedMultiplier(speed);
+				stats.put("trade.speed", speedStat);
+				player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Speed: "+speed+"x (Max: "+5+"x)");
+				upgrade.setAmount(0);
+			}
+			else{
+				//Invalid item
+				return;
+			}
+			i.clear(1);
+			if(update){
+				car.setStats(stats);
+				i.setItem(0, car.getItem());
+				plugin.carSaver.cars.remove(carId);
+				plugin.carSaver.cars.put(carId, car);
+				plugin.carSaver.save();
+				player.updateInventory();
+			}
+			return;
 	}
 	/*
 	@SuppressWarnings("deprecation")
@@ -284,6 +478,13 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		car.isPlaced = false;
+		if(main.random.nextBoolean()){
+			if(main.random.nextBoolean()){
+				if(main.random.nextBoolean()){
+				    car.stats.put("trade.handling", new HandlingDamagedStat(true, plugin));
+				}
+			}
+		}
 		plugin.carSaver.cars.put(id, car);
 		plugin.carSaver.save();
 		cart.eject();

@@ -40,6 +40,8 @@ public class main extends JavaPlugin {
 	public CarSaver carSaver = null;
 	public CarCalculations carCals = null;
 	public ShapedRecipe carRecipe = null;
+	public Boolean mariokartInstalled = false;
+	public Boolean uCarsRaceInstalled = false;
 	
 	public void onEnable(){
 		plugin = this;
@@ -189,6 +191,12 @@ public class main extends JavaPlugin {
 		this.carSaver = new CarSaver(carSaveFile);
 		this.carSaver.load();
 		this.carCals = new CarCalculations();
+		if(getServer().getPluginManager().getPlugin("uCarsRace") != null){
+			uCarsRaceInstalled = true;
+		}
+		if(getServer().getPluginManager().getPlugin("MarioKart") != null){
+			mariokartInstalled = true;
+		}
 		logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

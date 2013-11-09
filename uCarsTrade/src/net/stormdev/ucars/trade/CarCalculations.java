@@ -58,6 +58,9 @@ public class CarCalculations {
 		if(main.plugin.carSaver.cars.containsKey(car.getUniqueId())){
 			return true;
 		}
+		if(car.hasMetadata("kart.racing")){
+			return true;
+		}
 		return false;
 	}
 }

@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
+import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 
@@ -46,6 +47,7 @@ public class main extends JavaPlugin {
 	public Boolean mariokartInstalled = false;
 	public Boolean uCarsRaceInstalled = false;
 	public IconMenu tradeMenu = null;
+	public SalesManager salesManager = null;
 	
 	public void onEnable(){
 		plugin = this;
@@ -225,7 +227,10 @@ public class main extends JavaPlugin {
         tradeMenu.setOption(2, new ItemStack(Material.MINECART, 1), colors.getTitle()+"Sell Cars", colors.getInfo()+"Sell cars!");
         tradeMenu.setOption(3, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Buy Upgrades", colors.getInfo()+"Buy upgrades for your cars!");
         tradeMenu.setOption(4, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Sell Upgrades", colors.getInfo()+"Sell upgrades for cars!");
-		logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
+		File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");
+		File upgradesMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "upgradesMarket.marketData");
+		this.salesManager = new SalesManager(carsMarketSaveFile, upgradesMarketSaveFile);
+        logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
 	public void onDisable(){

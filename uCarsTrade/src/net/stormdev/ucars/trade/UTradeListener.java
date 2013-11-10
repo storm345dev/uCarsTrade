@@ -12,11 +12,18 @@ import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.IconMenu;
+import net.stormdev.ucars.utils.TradeBoothClickEvent;
+import net.stormdev.ucars.utils.TradeBoothMenuType;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -29,6 +36,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -524,6 +532,161 @@ public class UTradeListener implements Listener {
 		}
 		return;
 	}
-	
+	@EventHandler
+	public void tradeBooth(InventoryOpenEvent event){
+		Inventory inv = event.getInventory();
+		if (!(inv.getHolder() instanceof Chest || inv.getHolder() instanceof DoubleChest)){
+            return;
+        }
+		//They opened a chest
+		Block block = null;
+		if(inv.getHolder() instanceof Chest){
+			block = ((Chest)inv.getHolder()).getBlock();
+		}
+		else{
+			block = ((DoubleChest)inv.getHolder()).getLocation().getBlock();
+		}
+		Block underBlock = block.getRelative(BlockFace.DOWN);
+		if(!(underBlock.getState() instanceof Sign)){
+			return;
+		}
+		Sign sign = (Sign) underBlock.getState();
+		if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Trade]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
+			return;
+		}
+		//A trade sign for cars
+		event.setCancelled(true); //Cancel the event
+		//Create a trade inventory
+		Player player = (Player) event.getPlayer(); //Get the player from the event
+		event.getView().close();
+		plugin.tradeMenu.open(player);
+		//Made the trade booth
+		return;
+	}
+	@EventHandler
+	public void tradeMenuSelect(final TradeBoothClickEvent event){
+		IconMenu.OptionClickEvent clickEvent = event.getClickEvent();
+		final Player player = clickEvent.getPlayer();
+		int position = clickEvent.getPosition();
+		Runnable doAfter = null;
+		if(event.getMenuType() == TradeBoothMenuType.MENU){ //They are selecting which menu to open
+			if(position == 0){ //Read tutorial
+				player.sendMessage(main.colors.getTitle()+"Tutorial coming soon!");
+				return;
+			}
+			else if(position == 1){ //Buy cars
+				doAfter = new Runnable(){
+					public void run() {
+						getCarsForSaleMenu(1).open(player);
+						return;
+				    }};
+			    //Don't return
+			}
+		}
+		else if(event.getMenuType() == TradeBoothMenuType.BUY_CARS){
+			if(position == 0){
+				//Return to menu
+				doAfter = new Runnable(){
+					public void run() {
+						plugin.tradeMenu.open(player);
+						return;
+				    }};
+			}
+			else if(position == 53){
+				//Next page
+				doAfter = new Runnable(){
+					public void run() {
+						getCarsForSaleMenu(event.getPage()+1).open(player);
+						return;
+				    }};
+			}
+			else if(position == 52){
+				int page = event.getPage();
+				if(page > 1){
+					page--;
+				}
+				final int p = page;
+				doAfter = new Runnable(){
+					public void run() {
+						getCarsForSaleMenu(p).open(player);
+						return;
+				    }};
+			}
+			else{
+				//Positions 1-> 51
+				//TODO Get car and buy it using vault
+			}
+		}
+		else if(event.getMenuType() == TradeBoothMenuType.BUY_UPGRADES){
+			if(position == 0){
+				//Return to menu
+				doAfter = new Runnable(){
+					public void run() {
+						plugin.tradeMenu.open(player);
+						return;
+				    }};
+			}
+			else if(position == 53){
+				//Next page
+				doAfter = new Runnable(){
+					public void run() {
+						getUpgradesForSaleMenu(event.getPage()+1).open(player);
+						return;
+				    }};
+			}
+			else if(position == 52){
+				int page = event.getPage();
+				if(page > 1){
+					page--;
+				}
+				final int p = page;
+				doAfter = new Runnable(){
+					public void run() {
+						getUpgradesForSaleMenu(p).open(player);
+						return;
+				    }};
+			}
+			else{
+				//Positions 1-> 51
+				//TODO Get car and sell it using vault
+			}
+		}
+		if(doAfter != null){
+			plugin.getServer().getScheduler().runTaskLater(plugin, doAfter, 2l);
+		}
+		return;
+	}
+	IconMenu getCarsForSaleMenu(final int page){
+		//TODO Create method
+		IconMenu menu = new IconMenu(main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page, 54, new IconMenu.OptionClickEventHandler() {
+            public void onOptionClick(IconMenu.OptionClickEvent event) {
+            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_CARS, page);
+            	plugin.getServer().getPluginManager().callEvent(evt);
+            	event.setWillClose(true);
+            	event.setWillDestroy(true);
+            }
+        }, plugin);
+		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
+		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
+		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
+		//TODO Set option slots for all cars for sale
+		return menu;
+	}
+	IconMenu getUpgradesForSaleMenu(final int page){
+		//TODO Create method
+		IconMenu menu = new IconMenu(main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyUpgrades")+" Page: "+page, 54, new IconMenu.OptionClickEventHandler() {
+            public void onOptionClick(IconMenu.OptionClickEvent event) {
+            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_UPGRADES, page);
+            	plugin.getServer().getPluginManager().callEvent(evt);
+            	event.setWillClose(true);
+            	event.setWillDestroy(true);
+            }
+        }, plugin);
+		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
+		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
+		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
+		//TODO Set option slots for all upgrades for sale
+		return menu;
+	}
 
 }

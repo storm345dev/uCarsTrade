@@ -11,7 +11,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
+import net.stormdev.ucars.utils.TradeBoothClickEvent;
+import net.stormdev.ucars.utils.TradeBoothMenuType;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,7 +22,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,6 +45,7 @@ public class main extends JavaPlugin {
 	public ShapedRecipe carRecipe = null;
 	public Boolean mariokartInstalled = false;
 	public Boolean uCarsRaceInstalled = false;
+	public IconMenu tradeMenu = null;
 	
 	public void onEnable(){
 		plugin = this;
@@ -63,6 +67,12 @@ public class main extends JavaPlugin {
 			}
 			if(!lang.contains("general.upgrade.msg")){
 				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%"); //TODO
+			}
+			if(!lang.contains("title.carTrading")){
+				lang.set("title.carTrading", "Car Trading");
+			}
+			if(!lang.contains("title.trade.buyCars")){
+				lang.set("title.trade.buyCars", "Buy Cars");
 			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
@@ -200,6 +210,18 @@ public class main extends JavaPlugin {
 		if(getServer().getPluginManager().getPlugin("MarioKart") != null){
 			mariokartInstalled = true;
 		}
+        tradeMenu = new IconMenu(main.colors.getTitle()+Lang.get("title.carTrading"), 9, new IconMenu.OptionClickEventHandler() {
+            public void onOptionClick(IconMenu.OptionClickEvent event) {
+            	event.setWillClose(true);
+            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.MENU, 1);
+            	plugin.getServer().getPluginManager().callEvent(evt);
+            }
+        }, plugin);
+        tradeMenu.setOption(0, new ItemStack(Material.BOOK, 1), colors.getTitle()+"Read Tutorial", colors.getInfo()+"Read the tutorial!");
+        tradeMenu.setOption(1, new ItemStack(Material.MINECART, 1), colors.getTitle()+"Buy Cars", colors.getInfo()+"Buy Cars!");
+        tradeMenu.setOption(2, new ItemStack(Material.MINECART, 1), colors.getTitle()+"Sell Cars", colors.getInfo()+"Sell cars!");
+        tradeMenu.setOption(3, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Buy Upgrades", colors.getInfo()+"Buy upgrades for your cars!");
+        tradeMenu.setOption(4, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Sell Upgrades", colors.getInfo()+"Sell upgrades for cars!");
 		logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

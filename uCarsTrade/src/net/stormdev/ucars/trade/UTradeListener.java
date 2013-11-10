@@ -25,6 +25,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -511,7 +512,18 @@ public class UTradeListener implements Listener {
 		event.setCancelled(true);
 		return;
 	}
-	//TODO Manage actual car events eg. Make Car uuid = minecart uuid
+	//Add extra functions; eg. Car trade station, etc...
+	@EventHandler
+	public void signWriter(SignChangeEvent event){
+		String[] lines = event.getLines();
+		if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Trade]")){
+			lines[0] = ChatColor.GREEN+"[Trade]";
+			lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1]);
+			lines[2] = "Place chest";
+			lines[3] = "above";
+		}
+		return;
+	}
 	
 
 }

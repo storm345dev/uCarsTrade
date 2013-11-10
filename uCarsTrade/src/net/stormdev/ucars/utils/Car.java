@@ -14,12 +14,10 @@ import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.useful.ucars.ucars;
-import com.useful.ucarsCommon.StatValue;
 
 public class Car implements Serializable {
 	private static final long serialVersionUID = -4379501444781549934L;

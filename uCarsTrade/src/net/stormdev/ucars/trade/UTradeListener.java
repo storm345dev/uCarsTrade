@@ -176,7 +176,6 @@ public class UTradeListener implements Listener {
 		if(upgrade == null){
 			return;
 		}
-		main.logger.info("Upgrade item: "+upgrade.getType().name());
 		if(pickup && slotNumber == 1){
 			return; //Don't bother tracking and updating, etc...
 		} 
@@ -185,6 +184,7 @@ public class UTradeListener implements Listener {
 	}
 	@SuppressWarnings("deprecation")
 	public void applyUpgrades(ItemStack upgrade, HashMap<String, Stat> stats, Car car, Boolean update, Boolean save, Player player, Inventory i, UUID carId){
+		   String upgradeMsg = net.stormdev.ucars.trade.Lang.get("general.upgrade.msg");
 		   if(upgrade.getType() == Material.IRON_BLOCK){
 				//Health upgrade
 				double health = ucars.config.getDouble("general.cars.health.default");
@@ -195,11 +195,15 @@ public class UTradeListener implements Listener {
 					health = stat.getHealth();
 				}
 				double bonus = (9*upgrade.getAmount());
-				player.sendMessage(main.colors.getSuccess()+"+"+bonus+main.colors.getInfo()+" health! (Max: "+maxHealth+")");
 				health = health + bonus; //Add 9 to health stat
 				if(health > maxHealth){
 					health = maxHealth;
 				}
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "health");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
+				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
 				stat.setHealth(health);
 				stats.put("trade.health", stat);
@@ -215,7 +219,11 @@ public class UTradeListener implements Listener {
 				}
 				double bonus = 1*upgrade.getAmount();
 				health = health + bonus; //Add 1 to health stat
-				player.sendMessage(main.colors.getSuccess()+"+"+bonus+main.colors.getInfo()+" health! (Max: "+maxHealth+")");
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "health");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
+				player.sendMessage(upgradeMsg);
 				if(health > maxHealth){
 					health = maxHealth;
 				}
@@ -225,7 +233,11 @@ public class UTradeListener implements Listener {
 			}
 			else if(upgrade.getType() == Material.LEVER){
 				stats.remove("trade.handling"); //Fix handling if broken
-				player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Fixed any damage to the car!");
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "Fixed");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "all damage to the car");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), "Undamaged");
+				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
 			}
 			else if(upgrade.getType() == Material.REDSTONE){
@@ -245,7 +257,11 @@ public class UTradeListener implements Listener {
 				}
 				speedStat.setSpeedMultiplier(speed);
 				stats.put("trade.speed", speedStat);
-				player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Speed: "+speed+"x (Max: "+5+"x)");
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "0.05x");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "speed");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+5+"x)");
+				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
 			}
 			else{

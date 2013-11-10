@@ -61,6 +61,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.place.msg")){
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
+			if(!lang.contains("general.upgrade.msg")){
+				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%"); //TODO
+			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}

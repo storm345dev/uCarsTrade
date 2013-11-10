@@ -38,12 +38,6 @@ public class Car implements Serializable {
 		this.id = newId;
 		return;
 	}
-	public Minecart getCar(Minecart base){
-		for(String statName:stats.keySet()){
-			base.setMetadata(statName, new StatValue(stats.get(statName).getValue(), main.plugin));
-		}
-		return base;
-	}
 	public ItemStack getItem(){
 		ItemStack stack = new ItemStack(Material.MINECART);
 		stack.setDurability((short) 20);

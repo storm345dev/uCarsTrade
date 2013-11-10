@@ -41,10 +41,13 @@ public class CarCalculations {
 						//Change x
 						x = x*currentMult/3;
 					}
+					else if(main.random.nextBoolean()){
+						x = -x;
+						z = -z;
+					}
 					else{
 						//Change z
-						z = z*currentMult/3;
-						
+						z = z*currentMult/3;	
 					}
 					current.setX(x);
 					current.setZ(z);

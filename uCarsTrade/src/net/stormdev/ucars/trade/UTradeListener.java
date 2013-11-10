@@ -555,10 +555,10 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		//A trade sign for cars
-		event.setCancelled(true); //Cancel the event
 		//Create a trade inventory
 		Player player = (Player) event.getPlayer(); //Get the player from the event
 		event.getView().close();
+		event.setCancelled(true); //Cancel the event
 		plugin.tradeMenu.open(player);
 		//Made the trade booth
 		return;

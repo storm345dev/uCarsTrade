@@ -582,6 +582,20 @@ public class UTradeListener implements Listener {
 				    }};
 			    //Don't return
 			}
+			else if(position == 2){ //Sell cars
+			    //TODO	
+			}
+			else if(position == 3){ //Buy upgrades
+				doAfter = new Runnable(){
+					public void run() {
+						getUpgradesForSaleMenu(1).open(player);
+						return;
+				    }};
+			    //Don't return
+			}
+			else if(position == 4){ //Sell upgrades
+				//TODO
+			}
 		}
 		else if(event.getMenuType() == TradeBoothMenuType.BUY_CARS){
 			if(position == 0){
@@ -658,7 +672,11 @@ public class UTradeListener implements Listener {
 	}
 	IconMenu getCarsForSaleMenu(final int page){
 		//TODO Create method
-		IconMenu menu = new IconMenu(main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page, 54, new IconMenu.OptionClickEventHandler() {
+		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page;
+		if(title.length() > 32){
+			title = main.colors.getError()+"Buy Upgrades (ERROR:Too Long)";
+		}
+		IconMenu menu = new IconMenu(title, 54, new IconMenu.OptionClickEventHandler() {
             public void onOptionClick(IconMenu.OptionClickEvent event) {
             	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_CARS, page);
             	plugin.getServer().getPluginManager().callEvent(evt);
@@ -674,7 +692,11 @@ public class UTradeListener implements Listener {
 	}
 	IconMenu getUpgradesForSaleMenu(final int page){
 		//TODO Create method
-		IconMenu menu = new IconMenu(main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyUpgrades")+" Page: "+page, 54, new IconMenu.OptionClickEventHandler() {
+		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyUpgrades")+" Page: "+page;
+		if(title.length() > 32){
+			title = main.colors.getError()+"Buy Upgrades (ERROR:Too Long)";
+		}
+		IconMenu menu = new IconMenu(title, 54, new IconMenu.OptionClickEventHandler() {
             public void onOptionClick(IconMenu.OptionClickEvent event) {
             	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_UPGRADES, page);
             	plugin.getServer().getPluginManager().callEvent(evt);

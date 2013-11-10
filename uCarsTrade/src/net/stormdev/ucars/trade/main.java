@@ -66,13 +66,16 @@ public class main extends JavaPlugin {
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
 			if(!lang.contains("general.upgrade.msg")){
-				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%"); //TODO
+				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");
 			}
 			if(!lang.contains("title.carTrading")){
 				lang.set("title.carTrading", "Car Trading");
 			}
 			if(!lang.contains("title.trade.buyCars")){
 				lang.set("title.trade.buyCars", "Buy Cars");
+			}
+			if(!lang.contains("title.trade.buyUpgrades")){
+				lang.set("title.trade.buyUpgrades", "Buy Upgrades");
 			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");

@@ -146,7 +146,7 @@ public class main extends JavaPlugin {
 				config.set("general.carTrading.currencySign", "$");
 			}
         	if (!config.contains("general.carTrading.averageCarValue")) {
-				config.set("general.carTrading.averageCarValue", 459.99);
+				config.set("general.carTrading.averageCarValue", 29.99);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");

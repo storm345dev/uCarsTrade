@@ -534,6 +534,19 @@ public class UTradeListener implements Listener {
 	}
 	@EventHandler
 	public void tradeBooth(InventoryOpenEvent event){
+		if(!main.config.getBoolean("general.carTrading.enable")){
+			//Don't do car trading
+			return;
+		}
+		if(main.economy == null){
+	        Boolean installed = plugin.setupEconomy();
+	        if(!installed){
+	        	main.config.set("general.carTrading.enable", false);
+	        	main.logger.info(main.colors.getError()+"[Important] Unable to find an economy plugin:"
+	        			+ " trade booths have been closed.");
+	        	return;
+	        }
+		}
 		Inventory inv = event.getInventory();
 		if (!(inv.getHolder() instanceof Chest || inv.getHolder() instanceof DoubleChest)){
             return;

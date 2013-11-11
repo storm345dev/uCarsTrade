@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.milkbowl.vault.economy.Economy;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
@@ -23,9 +24,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.useful.ucars.Colors;
@@ -48,6 +49,17 @@ public class main extends JavaPlugin {
 	public Boolean uCarsRaceInstalled = false;
 	public IconMenu tradeMenu = null;
 	public SalesManager salesManager = null;
+	public static Economy economy = null;
+	
+	protected boolean setupEconomy() {
+		RegisteredServiceProvider<Economy> economyProvider = getServer()
+				.getServicesManager().getRegistration(
+						net.milkbowl.vault.economy.Economy.class);
+		if (economyProvider != null) {
+			economy = economyProvider.getProvider();
+		}
+		return (economy != null);
+	}
 	
 	public void onEnable(){
 		plugin = this;
@@ -121,6 +133,12 @@ public class main extends JavaPlugin {
 				config.set("general.cars.names", names);
 			}
         	//Setup the colour scheme
+        	if (!config.contains("general.carTrading.enable")) {
+				config.set("general.carTrading.enable", true);
+			}
+        	if (!config.contains("general.carTrading.averageCarValue")) {
+				config.set("general.carTrading.averageCarValue", 459.99d);
+			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
 			}
@@ -230,6 +248,14 @@ public class main extends JavaPlugin {
 		File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");
 		File upgradesMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "upgradesMarket.marketData");
 		this.salesManager = new SalesManager(carsMarketSaveFile, upgradesMarketSaveFile);
+		if(config.getBoolean("general.carTrading.enable")){
+			if(!setupEconomy()){
+				logger.info("Economy plugin not found on startup. An economy plugin and vault are needed"
+						+ "for trade features. If one is successfully installed then don't worry. We'll "
+						+ "find it later.");
+				//Don't bother to save
+			}
+		}
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

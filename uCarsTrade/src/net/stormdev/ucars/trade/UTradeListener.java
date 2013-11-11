@@ -739,10 +739,9 @@ public class UTradeListener implements Listener {
 				if(main.economy == null){
 					return;
 				}
-				String cName = main.economy.currencyNamePlural();
 				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");
 				msg = msg.replaceAll(Pattern.quote("%item%"), "a car");
-				msg = msg.replaceAll(Pattern.quote("%price%"), price+" "+cName);
+				msg = msg.replaceAll(Pattern.quote("%price%"), main.config.getString("general.carTrading.currencySign")+price);
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
 				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase);
@@ -785,12 +784,11 @@ public class UTradeListener implements Listener {
 						if(main.economy == null){
 							return;
 						}
-						String cName = main.economy.currencyNamePlural();
 						ItemStack sellItem = new ItemStack(Material.EMERALD);
 						ItemMeta im = sellItem.getItemMeta();
 						im.setDisplayName(main.colors.getTitle()+"Sell");
 						ArrayList<String> lre = new ArrayList<String>();
-					    lre.add(main.colors.getInfo()+"For: "+price+" "+cName);
+					    lre.add(main.colors.getInfo()+"For: "+main.config.getString("general.carTrading.currencySign")+price);
 						im.setLore(lre);
 						sellItem.setItemMeta(im);
 						inv.setItem(8, sellItem);

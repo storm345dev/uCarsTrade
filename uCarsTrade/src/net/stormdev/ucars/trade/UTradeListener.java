@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.stormdev.ucars.stats.HandlingDamagedStat;
@@ -741,7 +742,8 @@ public class UTradeListener implements Listener {
 				}
 				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");
 				msg = msg.replaceAll(Pattern.quote("%item%"), "a car");
-				msg = msg.replaceAll(Pattern.quote("%price%"), main.config.getString("general.carTrading.currencySign")+price);
+				String units = main.config.getString("general.carTrading.currencySign")+price;
+				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
 				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase);

@@ -80,7 +80,7 @@ public class main extends JavaPlugin {
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
 			if(!lang.contains("general.sell.msg")){
-				lang.set("general.sell.msg", "Selling %item% for %price% on market!");
+				lang.set("general.sell.msg", "Selling %item% for %price% on the market!");
 			}
 			if(!lang.contains("general.upgrade.msg")){
 				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");

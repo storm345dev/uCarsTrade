@@ -103,10 +103,11 @@ public class CarValueCalculator {
 		if(cost < 5){
 			cost = 5;
 		}
-		return cost;
+		return Math.round(cost*100)/100; //Round to 2 d.p
 	}
 	public static double getCarValueForPurchase(Car car){
 		double n = getCarValueForSale(car);
-		return n + 12.5*n/100; //Add 12.5 to the value it's worth
+		double cost = n + (12.5*n)/100; //Add 12.5 to the value it's worth
+		return Math.round(cost*100)/100; //Round to 2 d.p
 	}
 }

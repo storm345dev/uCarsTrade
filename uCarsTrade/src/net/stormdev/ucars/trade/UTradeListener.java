@@ -723,5 +723,6 @@ public class UTradeListener implements Listener {
 		//TODO Set option slots for all upgrades for sale
 		return menu;
 	}
+	
 
 }

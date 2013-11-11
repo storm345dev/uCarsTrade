@@ -82,7 +82,7 @@ public class InputMenu implements Listener {
                         public void run() {
                             p.closeInventory();
                         }
-                    }, 1);
+                    }, 1l);
                 }
                 if (e.willDestroy()) {
                     destroy();

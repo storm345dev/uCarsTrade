@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.useful.ucars.ucars;
 
-import net.stormdev.ucars.race.main;
+import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.stats.Stat;
 
 public class CarValueCalculator {
@@ -86,22 +86,22 @@ public class CarValueCalculator {
 			}
 		}
 		else{ //Rating is more than 0
-			if(percentExtra < 10){
+			if(rating < 10){
 				percentExtra = 0;
 			}
 			else{
-			percentExtra = (int)Math.floor(rating+0.5d); //Round to closest int
+			percentExtra = (int)rating; //Round to closest int
 			}
 		}
 		double cost = average;
 		if(worse){
-			cost = cost - percentExtra*average/100;
+			cost = cost - ((percentExtra*average)/100);
 		}
 		else{
-			cost = cost + percentExtra*average/100;
+			cost = cost + ((percentExtra*average)/100);
 		}
-		if(cost < 5){
-			cost = 5;
+		if(cost < 0.1){
+			cost = 0.1;
 		}
 		return Math.round(cost*100)/100; //Round to 2 d.p
 	}

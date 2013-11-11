@@ -1,6 +1,7 @@
 package net.stormdev.ucars.utils;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -35,6 +36,11 @@ public class IconMenu implements Listener {
     }
    
     public IconMenu setOption(int position, ItemStack icon, String name, String... info) {
+        optionNames[position] = name;
+        optionIcons[position] = setItemNameAndLore(icon, name, info);
+        return this;
+    }
+    public IconMenu setOption(int position, ItemStack icon, String name, List<String> info) {
         optionNames[position] = name;
         optionIcons[position] = setItemNameAndLore(icon, name, info);
         return this;
@@ -134,6 +140,13 @@ public class IconMenu implements Listener {
         ItemMeta im = item.getItemMeta();
             im.setDisplayName(name);
             im.setLore(Arrays.asList(lore));
+        item.setItemMeta(im);
+        return item;
+    }
+    private ItemStack setItemNameAndLore(ItemStack item, String name, List<String> lore) {
+        ItemMeta im = item.getItemMeta();
+            im.setDisplayName(name);
+            im.setLore(lore);
         item.setItemMeta(im);
         return item;
     }

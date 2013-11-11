@@ -12,7 +12,7 @@ public class CarForSale implements Serializable {
 	public CarForSale(UUID carId, String sellerName, double price){
 		this.carId = carId;
 		this.seller = sellerName;
-		this.price = 1.0;
+		this.price = price;
 	}
 	public String getSeller(){
 		return seller;

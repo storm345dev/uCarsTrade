@@ -3,12 +3,15 @@ package net.stormdev.ucars.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import net.stormdev.ucars.race.main;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -67,14 +70,18 @@ public class InputMenu implements Listener {
    
     @EventHandler(priority=EventPriority.MONITOR)
     void onInventoryClick(InventoryClickEvent event) {
-        if (event.getInventory().getTitle().equals(name)) {
+        if (event.getView().getTopInventory().getTitle().equals(name)) {
             int slot = event.getRawSlot();
-            if(cancelSlots.contains(slot)){
+            Boolean place = false;
+            if(event.getAction() == InventoryAction.PLACE_ALL || event.getAction() == InventoryAction.PLACE_ONE || event.getAction() == InventoryAction.PLACE_SOME){
+            	place = true;
+            }
+            if(cancelSlots.contains(slot) && !place){
             	event.setCancelled(true);
             }
-            if (slot >= 0 && slot < size && optionNames[slot] != null) {
+            if (slot >= 0 && slot < size) {
                 Plugin plugin = this.plugin;
-                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot]);
+                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot], event.getInventory());
                 handler.onOptionClick(e);
                 if (e.willClose()) {
                     final Player p = (Player)event.getWhoClicked();
@@ -101,13 +108,19 @@ public class InputMenu implements Listener {
         private String name;
         private boolean close;
         private boolean destroy;
+        private Inventory i = null;
        
-        public OptionClickEvent(Player player, int position, String name) {
+        public OptionClickEvent(Player player, int position, String name, Inventory i) {
             this.player = player;
             this.position = position;
             this.name = name;
-            this.close = true;
+            this.close = false;
             this.destroy = false;
+            this.i = i;
+        }
+        
+        public Inventory getInventory(){
+        	return i;
         }
        
         public Player getPlayer() {

@@ -1,5 +1,6 @@
 package net.stormdev.ucars.trade;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -11,8 +12,13 @@ import net.stormdev.ucars.stats.NameStat;
 import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.CarValueCalculator;
 import net.stormdev.ucars.utils.IconMenu;
+import net.stormdev.ucars.utils.InputMenu;
+import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
+import net.stormdev.ucars.utils.InputMenuClickEvent;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 
@@ -596,7 +602,12 @@ public class UTradeListener implements Listener {
 			    //Don't return
 			}
 			else if(position == 2){ //Sell cars
-			    //TODO	
+				doAfter = new Runnable(){
+					public void run() {
+						getSellCarsInputMenu().open(player);
+						return;
+				    }};
+				//Don't return
 			}
 			else if(position == 3){ //Buy upgrades
 				doAfter = new Runnable(){
@@ -683,6 +694,115 @@ public class UTradeListener implements Listener {
 		}
 		return;
 	}
+	@EventHandler
+	void sellStuff(InputMenuClickEvent event){
+		OptionClickEvent clickEvent = event.getClickEvent();
+		final Player player = clickEvent.getPlayer();
+		int position = clickEvent.getPosition();
+		Runnable doAfter = null;
+		if(event.getMenuType() == TradeBoothMenuType.SELL_CARS){
+			if(position == 0){
+				//Return to menu
+				doAfter = new Runnable(){
+					public void run() {
+						plugin.tradeMenu.open(player);
+						return;
+				    }};
+			}
+			else if(position == 8){
+				//TODO Check if valid and try to sell it
+				Inventory i = clickEvent.getInventory();
+				if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
+					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+					return;
+				}
+				ItemStack carItem = i.getItem(4);
+				if(carItem.getType() != Material.MINECART || carItem.getDurability() < 20){
+					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+					return;
+				}
+				//Is a valid car to sell
+				List<String> lore = carItem.getItemMeta().getLore();
+				Car c = null;
+				if(lore.size() > 0){
+				UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+				if(!plugin.carSaver.cars.containsKey(carId)){
+					return;
+				}
+				c = plugin.carSaver.cars.get(carId);
+				}
+				else{
+					player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
+					return;
+				}
+				double price = CarValueCalculator.getCarValueForSale(c);
+				if(main.economy == null){
+					return;
+				}
+				String cName = main.economy.currencyNamePlural();
+				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");
+				msg = msg.replaceAll(Pattern.quote("%item%"), "a car");
+				msg = msg.replaceAll(Pattern.quote("%price%"), price+" "+cName);
+				// Add to market for sale
+				double purchase = CarValueCalculator.getCarValueForPurchase(c);
+				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase);
+				if(!plugin.salesManager.carsForSale.containsKey(c.id)){
+					plugin.salesManager.carsForSale.put(c.id, saleItem);
+					plugin.salesManager.saveCars();
+					player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
+				}
+			}
+			else if(position == 4){
+				//Check if car and if it is update the sale button
+				final Inventory inv = clickEvent.getInventory();
+				plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
+
+					public void run() {
+						Inventory i = inv;
+						if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
+							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+							return;
+						}
+						ItemStack carItem = i.getItem(4);
+						if(carItem.getType() != Material.MINECART || carItem.getDurability() < 20){
+							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+							return;
+						}
+						List<String> lore = carItem.getItemMeta().getLore();
+						Car c = null;
+						if(lore.size() > 0){
+						UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+						if(!plugin.carSaver.cars.containsKey(carId)){
+							return;
+						}
+						c = plugin.carSaver.cars.get(carId);
+						}
+						else{
+							player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
+							return;
+						}
+						double price = CarValueCalculator.getCarValueForSale(c);
+						if(main.economy == null){
+							return;
+						}
+						String cName = main.economy.currencyNamePlural();
+						ItemStack sellItem = new ItemStack(Material.EMERALD);
+						ItemMeta im = sellItem.getItemMeta();
+						im.setDisplayName(main.colors.getTitle()+"Sell");
+						ArrayList<String> lre = new ArrayList<String>();
+					    lre.add(main.colors.getInfo()+"For: "+price+" "+cName);
+						im.setLore(lre);
+						sellItem.setItemMeta(im);
+						inv.setItem(8, sellItem);
+						return;
+					}}, 1l);
+			}
+		}
+		if(doAfter != null){
+			plugin.getServer().getScheduler().runTaskLater(plugin, doAfter, 2l);
+		}
+		return;
+	}
 	IconMenu getCarsForSaleMenu(final int page){
 		//TODO Create method
 		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page;
@@ -700,6 +820,38 @@ public class UTradeListener implements Listener {
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
 		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
 		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
+		//1-51 slots available on the page
+		int pos = 1;
+		int start = (page-1)*51;
+		@SuppressWarnings("unchecked")
+		HashMap<UUID, CarForSale> cars = (HashMap<UUID, CarForSale>) plugin.salesManager.carsForSale.clone();
+		Object[] keys = cars.keySet().toArray();
+		for(int i=start;i<keys.length;i++){
+			CarForSale car= cars.get(keys[i]);
+			double price = car.getPrice();
+	        String seller = car.getSeller();
+	        UUID carId = car.getCarId();
+	        ItemStack item = new ItemStack(Material.AIR);
+	        String name = "Car";
+	        List<String> lore = new ArrayList<String>();
+	        if(plugin.carSaver.cars.containsKey(carId)){
+	        	Car c = plugin.carSaver.cars.get(carId);
+	        	if(c.getStats().containsKey("trade.name")){
+	        		name = c.getStats().get("trade.name").getValue().toString();
+	        	}
+	        	item = c.getItem();
+	        	ItemMeta im = item.getItemMeta();
+	        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
+	        	lore.add(main.colors.getInfo()+"Seller: "+seller);
+	        	lore.addAll(2, im.getLore());
+	        	im.setLore(lore);
+	        	item.setItemMeta(im);
+	        }   
+	        if(pos < 52){
+        		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
+        		pos++;
+        	}
+		}
 		//TODO Set option slots for all cars for sale
 		return menu;
 	}
@@ -724,5 +876,38 @@ public class UTradeListener implements Listener {
 		return menu;
 	}
 	
+	InputMenu getSellCarsInputMenu(){
+		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.sellCars");
+		if(title.length() > 32){
+			title = main.colors.getError()+"Sell a car";
+		}
+		InputMenu menu = new InputMenu(title, 9, new InputMenu.OptionClickEventHandler() {
+            public void onOptionClick(InputMenu.OptionClickEvent event) {
+            	if(event.getPosition() == 0 || event.getPosition() == 8){
+            		event.setWillClose(true);
+            	}
+            	InputMenuClickEvent evt = new InputMenuClickEvent(event, TradeBoothMenuType.SELL_CARS);
+            	plugin.getServer().getPluginManager().callEvent(evt);
+            }
+        }, plugin);
+		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
+		menu.addButtonSlot(0);
+		menu.setOption(8, new ItemStack(Material.EMERALD), main.colors.getTitle()+"Sell", main.colors.getError()+"Unavailable");
+		menu.addButtonSlot(8);
+		menu.setOption(1, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(1);
+		menu.setOption(2, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(2);
+		menu.setOption(3, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(3);
+		menu.setOption(5, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(5);
+		menu.setOption(6, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(6);
+		menu.setOption(7, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(7);
+		//4 is the input box
+		return menu;
+	}
 
 }

@@ -79,6 +79,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.place.msg")){
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
+			if(!lang.contains("general.sell.msg")){
+				lang.set("general.sell.msg", "Selling %item% for %price% on market!");
+			}
 			if(!lang.contains("general.upgrade.msg")){
 				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");
 			}
@@ -90,6 +93,9 @@ public class main extends JavaPlugin {
 			}
 			if(!lang.contains("title.trade.buyUpgrades")){
 				lang.set("title.trade.buyUpgrades", "Buy Upgrades");
+			}
+			if(!lang.contains("title.trade.sellCars")){
+				lang.set("title.trade.sellCars", "Sell a car");
 			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
@@ -136,8 +142,11 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.carTrading.enable")) {
 				config.set("general.carTrading.enable", true);
 			}
+        	if (!config.contains("general.carTrading.currencySign")) {
+				config.set("general.carTrading.currencySign", "$");
+			}
         	if (!config.contains("general.carTrading.averageCarValue")) {
-				config.set("general.carTrading.averageCarValue", 459.99d);
+				config.set("general.carTrading.averageCarValue", 459.99);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");

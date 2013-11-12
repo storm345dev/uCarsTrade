@@ -17,7 +17,7 @@ public class UpgradeForSale implements Serializable {
 	public UpgradeForSale(UUID saleId, String sellerName, double price, StatType upgradeType, int quantity, double profit){
 		this.saleId = saleId;
 		this.seller = sellerName;
-		this.price = 1.0;
+		this.price = price;
 		this.upgradeType = upgradeType;
 		this.quantity = quantity;
 		this.profit = profit;

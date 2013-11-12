@@ -769,7 +769,103 @@ public class UTradeListener implements Listener {
 			}
 			else{
 				//Positions 1-> 51
-				//TODO Get car and sell it using vault
+				//TODO Get upgrade and buy it using vault
+				int page = event.getPage();
+				int slot = clickEvent.getPosition() - 1; //Click on '1' = pos=0
+				int mapPos = (page-1)*51+slot; //Page one, slot 1 = mapPos: 0
+				HashMap<UUID, UpgradeForSale> cars = null;
+				try {
+				    cars = (HashMap<UUID, UpgradeForSale>) event.getArgs()[0];
+				} catch (Exception e) {
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again.");
+					return;
+				}
+				UpgradeForSale car = null;
+				try {
+					car = cars.get(cars.keySet().toArray()[mapPos]);
+				} catch (Exception e) {
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again.");
+					return;
+				}
+				//We have selected the correct car
+				if(!plugin.salesManager.upgradeForSale.containsKey(car.getSaleId())){
+					//It was just bought
+					return;
+				}
+				if(main.economy == null){
+					if(!plugin.setupEconomy()){
+						player.sendMessage(main.colors.getError()+"An error occured. Please try again later.");
+						return;
+					}
+				}
+				//Economy plugin successfully hooked
+				double price = car.getPrice();
+				double balance = main.economy.getBalance(player.getName());
+				if(balance < price){
+					String msg = net.stormdev.ucars.trade.Lang.get("general.buy.notEnoughMoney");
+					msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+balance));
+					player.sendMessage(main.colors.getError()+msg);
+					return;
+				}
+				plugin.salesManager.upgradeForSale.remove(car.getSaleId());
+				EconomyResponse er = main.economy.withdrawPlayer(player.getName(), price);
+				balance = er.balance;
+				if(!er.transactionSuccess()){
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again later.");
+					return;
+				}
+				double profit = car.getProfit();
+				EconomyResponse er2 = main.economy.depositPlayer(car.getSeller(), profit);
+				if(plugin.getServer().getPlayer(car.getSeller())!=null && plugin.getServer().getPlayer(car.getSeller()).isOnline()){
+					Player pl = plugin.getServer().getPlayer(car.getSeller());
+					pl.sendMessage(main.colors.getSuccess()+"+"+main.config.getString("general.carTrading.currencySign")+profit+main.colors.getInfo()+" For upgrade sale!");
+				}
+				else{
+					DateFormat dateFormat = new SimpleDateFormat("[dd/MM/yyyy@HH:mm]");
+					String time = dateFormat.format(new Date());
+					String msg = main.colors.getInfo()+time+" "+ChatColor.RESET+main.colors.getSuccess()+"+"+main.config.getString("general.carTrading.currencySign")+profit+main.colors.getInfo()+" For upgrade sale!";
+					plugin.alerts.put(car.getSeller(), msg);
+				}
+				if(!er2.transactionSuccess()){
+					main.logger.info(main.colors.getError()+"Failed to give seller money for seller: "+car.getSeller()+"!");
+				}
+				String msg = net.stormdev.ucars.trade.Lang.get("general.buy.success");
+				msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+balance));
+				msg = msg.replaceAll(Pattern.quote("%item%"), "upgrades");
+				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+price));
+				//Give them the car and remove it from the list
+				plugin.salesManager.saveUpgrades();
+				ItemStack item = new ItemStack(Material.IRON_INGOT);
+				ItemMeta im = item.getItemMeta();
+				List<String> lore = new ArrayList<String>();
+		        StatType type = car.getUpgradeType();
+	        	if(type == StatType.HANDLING_DAMAGED){
+	        		item = new ItemStack(Material.LEVER);
+	        		im = item.getItemMeta();
+	        		im.setDisplayName("Repair Upgrade");
+	        		lore.add(main.colors.getInfo()+"Repairs all car damage");
+	        		im.setLore(lore);
+	        	    item.setItemMeta(im);
+	        	}
+	        	else if(type == StatType.HEALTH){
+	        		item = new ItemStack(Material.IRON_INGOT);
+	        		im = item.getItemMeta();
+	        		im.setDisplayName("Health Upgrade");
+	        		lore.add(main.colors.getInfo()+"Adds 1 health to your car");
+	        		im.setLore(lore);
+	        	    item.setItemMeta(im);
+	        	}
+	        	else if(type == StatType.SPEED){
+	        		item = new ItemStack(Material.REDSTONE);
+	        		im = item.getItemMeta();
+	        		im.setDisplayName("Speed Upgrade");
+	        		lore.add(main.colors.getInfo()+"Adds 0.05x speed to your car");
+	        		im.setLore(lore);
+	        	    item.setItemMeta(im);
+	        	}
+	        	item.setAmount(car.getQuantity());
+				player.getInventory().addItem(item);
+				player.sendMessage(main.colors.getSuccess()+msg);
 			}
 		}
 		if(doAfter != null){
@@ -793,7 +889,7 @@ public class UTradeListener implements Listener {
 				    }};
 			}
 			else if(position == 8){
-				//TODO Check if valid and try to sell it
+				//Check if valid and try to sell it
 				Inventory i = clickEvent.getInventory();
 				if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
 					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
@@ -890,7 +986,7 @@ public class UTradeListener implements Listener {
 				    }};
 			}
 			else if(position == 8){
-				//TODO Check if valid and try to sell it
+				//Check if valid and try to sell it
 				Inventory i = clickEvent.getInventory();
 				if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
 					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
@@ -915,6 +1011,7 @@ public class UTradeListener implements Listener {
 				}
 				double price = main.config.getDouble("general.carTrading.upgradeValue")*upgradeItem.getAmount();
 				double sellFor = price + (main.config.getDouble("general.carTrading.VATPercent")*price)/100;
+				sellFor = Math.round(sellFor*100)/100;
 				UUID saleId = UUID.randomUUID();
 				UpgradeForSale saleItem = new UpgradeForSale(saleId, player.getName(), sellFor, upgradeType, upgradeItem.getAmount(), price);
 				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");
@@ -958,7 +1055,6 @@ public class UTradeListener implements Listener {
 							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
 							return;
 						}
-						//TODO
 						return;
 					}}, 1l);
 			}
@@ -969,7 +1065,6 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	IconMenu getCarsForSaleMenu(final int page){
-		//TODO Create method
 		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page;
 		if(title.length() > 32){
 			title = main.colors.getError()+"Buy Cars (ERROR:Too Long)";
@@ -1008,7 +1103,9 @@ public class UTradeListener implements Listener {
 	        	ItemMeta im = item.getItemMeta();
 	        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
 	        	lore.add(main.colors.getInfo()+"Seller: "+seller);
-	        	lore.addAll(2, im.getLore());
+	        	List<String> iml = im.getLore();
+	        	iml.remove(0);
+	        	lore.addAll(2, iml);
 	        	im.setLore(lore);
 	        	item.setItemMeta(im);
 	        }   
@@ -1017,19 +1114,18 @@ public class UTradeListener implements Listener {
         		pos++;
         	}
 		}
-		
-		//TODO Set option slots for all cars for sale
 		return menu;
 	}
 	IconMenu getUpgradesForSaleMenu(final int page){
-		//TODO Create method
 		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyUpgrades")+" Page: "+page;
 		if(title.length() > 32){
 			title = main.colors.getError()+"Buy Upgrades (ERROR:Too Long)";
 		}
+		@SuppressWarnings("unchecked")
+		final HashMap<UUID, UpgradeForSale> ups = (HashMap<UUID, UpgradeForSale>) plugin.salesManager.upgradeForSale.clone();
 		IconMenu menu = new IconMenu(title, 54, new IconMenu.OptionClickEventHandler() {
             public void onOptionClick(IconMenu.OptionClickEvent event) {
-            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_UPGRADES, page);
+            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_UPGRADES, page, new Object[]{ups});
             	plugin.getServer().getPluginManager().callEvent(evt);
             	event.setWillClose(true);
             	event.setWillDestroy(true);
@@ -1038,7 +1134,57 @@ public class UTradeListener implements Listener {
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
 		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
 		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
-		//TODO Set option slots for all upgrades for sale
+		//Set option slots for all upgrades for sale
+		//1-51 slots available on the page
+				int pos = 1;
+				int start = (page-1)*51;
+				Object[] keys = ups.keySet().toArray();
+				for(int i=start;i<keys.length;i++){
+					UpgradeForSale car= ups.get(keys[i]);
+					double price = car.getPrice();
+			        String seller = car.getSeller();
+			        ItemStack item = new ItemStack(Material.AIR);
+			        ItemMeta im = item.getItemMeta();
+			        String name = "Upgrade";
+			        List<String> lore = new ArrayList<String>();
+			        item = new ItemStack(Material.IRON_INGOT);
+			        StatType type = car.getUpgradeType();
+		        	if(type == StatType.HANDLING_DAMAGED){
+		        		item = new ItemStack(Material.LEVER);
+		        		im = item.getItemMeta();
+		        		name = "Repair Upgrade";
+		        		lore.add(main.colors.getInfo()+"Repairs all car damage");
+		        		im.setLore(lore);
+		        	    item.setItemMeta(im);
+		        	}
+		        	else if(type == StatType.HEALTH){
+		        		item = new ItemStack(Material.IRON_INGOT);
+		        		im = item.getItemMeta();
+		        		name = "Health Upgrade";
+		        		lore.add(main.colors.getInfo()+"Adds 1 health to your car");
+		        		im.setLore(lore);
+		        	    item.setItemMeta(im);
+		        	}
+		        	else if(type == StatType.SPEED){
+		        		item = new ItemStack(Material.REDSTONE);
+		        		im = item.getItemMeta();
+		        		name = "Speed Upgrade";
+		        		lore.add(main.colors.getInfo()+"Adds 0.05x speed to your car");
+		        		im.setLore(lore);
+		        	    item.setItemMeta(im);
+		        	}
+		        	lore = new ArrayList<String>();
+		        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
+		        	lore.add(main.colors.getInfo()+"Seller: "+seller);
+		        	lore.addAll(2, im.getLore());
+		        	im.setLore(lore);
+		        	item.setItemMeta(im);	
+		        	item.setAmount(car.getQuantity());
+			        if(pos < 52){
+		        		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
+		        		pos++;
+		        	}
+				}
 		return menu;
 	}
 	

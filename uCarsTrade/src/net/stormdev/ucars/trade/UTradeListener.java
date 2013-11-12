@@ -281,7 +281,7 @@ public class UTradeListener implements Listener {
 				speedStat.setSpeedMultiplier(speed);
 				stats.put("trade.speed", speedStat);
 				upgradeMsg = ucars.colorise(upgradeMsg);
-				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "0.05x");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), (0.05*upgrade.getAmount())+"x");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "speed");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+5+"x)");
 				player.sendMessage(upgradeMsg);

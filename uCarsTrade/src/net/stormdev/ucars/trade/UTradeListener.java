@@ -16,6 +16,7 @@ import net.stormdev.ucars.stats.HealthStat;
 import net.stormdev.ucars.stats.NameStat;
 import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
+import net.stormdev.ucars.stats.StatType;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
@@ -26,6 +27,7 @@ import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.InputMenuClickEvent;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucars.utils.UpgradeForSale;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -625,7 +627,12 @@ public class UTradeListener implements Listener {
 			    //Don't return
 			}
 			else if(position == 4){ //Sell upgrades
-				//TODO
+				doAfter = new Runnable(){
+					public void run() {
+						getSellUpgradesInputMenu().open(player);
+						return;
+				    }};
+				//Don't return
 			}
 		}
 		else if(event.getMenuType() == TradeBoothMenuType.BUY_CARS){
@@ -873,6 +880,89 @@ public class UTradeListener implements Listener {
 					}}, 1l);
 			}
 		}
+		else if(event.getMenuType() == TradeBoothMenuType.SELL_UPGRADES){
+			if(position == 0){
+				//Return to menu
+				doAfter = new Runnable(){
+					public void run() {
+						plugin.tradeMenu.open(player);
+						return;
+				    }};
+			}
+			else if(position == 8){
+				//TODO Check if valid and try to sell it
+				Inventory i = clickEvent.getInventory();
+				if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
+					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+					return;
+				}
+				ItemStack upgradeItem = i.getItem(4).clone();
+				i.clear(4);
+				Material type = upgradeItem.getType();
+				StatType upgradeType = StatType.SPEED;
+				if(type == Material.IRON_INGOT){ //Health Upgrade
+					upgradeType = StatType.HEALTH;
+				}
+				else if(type == Material.REDSTONE){ //Speed upgrade
+					upgradeType = StatType.SPEED;
+				}
+				else if(type == Material.LEVER){ //Repair upgrade
+					upgradeType = StatType.HANDLING_DAMAGED;
+				}
+				else{
+					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+					return;
+				}
+				double price = main.config.getDouble("general.carTrading.upgradeValue")*upgradeItem.getAmount();
+				double sellFor = price + (main.config.getDouble("general.carTrading.VATPercent")*price)/100;
+				UUID saleId = UUID.randomUUID();
+				UpgradeForSale saleItem = new UpgradeForSale(saleId, player.getName(), sellFor, upgradeType, upgradeItem.getAmount(), price);
+				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");
+				msg = msg.replaceAll(Pattern.quote("%item%"), "upgrades");
+				String units = main.config.getString("general.carTrading.currencySign")+price;
+				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
+				// Add to market for sale
+				if(!plugin.salesManager.upgradeForSale.containsKey(saleId)){
+					plugin.salesManager.upgradeForSale.put(saleId, saleItem);
+					plugin.salesManager.saveUpgrades();
+					player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
+				}
+				clickEvent.getMenu().destroy(); //Close the menu
+			}
+			else if(position == 4){
+				//Check if valid and if it is update the sale button
+				final Inventory inv = clickEvent.getInventory();
+				plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
+
+					public void run() {
+						Inventory i = inv;
+						if(i.getItem(4)==null || i.getItem(4).getType() == Material.AIR){
+							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+							return;
+						}
+						Material type = i.getItem(4).getType();
+						if(type == Material.IRON_INGOT || type == Material.REDSTONE
+								|| type == Material.LEVER){ //Valid Upgrade
+						    //Update button	
+							ItemStack sellItem = new ItemStack(Material.EMERALD);
+							ItemMeta im = sellItem.getItemMeta();
+							im.setDisplayName(main.colors.getTitle()+"Sell");
+							ArrayList<String> lre = new ArrayList<String>();
+							double price = main.config.getDouble("general.carTrading.upgradeValue")*i.getItem(4).getAmount();
+						    lre.add(main.colors.getInfo()+"For: "+main.config.getString("general.carTrading.currencySign")+price);
+							im.setLore(lre);
+							sellItem.setItemMeta(im);
+							inv.setItem(8, sellItem);
+						}
+						else{
+							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
+							return;
+						}
+						//TODO
+						return;
+					}}, 1l);
+			}
+		}
 		if(doAfter != null){
 			plugin.getServer().getScheduler().runTaskLater(plugin, doAfter, 2l);
 		}
@@ -963,6 +1053,39 @@ public class UTradeListener implements Listener {
             		event.setWillClose(true);
             	}
             	InputMenuClickEvent evt = new InputMenuClickEvent(event, TradeBoothMenuType.SELL_CARS);
+            	plugin.getServer().getPluginManager().callEvent(evt);
+            }
+        }, plugin);
+		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
+		menu.addButtonSlot(0);
+		menu.setOption(8, new ItemStack(Material.EMERALD), main.colors.getTitle()+"Sell", main.colors.getError()+"Unavailable");
+		menu.addButtonSlot(8);
+		menu.setOption(1, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(1);
+		menu.setOption(2, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(2);
+		menu.setOption(3, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
+		menu.addButtonSlot(3);
+		menu.setOption(5, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(5);
+		menu.setOption(6, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(6);
+		menu.setOption(7, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
+		menu.addButtonSlot(7);
+		//4 is the input box
+		return menu;
+	}
+	InputMenu getSellUpgradesInputMenu(){
+		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.sellUpgrades");
+		if(title.length() > 32){
+			title = main.colors.getError()+"Sell upgrades";
+		}
+		InputMenu menu = new InputMenu(title, 9, new InputMenu.OptionClickEventHandler() {
+            public void onOptionClick(InputMenu.OptionClickEvent event) {
+            	if(event.getPosition() == 0 || event.getPosition() == 8){
+            		event.setWillClose(true);
+            	}
+            	InputMenuClickEvent evt = new InputMenuClickEvent(event, TradeBoothMenuType.SELL_UPGRADES);
             	plugin.getServer().getPluginManager().callEvent(evt);
             }
         }, plugin);

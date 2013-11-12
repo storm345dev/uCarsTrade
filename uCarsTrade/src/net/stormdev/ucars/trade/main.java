@@ -124,6 +124,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("title.trade.sellCars")){
 				lang.set("title.trade.sellCars", "Sell a car");
 			}
+			if(!lang.contains("title.trade.sellUpgrades")){
+				lang.set("title.trade.sellUpgrades", "Sell Upgrades");
+			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
@@ -174,6 +177,9 @@ public class main extends JavaPlugin {
 			}
         	if (!config.contains("general.carTrading.averageCarValue")) {
 				config.set("general.carTrading.averageCarValue", 29.99);
+			}
+        	if (!config.contains("general.carTrading.upgradeValue")) {
+				config.set("general.carTrading.upgradeValue", 5.00);
 			}
         	if (!config.contains("general.carTrading.VATPercent")) {
 				config.set("general.carTrading.VATPercent", 12.50);

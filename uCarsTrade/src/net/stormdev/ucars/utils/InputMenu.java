@@ -81,7 +81,7 @@ public class InputMenu implements Listener {
             }
             if (slot >= 0 && slot < size) {
                 Plugin plugin = this.plugin;
-                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot], event.getInventory());
+                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot], event.getInventory(), this);
                 handler.onOptionClick(e);
                 if (e.willClose()) {
                     final Player p = (Player)event.getWhoClicked();
@@ -109,14 +109,20 @@ public class InputMenu implements Listener {
         private boolean close;
         private boolean destroy;
         private Inventory i = null;
+        private InputMenu im = null;
        
-        public OptionClickEvent(Player player, int position, String name, Inventory i) {
+        public OptionClickEvent(Player player, int position, String name, Inventory i, InputMenu im) {
             this.player = player;
             this.position = position;
             this.name = name;
             this.close = false;
             this.destroy = false;
             this.i = i;
+            this.im = im;
+        }
+        
+        public InputMenu getMenu(){
+        	return im;
         }
         
         public Inventory getInventory(){

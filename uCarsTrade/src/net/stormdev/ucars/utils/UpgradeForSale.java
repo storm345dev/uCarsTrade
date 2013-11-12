@@ -11,14 +11,16 @@ public class UpgradeForSale implements Serializable {
 	UUID saleId = null;
 	String seller = null;
 	double price = 1.0;
+	double profit = 1.0;
 	StatType upgradeType = StatType.SPEED;
 	int quantity = 1;
-	public UpgradeForSale(UUID saleId, String sellerName, double price, StatType upgradeType, int quantity){
+	public UpgradeForSale(UUID saleId, String sellerName, double price, StatType upgradeType, int quantity, double profit){
 		this.saleId = saleId;
 		this.seller = sellerName;
 		this.price = 1.0;
 		this.upgradeType = upgradeType;
 		this.quantity = quantity;
+		this.profit = profit;
 	}
 	public String getSeller(){
 		return seller;
@@ -28,6 +30,9 @@ public class UpgradeForSale implements Serializable {
 	}
     public double getPrice(){
     	return price;
+    }
+    public double getProfit(){
+    	return profit;
     }
     public int getQuantity(){
     	return quantity;

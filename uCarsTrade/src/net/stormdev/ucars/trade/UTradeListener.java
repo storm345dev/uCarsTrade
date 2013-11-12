@@ -1011,7 +1011,8 @@ public class UTradeListener implements Listener {
 				}
 				double price = main.config.getDouble("general.carTrading.upgradeValue")*upgradeItem.getAmount();
 				double sellFor = price + (main.config.getDouble("general.carTrading.VATPercent")*price)/100;
-				sellFor = Math.round(sellFor*100)/100;
+				sellFor = Math.round((sellFor*100));
+				sellFor = sellFor / 100;
 				UUID saleId = UUID.randomUUID();
 				UpgradeForSale saleItem = new UpgradeForSale(saleId, player.getName(), sellFor, upgradeType, upgradeItem.getAmount(), price);
 				String msg = net.stormdev.ucars.trade.Lang.get("general.sell.msg");

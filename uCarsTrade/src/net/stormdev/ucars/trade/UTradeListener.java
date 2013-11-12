@@ -707,10 +707,10 @@ public class UTradeListener implements Listener {
 				EconomyResponse er2 = main.economy.depositPlayer(car.getSeller(), profit);
 				if(plugin.getServer().getPlayer(car.getSeller())!=null && plugin.getServer().getPlayer(car.getSeller()).isOnline()){
 					Player pl = plugin.getServer().getPlayer(car.getSeller());
-					pl.sendMessage(main.colors.getSuccess()+"+"+profit+main.colors.getInfo()+" For car sale!");
+					pl.sendMessage(main.colors.getSuccess()+"+"+main.config.getString("general.carTrading.currencySign")+profit+main.colors.getInfo()+" For car sale!");
 				}
 				else{
-					DateFormat dateFormat = new SimpleDateFormat("[dd/MM/yyyy|HH:mm]");
+					DateFormat dateFormat = new SimpleDateFormat("[dd/MM/yyyy@HH:mm]");
 					String time = dateFormat.format(new Date());
 					String msg = main.colors.getInfo()+time+" "+ChatColor.RESET+main.colors.getSuccess()+"+"+main.config.getString("general.carTrading.currencySign")+profit+main.colors.getInfo()+" For car sale!";
 					plugin.alerts.put(car.getSeller(), msg);

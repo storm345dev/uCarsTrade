@@ -296,6 +296,9 @@ public class main extends JavaPlugin {
 			}
 		}
 		this.alerts = loadHashMapAlerts(alertsFile.getAbsolutePath());
+		if(this.alerts == null){
+			this.alerts = new HashMap<String, String>();
+		}
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

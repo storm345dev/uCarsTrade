@@ -1,22 +1,29 @@
 package net.stormdev.ucars.trade;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
+import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucars.utils.UpgradeForSale;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -50,6 +57,8 @@ public class main extends JavaPlugin {
 	public IconMenu tradeMenu = null;
 	public SalesManager salesManager = null;
 	public static Economy economy = null;
+	public HashMap<String, String> alerts = new HashMap<String, String>();
+	File alertsFile = null;
 	
 	protected boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -63,6 +72,15 @@ public class main extends JavaPlugin {
 	
 	public void onEnable(){
 		plugin = this;
+		alertsFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "alerts.stringMap");
+		if(alertsFile.length()<1||!alertsFile.exists()){
+			try {
+				alertsFile.createNewFile();
+			} catch (IOException e) {
+				main.logger.info(main.colors.getError()+"Failed to create Alerts File");
+			}
+		}
 		File langFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "lang.yml");
 		if (langFile.exists() == false
@@ -81,6 +99,15 @@ public class main extends JavaPlugin {
 			}
 			if(!lang.contains("general.sell.msg")){
 				lang.set("general.sell.msg", "Selling %item% for %price% on the market!");
+			}
+			if(!lang.contains("general.buy.notEnoughMoney")){
+				lang.set("general.buy.notEnoughMoney", "You cannot afford that item! You only have %balance%!");
+			}
+			if(!lang.contains("general.buy.taken")){
+				lang.set("general.buy.taken", "Sorry, somebody else just bought that item.");
+			}
+			if(!lang.contains("general.buy.success")){
+				lang.set("general.buy.success", "Successfully bought %item% for %price%, you now have %balance%!");
 			}
 			if(!lang.contains("general.upgrade.msg")){
 				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");
@@ -147,6 +174,9 @@ public class main extends JavaPlugin {
 			}
         	if (!config.contains("general.carTrading.averageCarValue")) {
 				config.set("general.carTrading.averageCarValue", 29.99);
+			}
+        	if (!config.contains("general.carTrading.VATPercent")) {
+				config.set("general.carTrading.VATPercent", 12.50);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
@@ -265,10 +295,19 @@ public class main extends JavaPlugin {
 				//Don't bother to save
 			}
 		}
+		this.alerts = loadHashMapAlerts(alertsFile.getAbsolutePath());
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	
 	public void onDisable(){
+		if(alertsFile.length()<1||!alertsFile.exists()){
+			try {
+				alertsFile.createNewFile();
+			} catch (IOException e) {
+				main.logger.info(main.colors.getError()+"Failed to create Alerts File");
+			}
+		}
+		saveHashMapAlerts(alerts, alertsFile.getAbsolutePath());
 		if(ucars != null){
 		ucars.unHookPlugin(this);
 		}
@@ -292,5 +331,36 @@ public class main extends JavaPlugin {
 	}
 	public static String colorise(String prefix) {
 		 return ChatColor.translateAlternateColorCodes('&', prefix);
+	}
+	@SuppressWarnings("unchecked")
+	public static HashMap<String, String> loadHashMapAlerts(String path)
+	{
+		try
+		{
+	        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+	        Object result = ois.readObject();
+	        ois.close();
+			return (HashMap<String, String>) result;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public static void saveHashMapAlerts(HashMap<String, String> map, String path)
+	{
+		try
+		{
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+			oos.writeObject(map);
+			oos.flush();
+			oos.close();
+			//Handle I/O exceptions
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

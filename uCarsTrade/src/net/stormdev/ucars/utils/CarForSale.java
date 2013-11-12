@@ -9,10 +9,12 @@ public class CarForSale implements Serializable {
 	UUID carId = null;
 	String seller = null;
 	double price = 1.0;
-	public CarForSale(UUID carId, String sellerName, double price){
+	double profit = 1.0;
+	public CarForSale(UUID carId, String sellerName, double price, double profitForSeller){
 		this.carId = carId;
 		this.seller = sellerName;
 		this.price = price;
+		this.profit = profitForSeller;
 	}
 	public String getSeller(){
 		return seller;
@@ -22,5 +24,12 @@ public class CarForSale implements Serializable {
 	}
     public double getPrice(){
     	return price;
+    }
+    public double getProfit(){
+    	try {
+			return this.profit;
+		} catch (Exception e) {
+			return getPrice();
+		}
     }
 }

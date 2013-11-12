@@ -107,7 +107,7 @@ public class CarValueCalculator {
 	}
 	public static double getCarValueForPurchase(Car car){
 		double n = getCarValueForSale(car);
-		double cost = n + (12.5*n)/100; //Add 12.5 to the value it's worth
+		double cost = n + (main.config.getDouble("general.carTrading.VATPercent")*n)/100; //Add VAT% to the value it's worth
 		return Math.round(cost*100)/100; //Round to 2 d.p
 	}
 }

@@ -1,12 +1,16 @@
 package net.stormdev.ucars.trade;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.milkbowl.vault.economy.EconomyResponse;
 import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.HealthStat;
 import net.stormdev.ucars.stats.NameStat;
@@ -45,6 +49,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -583,6 +588,7 @@ public class UTradeListener implements Listener {
 		//Made the trade booth
 		return;
 	}
+	@SuppressWarnings("unchecked")
 	@EventHandler
 	public void tradeMenuSelect(final TradeBoothClickEvent event){
 		IconMenu.OptionClickEvent clickEvent = event.getClickEvent();
@@ -653,7 +659,76 @@ public class UTradeListener implements Listener {
 			}
 			else{
 				//Positions 1-> 51
-				//TODO Get car and buy it using vault
+				int page = event.getPage();
+				int slot = clickEvent.getPosition() - 1; //Click on '1' = pos=0
+				int mapPos = (page-1)*51+slot; //Page one, slot 1 = mapPos: 0
+				HashMap<UUID, CarForSale> cars = null;
+				try {
+				    cars = (HashMap<UUID, CarForSale>) event.getArgs()[0];
+				} catch (Exception e) {
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again.");
+					return;
+				}
+				CarForSale car = null;
+				try {
+					car = cars.get(cars.keySet().toArray()[mapPos]);
+				} catch (Exception e) {
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again.");
+					return;
+				}
+				//We have selected the correct car
+				if(!plugin.salesManager.carsForSale.containsKey(car.getCarId())){
+					//It was just bought
+					return;
+				}
+				if(main.economy == null){
+					if(!plugin.setupEconomy()){
+						player.sendMessage(main.colors.getError()+"An error occured. Please try again later.");
+						return;
+					}
+				}
+				//Economy plugin successfully hooked
+				double price = car.getPrice();
+				double balance = main.economy.getBalance(player.getName());
+				if(balance < price){
+					String msg = net.stormdev.ucars.trade.Lang.get("general.buy.notEnoughMoney");
+					msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+balance));
+					player.sendMessage(main.colors.getError()+msg);
+					return;
+				}
+				plugin.salesManager.carsForSale.remove(car.getCarId());
+				EconomyResponse er = main.economy.withdrawPlayer(player.getName(), price);
+				balance = er.balance;
+				if(!er.transactionSuccess()){
+					player.sendMessage(main.colors.getError()+"An error occured. Please try again later.");
+					return;
+				}
+				double profit = car.getProfit();
+				EconomyResponse er2 = main.economy.depositPlayer(car.getSeller(), profit);
+				if(plugin.getServer().getPlayer(car.getSeller())!=null && plugin.getServer().getPlayer(car.getSeller()).isOnline()){
+					Player pl = plugin.getServer().getPlayer(car.getSeller());
+					pl.sendMessage(main.colors.getSuccess()+"+"+profit+main.colors.getInfo()+" For car sale!");
+				}
+				else{
+					DateFormat dateFormat = new SimpleDateFormat("[dd/MM/yyyy|HH:mm]");
+					String time = dateFormat.format(new Date());
+					String msg = main.colors.getInfo()+time+" "+ChatColor.RESET+main.colors.getSuccess()+"+"+main.config.getString("general.carTrading.currencySign")+profit+main.colors.getInfo()+" For car sale!";
+					plugin.alerts.put(car.getSeller(), msg);
+				}
+				if(!er2.transactionSuccess()){
+					main.logger.info(main.colors.getError()+"Failed to give seller money for seller: "+car.getSeller()+"!");
+				}
+				String msg = net.stormdev.ucars.trade.Lang.get("general.buy.success");
+				msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+balance));
+				msg = msg.replaceAll(Pattern.quote("%item%"), "1 car");
+				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+price));
+				//Give them the car and remove it from the list
+				UUID carId = car.getCarId();
+				plugin.salesManager.saveCars();
+				Car c = plugin.carSaver.cars.get(carId);
+				c.isPlaced = false;
+				player.getInventory().addItem(c.getItem());
+				player.sendMessage(main.colors.getSuccess()+msg);
 			}
 		}
 		else if(event.getMenuType() == TradeBoothMenuType.BUY_UPGRADES){
@@ -746,7 +821,7 @@ public class UTradeListener implements Listener {
 				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
-				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase);
+				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase, price);
 				if(!plugin.salesManager.carsForSale.containsKey(c.id)){
 					plugin.salesManager.carsForSale.put(c.id, saleItem);
 					plugin.salesManager.saveCars();
@@ -807,11 +882,13 @@ public class UTradeListener implements Listener {
 		//TODO Create method
 		String title = main.colors.getTitle()+net.stormdev.ucars.trade.Lang.get("title.trade.buyCars")+" Page: "+page;
 		if(title.length() > 32){
-			title = main.colors.getError()+"Buy Upgrades (ERROR:Too Long)";
+			title = main.colors.getError()+"Buy Cars (ERROR:Too Long)";
 		}
+		@SuppressWarnings("unchecked")
+		final HashMap<UUID, CarForSale> cars = (HashMap<UUID, CarForSale>) plugin.salesManager.carsForSale.clone();
 		IconMenu menu = new IconMenu(title, 54, new IconMenu.OptionClickEventHandler() {
             public void onOptionClick(IconMenu.OptionClickEvent event) {
-            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_CARS, page);
+            	TradeBoothClickEvent evt = new TradeBoothClickEvent(event, TradeBoothMenuType.BUY_CARS, page, new Object[]{cars});
             	plugin.getServer().getPluginManager().callEvent(evt);
             	event.setWillClose(true);
             	event.setWillDestroy(true);
@@ -823,8 +900,6 @@ public class UTradeListener implements Listener {
 		//1-51 slots available on the page
 		int pos = 1;
 		int start = (page-1)*51;
-		@SuppressWarnings("unchecked")
-		HashMap<UUID, CarForSale> cars = (HashMap<UUID, CarForSale>) plugin.salesManager.carsForSale.clone();
 		Object[] keys = cars.keySet().toArray();
 		for(int i=start;i<keys.length;i++){
 			CarForSale car= cars.get(keys[i]);
@@ -852,6 +927,7 @@ public class UTradeListener implements Listener {
         		pos++;
         	}
 		}
+		
 		//TODO Set option slots for all cars for sale
 		return menu;
 	}
@@ -908,6 +984,16 @@ public class UTradeListener implements Listener {
 		menu.addButtonSlot(7);
 		//4 is the input box
 		return menu;
+	}
+	@EventHandler (priority = EventPriority.MONITOR)
+	void alerts(PlayerJoinEvent event){
+		String name = event.getPlayer().getName();
+		if(!plugin.alerts.containsKey(name)){
+			return;
+		}
+		event.getPlayer().sendMessage(plugin.alerts.get(name));
+		plugin.alerts.remove(name);
+		return;
 	}
 
 }

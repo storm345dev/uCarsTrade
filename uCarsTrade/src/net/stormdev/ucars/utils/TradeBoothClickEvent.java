@@ -9,11 +9,21 @@ public class TradeBoothClickEvent extends Event implements Cancellable{
     private static final HandlerList handlers = new HandlerList();
     IconMenu.OptionClickEvent clickEvent = null;
     int page = 1;
+    Object[] args = new Object[]{};
     TradeBoothMenuType type = TradeBoothMenuType.MENU;
 	public TradeBoothClickEvent(IconMenu.OptionClickEvent clickEvent, TradeBoothMenuType type, int absolutePageNumber) {
 		this.clickEvent = clickEvent;
 		this.page = absolutePageNumber;
 		this.type = type;
+	}
+	public TradeBoothClickEvent(IconMenu.OptionClickEvent clickEvent, TradeBoothMenuType type, int absolutePageNumber, Object[] args) {
+		this.clickEvent = clickEvent;
+		this.page = absolutePageNumber;
+		this.type = type;
+		this.args = args;
+	}
+	public Object[] getArgs(){
+		return args;
 	}
 	public boolean isCancelled() {
 		return this.cancelled;

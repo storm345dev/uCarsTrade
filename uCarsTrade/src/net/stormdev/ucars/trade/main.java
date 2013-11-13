@@ -13,17 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
-import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
-import net.stormdev.ucars.utils.UpgradeForSale;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -72,15 +69,6 @@ public class main extends JavaPlugin {
 	
 	public void onEnable(){
 		plugin = this;
-		alertsFile = new File(getDataFolder().getAbsolutePath()
-				+ File.separator + "alerts.stringMap");
-		if(alertsFile.length()<1||!alertsFile.exists()){
-			try {
-				alertsFile.createNewFile();
-			} catch (IOException e) {
-				main.logger.info(main.colors.getError()+"Failed to create Alerts File");
-			}
-		}
 		File langFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "lang.yml");
 		if (langFile.exists() == false
@@ -214,6 +202,16 @@ public class main extends JavaPlugin {
 				config.getString("colorScheme.title"),
 				config.getString("colorScheme.title"));
 		logger.info("Config loaded!");
+		alertsFile = new File(getDataFolder().getAbsolutePath()
+				+ File.separator + "alerts.stringMap");
+		alertsFile.getParentFile().mkdirs();
+		if(alertsFile.length()<1||!alertsFile.exists()){
+			try {
+				alertsFile.createNewFile();
+			} catch (IOException e) {
+				main.logger.info(main.colors.getError()+"Failed to create Alerts File");
+			}
+		}
 		logger.info("Searching for uCars...");
 		Plugin[] plugins = getServer().getPluginManager().getPlugins();
 		Boolean installed = false;

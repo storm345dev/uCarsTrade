@@ -902,7 +902,10 @@ public class UTradeListener implements Listener {
 					return;
 				}
 				ItemStack carItem = i.getItem(4);
-				if(carItem.getType() != Material.MINECART || carItem.getDurability() < 20){
+				if(carItem.getType() != Material.MINECART
+						|| carItem.getItemMeta() == null
+						|| carItem.getItemMeta().getLore() == null
+						|| carItem.getItemMeta().getLore().size() < 2){
 					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
 					return;
 				}
@@ -949,7 +952,10 @@ public class UTradeListener implements Listener {
 							return;
 						}
 						ItemStack carItem = i.getItem(4);
-						if(carItem.getType() != Material.MINECART || carItem.getDurability() < 20){
+						if(carItem.getType() != Material.MINECART 
+								|| carItem.getItemMeta() == null
+								|| carItem.getItemMeta().getLore() == null
+								|| carItem.getItemMeta().getLore().size() < 2){
 							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
 							return;
 						}

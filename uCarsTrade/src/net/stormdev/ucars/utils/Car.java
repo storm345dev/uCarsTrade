@@ -67,7 +67,7 @@ public class Car implements Serializable {
 				extra.add("-"+stat.getValue());
 			}	
 		}
-		lore.add(main.colors.getTitle()+this.id);
+		lore.add(this.id);
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed+"x");
 		double max = ucars.config.getDouble("general.cars.health.max");
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);

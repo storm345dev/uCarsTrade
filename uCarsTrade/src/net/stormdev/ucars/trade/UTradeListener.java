@@ -79,7 +79,7 @@ public class UTradeListener implements Listener {
 		if(!(recipe.getType() == Material.MINECART)){
 			return;
 		}
-		if(recipe.getDurability() < 20){
+		if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("car")){
 			return;
 		}
 		Car car = CarGenerator.gen();
@@ -90,10 +90,14 @@ public class UTradeListener implements Listener {
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
 	void carUpgradeAnvil(InventoryClickEvent event){
-		if(event.getAction()==InventoryAction.CLONE_STACK){ //Don't work but left here until bukkit fixes
+		if(event.getAction()==InventoryAction.CLONE_STACK){
 			ItemStack cloned = event.getCursor();
-			if(cloned.getType() == Material.MINECART && cloned.getDurability()>19){
+			if(cloned.getType() == Material.MINECART || 
+					cloned.getItemMeta() == null ||
+					cloned.getItemMeta().getLore() == null ||
+					cloned.getItemMeta().getLore().size() < 2){
 				event.setCancelled(true);
+				return;
 			}
 			return;
 		}
@@ -128,7 +132,8 @@ public class UTradeListener implements Listener {
 		if(carItem == null){
 			return;
 		}
-		if(!(carItem.getType() == Material.MINECART) || !(carItem.getDurability() > 19)){
+		if(!(carItem.getType() == Material.MINECART) || 
+				carItem.getItemMeta().getLore().size() < 2){
 			return; //Not a car
 		}
 		//Anvil contains a car in first slot.
@@ -405,104 +410,105 @@ public class UTradeListener implements Listener {
 		}
 		Block block = event.getClickedBlock();
 		ItemStack inHand = event.getPlayer().getItemInHand().clone();
-		if(inHand.getDurability() < 20){ //Not a car
+		if(inHand == null ||
+				inHand.getItemMeta() == null ||
+				inHand.getItemMeta().getLore() == null ||
+				inHand.getItemMeta().getLore().size() < 2 || inHand.getType() != Material.MINECART){ //Not a car
 			return;
 		}
-		if (inHand.getType() == Material.MINECART) {
-			// Its a minecart!
-			int iar = block.getTypeId();
-			if (iar == 66 || iar == 28 || iar == 27) {
-				return;
-			}
-			if(!PlaceManager.placeableOn(iar, block.getData())){
-				return;
-			}
-			if (!ucars.config.getBoolean("general.cars.enable")) {
-				return;
-			}
-			if (ucars.config.getBoolean("general.cars.placePerm.enable")) {
-				String perm = ucars.config
-						.getString("general.cars.placePerm.perm");
-				if (!event.getPlayer().hasPermission(perm)) {
-					String noPerm = Lang.get("lang.messages.noPlacePerm");
-					noPerm = noPerm.replaceAll("%perm%", perm);
-					event.getPlayer().sendMessage(
-							ucars.colors.getError() + noPerm);
-					return;
-				}
-			}
-			if (event.isCancelled()) {
-				event.getPlayer().sendMessage(
-						ucars.colors.getError()
-								+ Lang.get("lang.messages.noPlaceHere"));
-				return;
-			}
-			List<String> lore = inHand.getItemMeta().getLore();
-			Car c = null;
-			if(lore.size() > 0){
-			UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-			if(!plugin.carSaver.cars.containsKey(carId)){
-				return;
-			}
-			c = plugin.carSaver.cars.get(carId);
-			}
-			else{
-				return;
-			}
-			HashMap<String, Stat> stats = c.getStats();
-			Location loc = block.getLocation().add(0, 1.5, 0);
-			loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
-			final Entity car = event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
-			double health = ucars.config.getDouble("general.cars.health.default");
-			if(stats.containsKey("trade.health")){
-				try {
-					health = (Double) stats.get("trade.health").getValue();
-				} catch (Exception e) {
-					//Leave health to default
-				}
-			}
-			Runnable onDeath = new Runnable(){
-				//@Override
-				public void run(){
-					plugin.getServer().getPluginManager().callEvent(new ucarDeathEvent((Minecart) car));
-				}
-			};
-			car.setMetadata("carhealth", new CarHealthData(health, onDeath, plugin));
-			/*
-			 * Location carloc = car.getLocation();
-			 * carloc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
-			 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
-			 * car.setVelocity(new Vector(0,0,0));
-			 */
-			UUID id = car.getUniqueId();
-			car.setMetadata("trade.car", new StatValue(true, plugin));
-				ItemStack placed = event.getPlayer().getItemInHand();
-				placed.setAmount(0);
-				event.getPlayer().getInventory().setItemInHand(placed);
-			event.setCancelled(true);
-			while(plugin.carSaver.cars.containsKey(id)){
-				Car cr = plugin.carSaver.cars.get(id);
-				plugin.carSaver.cars.remove(id);
-			    UUID newId = UUID.randomUUID();
-			    while(plugin.carSaver.cars.containsKey(newId)){
-			    	newId = UUID.randomUUID();
-			    }
-			    plugin.carSaver.cars.put(newId, cr);
-			}
-			plugin.carSaver.cars.remove(c.getId());
-			c.setId(id); //Bind car id to minecart id
-			c.isPlaced = true;
-			plugin.carSaver.cars.put(id, c);
-			plugin.carSaver.save();
-			String name = "Unnamed";
-			if(stats.containsKey("trade.name")){
-				name = stats.get("trade.name").getValue().toString();
-			}
-			String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
-			placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
-			event.getPlayer().sendMessage(placeMsg);
-			//Registered car
+		// Its a minecart!
+		int iar = block.getTypeId();
+		if (iar == 66 || iar == 28 || iar == 27) {
+			return;
 		}
+		if(!PlaceManager.placeableOn(iar, block.getData())){
+			return;
+		}
+		if (!ucars.config.getBoolean("general.cars.enable")) {
+			return;
+		}
+		if (ucars.config.getBoolean("general.cars.placePerm.enable")) {
+			String perm = ucars.config
+					.getString("general.cars.placePerm.perm");
+			if (!event.getPlayer().hasPermission(perm)) {
+				String noPerm = Lang.get("lang.messages.noPlacePerm");
+				noPerm = noPerm.replaceAll("%perm%", perm);
+				event.getPlayer().sendMessage(
+						ucars.colors.getError() + noPerm);
+				return;
+			}
+		}
+		if (event.isCancelled()) {
+			event.getPlayer().sendMessage(
+					ucars.colors.getError()
+							+ Lang.get("lang.messages.noPlaceHere"));
+			return;
+		}
+		List<String> lore = inHand.getItemMeta().getLore();
+		Car c = null;
+		if(lore.size() > 0){
+		UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		if(!plugin.carSaver.cars.containsKey(carId)){
+			return;
+		}
+		c = plugin.carSaver.cars.get(carId);
+		}
+		else{
+			return;
+		}
+		HashMap<String, Stat> stats = c.getStats();
+		Location loc = block.getLocation().add(0, 1.5, 0);
+		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
+		final Entity car = event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
+		double health = ucars.config.getDouble("general.cars.health.default");
+		if(stats.containsKey("trade.health")){
+			try {
+				health = (Double) stats.get("trade.health").getValue();
+			} catch (Exception e) {
+				//Leave health to default
+			}
+		}
+		Runnable onDeath = new Runnable(){
+			//@Override
+			public void run(){
+				plugin.getServer().getPluginManager().callEvent(new ucarDeathEvent((Minecart) car));
+			}
+		};
+		car.setMetadata("carhealth", new CarHealthData(health, onDeath, plugin));
+		/*
+		 * Location carloc = car.getLocation();
+		 * carloc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
+		 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
+		 * car.setVelocity(new Vector(0,0,0));
+		 */
+		UUID id = car.getUniqueId();
+		car.setMetadata("trade.car", new StatValue(true, plugin));
+			ItemStack placed = event.getPlayer().getItemInHand();
+			placed.setAmount(0);
+			event.getPlayer().getInventory().setItemInHand(placed);
+		event.setCancelled(true);
+		while(plugin.carSaver.cars.containsKey(id)){
+			Car cr = plugin.carSaver.cars.get(id);
+			plugin.carSaver.cars.remove(id);
+		    UUID newId = UUID.randomUUID();
+		    while(plugin.carSaver.cars.containsKey(newId)){
+		    	newId = UUID.randomUUID();
+		    }
+		    plugin.carSaver.cars.put(newId, cr);
+		}
+		plugin.carSaver.cars.remove(c.getId());
+		c.setId(id); //Bind car id to minecart id
+		c.isPlaced = true;
+		plugin.carSaver.cars.put(id, c);
+		plugin.carSaver.save();
+		String name = "Unnamed";
+		if(stats.containsKey("trade.name")){
+			name = stats.get("trade.name").getValue().toString();
+		}
+		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
+		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
+		event.getPlayer().sendMessage(placeMsg);
+		//Registered car
 		return;
 	}
 	@EventHandler (priority=EventPriority.LOW)
@@ -769,7 +775,7 @@ public class UTradeListener implements Listener {
 			}
 			else{
 				//Positions 1-> 51
-				//TODO Get upgrade and buy it using vault
+				//Get upgrade and buy it using vault
 				int page = event.getPage();
 				int slot = clickEvent.getPosition() - 1; //Click on '1' = pos=0
 				int mapPos = (page-1)*51+slot; //Page one, slot 1 = mapPos: 0

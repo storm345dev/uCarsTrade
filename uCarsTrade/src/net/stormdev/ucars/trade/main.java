@@ -69,6 +69,7 @@ public class main extends JavaPlugin {
 	
 	public void onEnable(){
 		plugin = this;
+		getDataFolder().mkdirs();
 		File langFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "lang.yml");
 		if (langFile.exists() == false

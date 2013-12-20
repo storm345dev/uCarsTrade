@@ -101,6 +101,12 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.upgrade.msg")){
 				lang.set("general.upgrade.msg", "&a+%amount% &e%stat%. Value: %value%");
 			}
+			if(!lang.contains("general.cmd.playersOnly")){
+				lang.set("general.cmd.playersOnly", "Players Only!");
+			}
+			if(!lang.contains("general.cmd.give")){
+				lang.set("general.cmd.give", "Given you a car!");
+			}
 			if(!lang.contains("title.carTrading")){
 				lang.set("title.carTrading", "Car Trading");
 			}

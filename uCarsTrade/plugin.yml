@@ -6,7 +6,8 @@ depend: [uCars]
 commands:
    ucarsTrade:
         description: This is the admin commands
-        usage: /<command>
+        aliases: [car, ut, carsTrade, carTrade]
+        usage: /<command> [Give Random] [Give <Speed> <Health> <Name>]
         permission: ucarstrade.admin
         permission-message: You don't have access to this command
         default: op

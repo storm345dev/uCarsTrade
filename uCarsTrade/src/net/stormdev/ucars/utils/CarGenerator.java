@@ -48,4 +48,12 @@ public class CarGenerator {
 		Car c = new Car(false, meta);
 		return c;
 	}
+	public static Car gen(double speed, double health, String name){
+		HashMap<String, Stat> meta = new HashMap<String, Stat>();
+		meta.put("trade.name", new NameStat(main.colorise(name), main.plugin));
+		meta.put("trade.health", new HealthStat(health, main.plugin));
+		meta.put("trade.speed", new SpeedStat(speed, main.plugin));
+		Car c = new Car(false, meta);
+		return c;
+	}
 }

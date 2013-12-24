@@ -68,6 +68,21 @@ public class main extends JavaPlugin {
 	}
 	
 	public void onEnable(){
+		try {
+			if(Double.parseDouble(com.useful.ucars.ucars.plugin.getDescription().getVersion())
+					< 16.2){
+				main.logger.log("uCarsTrade needs uCars v16.2 or higher to function with the new API!", Level.SEVERE);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					//Oh well
+				}
+				getServer().getPluginManager().disablePlugin(this);
+				return;
+			}
+		} catch (NumberFormatException e2) {
+			//Error determining uCarsVersion
+		}
 		plugin = this;
 		getDataFolder().mkdirs();
 		File langFile = new File(getDataFolder().getAbsolutePath()

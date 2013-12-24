@@ -10,10 +10,32 @@ import net.stormdev.ucars.utils.Car;
 import org.bukkit.entity.Minecart;
 import org.bukkit.util.Vector;
 
+import com.useful.uCarsAPI.CarCheck;
+import com.useful.uCarsAPI.CarSpeedModifier;
+import com.useful.uCarsAPI.uCarsAPI;
+
 public class CarCalculations {
 
+	private uCarsAPI api = null;
 	public CarCalculations(){
-		
+		setup();
+	}
+	public void setup(){
+		api = uCarsAPI.getAPI();
+		if(!api.isPluginHooked(main.plugin)){
+			api.hookPlugin(main.plugin);
+		}
+		CarCheck isACar = new CarCheck(){
+			public Boolean isACar(Minecart car) {
+				return isAuCar(car);
+			}};
+		api.registerCarCheck(main.plugin, isACar);
+		CarSpeedModifier modifier = new CarSpeedModifier(){
+			public Vector getModifiedSpeed(Minecart car, Vector travelVector, double currentMult) {
+				return getVelocity(car, travelVector, currentMult);
+			}};
+		api.registerSpeedMod(main.plugin, modifier);
+		return;
 	}
 	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
 		UUID id = cart.getUniqueId();
@@ -54,10 +76,9 @@ public class CarCalculations {
 				}
 			}
 		}
-		//TODO
 		return current;
 	}
-	public Boolean isACar(Minecart car){
+	public Boolean isAuCar(Minecart car){
 		if(main.plugin.carSaver.cars.containsKey(car.getUniqueId())){
 			return true;
 		}

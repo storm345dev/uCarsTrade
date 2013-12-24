@@ -71,9 +71,10 @@ public class main extends JavaPlugin {
 		try {
 			if(Double.parseDouble(com.useful.ucars.ucars.plugin.getDescription().getVersion())
 					< 16.2){
-				main.logger.log("uCarsTrade needs uCars v16.2 or higher to function with the new API!", Level.SEVERE);
+				getLogger().log(Level.SEVERE, "uCarsTrade needs uCars v16.2 or newer to function with the new API!"
+						+ "(Installed version: "+com.useful.ucars.ucars.plugin.getDescription().getVersion()+")");
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					//Oh well
 				}
@@ -329,18 +330,23 @@ public class main extends JavaPlugin {
 	}
 	
 	public void onDisable(){
-		if(alertsFile.length()<1||!alertsFile.exists()){
-			try {
-				alertsFile.createNewFile();
-			} catch (IOException e) {
-				main.logger.info(main.colors.getError()+"Failed to create Alerts File");
+		try {
+			if(alertsFile.length()<1||!alertsFile.exists()){
+				try {
+					alertsFile.createNewFile();
+				} catch (IOException e) {
+					main.logger.info(main.colors.getError()+"Failed to create Alerts File");
+				}
 			}
+			saveHashMapAlerts(alerts, alertsFile.getAbsolutePath());
+			if(ucars != null){
+			ucars.unHookPlugin(this);
+			}
+			logger.info("uCarsTrade has been disabled!");
+		} catch (Exception e) {
+			//Disabled without being enabled
+			getLogger().info("Disabled uCarsTrade!");
 		}
-		saveHashMapAlerts(alerts, alertsFile.getAbsolutePath());
-		if(ucars != null){
-		ucars.unHookPlugin(this);
-		}
-		logger.info("uCarsTrade has been disabled!");
 	}
 	
 	private void copy(InputStream in, File file) {

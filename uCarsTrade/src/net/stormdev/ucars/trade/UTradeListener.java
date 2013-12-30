@@ -311,7 +311,6 @@ public class UTradeListener implements Listener {
 			return;
 	}
 	
-	/*
 	@EventHandler(priority = EventPriority.HIGHEST)
 	void carStackRemoval(VehicleDestroyEvent event){
 		if(event.isCancelled()){
@@ -322,6 +321,7 @@ public class UTradeListener implements Listener {
 			//Read up the stack and remove all
 			Minecart car = (Minecart)v;
 			Entity top = car;
+			Location loc = car.getLocation();
 			while(top.getPassenger() != null){
 				top = top.getPassenger();
 			}
@@ -331,10 +331,10 @@ public class UTradeListener implements Listener {
 				top = veh;
 			}
 			top.remove();
+			loc.getWorld().dropItemNaturally(loc, new ItemStack(Material.MINECART));
 		}
 		return;
 	}
-	*/
 	
 	@EventHandler (priority = EventPriority.HIGH)
 	void enterCar(PlayerInteractEntityEvent event){

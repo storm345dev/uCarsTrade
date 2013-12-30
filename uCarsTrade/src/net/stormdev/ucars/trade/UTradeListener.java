@@ -61,7 +61,6 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
@@ -312,6 +311,7 @@ public class UTradeListener implements Listener {
 			return;
 	}
 	
+	/*
 	@EventHandler(priority = EventPriority.HIGHEST)
 	void carStackRemoval(VehicleDestroyEvent event){
 		if(event.isCancelled()){
@@ -334,6 +334,7 @@ public class UTradeListener implements Listener {
 		}
 		return;
 	}
+	*/
 	
 	@EventHandler (priority = EventPriority.HIGH)
 	void enterCar(PlayerInteractEntityEvent event){
@@ -562,8 +563,9 @@ public class UTradeListener implements Listener {
 		//Registered car
 		return;
 	}
-	@EventHandler (priority=EventPriority.LOW)
+	@EventHandler (priority=EventPriority.HIGH)
 	void carRemoval(ucarDeathEvent event){
+		//TODO
 		Minecart cart = event.getCar();
 		UUID id = cart.getUniqueId();
 		if(!plugin.carSaver.cars.containsKey(id)){
@@ -585,7 +587,16 @@ public class UTradeListener implements Listener {
 		plugin.carSaver.save();
 		cart.eject();
 		Location loc = cart.getLocation();
-		cart.remove();
+		Entity top = cart;
+		while(top.getPassenger() != null){
+			top = top.getPassenger();
+		}
+		while(top.getVehicle() != null){
+			Entity veh = top.getVehicle();
+			top.remove();
+			top = veh;
+		}
+		top.remove();
 		loc.getWorld().dropItemNaturally(loc, new ItemStack(car.getItem()));
 		//Remove car and get back item
 		event.setCancelled(true);

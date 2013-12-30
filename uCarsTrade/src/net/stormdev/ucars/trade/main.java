@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +23,14 @@ import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
@@ -397,5 +402,36 @@ public class main extends JavaPlugin {
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void putBlockInCar(Minecart car, int id, int data){
+		Boolean useFallingBlock = false;
+		// net.minecraft.server.v1_7_R1.EntityMinecartAbstract;
+		String version = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage()
+				.getName().replace(".", ",").split(",")[3];
+		Class c = null;
+		try {
+			c = Class.forName(version + ".EntityMinecartAbstract");
+			Method carId = c.getMethod("k", int.class);
+			Method carData = c.getMethod("l", int.class);
+			carId.setAccessible(true);
+			carData.setAccessible(true);
+			//TODO Cannot invoke on Bukkit 'interfaces', need to get the CB version of the class
+			//and invoke on that
+			carId.invoke(car, id);
+			carData.invoke(car, data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			useFallingBlock = true;
+		}
+		if(useFallingBlock){
+			Location toSpawn = car.getLocation().clone();
+			double newY = toSpawn.getY() + 1;
+			toSpawn.setY(newY);
+			FallingBlock f = toSpawn.getWorld().spawnFallingBlock(toSpawn, id, (byte) data);
+			car.setPassenger(f);
+		}
+		return;
 	}
 }

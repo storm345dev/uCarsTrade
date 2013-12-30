@@ -39,6 +39,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -563,7 +564,7 @@ public class UTradeListener implements Listener {
 		HashMap<String, Stat> stats = c.getStats();
 		Location loc = block.getLocation().add(0, 1.5, 0);
 		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
-		final Entity car = event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
+		final Minecart car = (Minecart) event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
 		double health = ucars.config.getDouble("general.cars.health.default");
 		if(stats.containsKey("trade.health")){
 			try {
@@ -612,8 +613,9 @@ public class UTradeListener implements Listener {
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
-		//TODO Debug stack test
-		car.setPassenger(car.getLocation().getWorld().spawnEntity(loc, EntityType.PIG));
+		//TODO Put correct displays into stack
+		//Entity f = car.getWorld().spawnFallingBlock(loc.clone().add(0,0.1,0), Material.WOOL, (byte)3);
+		main.plugin.putBlockInCar(car, 35, 2);
 		//Registered car
 		return;
 	}

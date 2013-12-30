@@ -47,6 +47,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -352,7 +354,8 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		Entity top = car;
-		while(top.getPassenger() != null){
+		while(top.getPassenger() != null
+				&& !(top.getPassenger() instanceof Player)){
 			top = top.getPassenger();
 		}
 		top.setPassenger(event.getPlayer());
@@ -452,6 +455,55 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	*/
+	
+	@EventHandler(priority = EventPriority.LOW)
+	void carDisplayDamage(EntityDamageEvent event){
+		if(event.getEntity() instanceof Player){
+			return;
+		}
+		Entity e = event.getEntity();
+		Entity v = e.getVehicle();
+		if(v == null){
+			return;
+		}
+		while(v.getVehicle() != null && !(v.getVehicle() instanceof Minecart)){
+			v = v.getVehicle();
+		}
+		if(!(v instanceof Minecart)){
+			return;
+		}
+		//Part of a car stack
+		event.setDamage(0);
+		event.setCancelled(true);
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.LOW)
+	void carDisplayDeaths(EntityDeathEvent event){
+		try {
+			if(event.getEntity() instanceof Player){
+				return;
+			}
+			Entity e = event.getEntity();
+			Entity v = e.getVehicle();
+			if(v == null){
+				return;
+			}
+			while(v.getVehicle() != null && !(v.getVehicle() instanceof Minecart)){
+				v = v.getVehicle();
+			}
+			if(!(v instanceof Minecart)){
+				return;
+			}
+			//Part of a car stack
+			event.setDroppedExp(0);
+			event.getDrops().clear();
+		} catch (Exception e) {
+			//Entities already removed
+		}
+		return;
+	}
+	
 	@EventHandler(priority = EventPriority.LOW)
 	void carPlace(PlayerInteractEvent event){
 		if(event.isCancelled()){
@@ -560,12 +612,13 @@ public class UTradeListener implements Listener {
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
+		//TODO Debug stack test
+		car.setPassenger(car.getLocation().getWorld().spawnEntity(loc, EntityType.PIG));
 		//Registered car
 		return;
 	}
 	@EventHandler (priority=EventPriority.HIGH)
 	void carRemoval(ucarDeathEvent event){
-		//TODO
 		Minecart cart = event.getCar();
 		UUID id = cart.getUniqueId();
 		if(!plugin.carSaver.cars.containsKey(id)){
@@ -585,18 +638,22 @@ public class UTradeListener implements Listener {
 		}
 		plugin.carSaver.cars.put(id, car);
 		plugin.carSaver.save();
-		cart.eject();
 		Location loc = cart.getLocation();
 		Entity top = cart;
-		while(top.getPassenger() != null){
+		while(top.getPassenger() != null
+				&& !(top.getPassenger() instanceof Player)){
 			top = top.getPassenger();
+		}
+		if(top.getPassenger() instanceof Player){
+			top.eject();
 		}
 		while(top.getVehicle() != null){
 			Entity veh = top.getVehicle();
 			top.remove();
 			top = veh;
 		}
-		top.remove();
+		cart.eject();
+		cart.remove();
 		loc.getWorld().dropItemNaturally(loc, new ItemStack(car.getItem()));
 		//Remove car and get back item
 		event.setCancelled(true);

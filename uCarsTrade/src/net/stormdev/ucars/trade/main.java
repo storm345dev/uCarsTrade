@@ -408,19 +408,24 @@ public class main extends JavaPlugin {
 	public void putBlockInCar(Minecart car, int id, int data){
 		Boolean useFallingBlock = false;
 		// net.minecraft.server.v1_7_R1.EntityMinecartAbstract;
-		String version = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage()
+		// org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+		String NMSversion = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage()
 				.getName().replace(".", ",").split(",")[3];
-		Class c = null;
+		String CBversion = "org.bukkit.craftbukkit." + Bukkit.getServer().getClass().getPackage()
+				.getName().replace(".", ",").split(",")[3];
+		Class nms = null;
+		Class cb = null;
 		try {
-			c = Class.forName(version + ".EntityMinecartAbstract");
-			Method carId = c.getMethod("k", int.class);
-			Method carData = c.getMethod("l", int.class);
+			nms = Class.forName(NMSversion + ".EntityMinecartAbstract");
+			cb = Class.forName(CBversion + ".entity.CraftEntity");
+			Method carId = nms.getMethod("k", int.class);
+			Method carData = nms.getMethod("l", int.class);
 			carId.setAccessible(true);
 			carData.setAccessible(true);
-			//TODO Cannot invoke on Bukkit 'interfaces', need to get the CB version of the class
-			//and invoke on that
-			carId.invoke(car, id);
-			carData.invoke(car, data);
+			//TODO Cannot invoke on CB classes, need to get the CB 'getHandle()' of the NMS class
+			//and invoke on that - Use more reflect..
+			carId.invoke(nms.cast(cb.cast(car)), id);
+			carData.invoke(nms.cast(cb.cast(car)), data);
 		} catch (Exception e) {
 			e.printStackTrace();
 			useFallingBlock = true;

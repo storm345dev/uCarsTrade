@@ -41,6 +41,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,14 +51,17 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
@@ -306,6 +310,53 @@ public class UTradeListener implements Listener {
 				player.updateInventory();
 			}
 			return;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	void carStackRemoval(VehicleDestroyEvent event){
+		if(event.isCancelled()){
+			return;
+		}
+		Vehicle v = event.getVehicle();
+		if(v instanceof Minecart){
+			//Read up the stack and remove all
+			Minecart car = (Minecart)v;
+			Entity top = car;
+			while(top.getPassenger() != null){
+				top = top.getPassenger();
+			}
+			while(top.getVehicle() != null){
+				Entity veh = top.getVehicle();
+				top.remove();
+				top = veh;
+			}
+			top.remove();
+		}
+		return;
+	}
+	
+	@EventHandler (priority = EventPriority.HIGH)
+	void enterCar(PlayerInteractEntityEvent event){
+		//Enter things such as pigucarts
+		if(event.isCancelled()){
+			return;
+		}
+		Entity clicked = event.getRightClicked();
+		if(!(clicked instanceof Minecart)){
+			return;
+		}
+		Minecart car = (Minecart) clicked;
+		if(car.getPassenger() == null
+				|| car.getPassenger() instanceof Player){
+			return;
+		}
+		Entity top = car;
+		while(top.getPassenger() != null){
+			top = top.getPassenger();
+		}
+		top.setPassenger(event.getPlayer());
+		event.setCancelled(true);
+		return;
 	}
 	/*
 	@SuppressWarnings("deprecation")

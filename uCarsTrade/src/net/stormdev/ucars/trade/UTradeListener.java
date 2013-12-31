@@ -614,9 +614,6 @@ public class UTradeListener implements Listener {
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
 		//TODO Put correct displays into stack
-		//Entity f = car.getWorld().spawnFallingBlock(loc.clone().add(0,0.1,0), Material.WOOL, (byte)3);
-		main.plugin.putBlockInCar(car, 35, 2);
-		//Registered car
 		return;
 	}
 	@EventHandler (priority=EventPriority.HIGH)

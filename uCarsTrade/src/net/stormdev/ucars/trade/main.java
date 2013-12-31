@@ -415,27 +415,28 @@ public class main extends JavaPlugin {
 				.getName().replace(".", ",").split(",")[3];
 		Class nms = null;
 		Class cb = null;
+		Class nmsEntity = null;
 		try {
 			nms = Class.forName(NMSversion + ".EntityMinecartAbstract");
+			nmsEntity = Class.forName(NMSversion + ".Entity");
 			cb = Class.forName(CBversion + ".entity.CraftEntity");
 			Method carId = nms.getMethod("k", int.class);
 			Method carData = nms.getMethod("l", int.class);
+			Method getNMSEntity = cb.getMethod("getHandle");
 			carId.setAccessible(true);
 			carData.setAccessible(true);
-			//TODO Cannot invoke on CB classes, need to get the CB 'getHandle()' of the NMS class
-			//and invoke on that - Use more reflect..
-			carId.invoke(nms.cast(cb.cast(car)), id);
-			carData.invoke(nms.cast(cb.cast(car)), data);
+			getNMSEntity.setAccessible(true);
+			Object ce = cb.cast(car);
+			Object nmsE = nmsEntity.cast(getNMSEntity.invoke(ce));
+			carId.invoke(nmsE, id);
+			carData.invoke(nmsE, data);
 		} catch (Exception e) {
-			e.printStackTrace();
 			useFallingBlock = true;
 		}
 		if(useFallingBlock){
-			Location toSpawn = car.getLocation().clone();
-			double newY = toSpawn.getY() + 1;
-			toSpawn.setY(newY);
-			FallingBlock f = toSpawn.getWorld().spawnFallingBlock(toSpawn, id, (byte) data);
-			car.setPassenger(f);
+			//Don't use falling blocks as they're derpy
+			main.logger.info("[ALERT] uCarsTrade was unable to place a wool block in a car,"
+					+ " please check for an update.");
 		}
 		return;
 	}

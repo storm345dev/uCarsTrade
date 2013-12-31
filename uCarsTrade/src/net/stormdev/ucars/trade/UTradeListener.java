@@ -517,9 +517,8 @@ public class UTradeListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW) //Call second
 	void carDestroy(EntityDamageByEntityEvent event){
 		if(event.getEntity() instanceof Minecart
-				|| !(event.getDamager() instanceof Player)
-				|| event.isCancelled()){
-			return; //uCars can handle it, or they're not a player, or falling
+				|| !(event.getDamager() instanceof Player)){
+			return; //uCars can handle it, or they're not a player
 		}
 		final Player player = (Player) event.getDamager();
 		final Minecart car = isEntityInCar(event.getEntity());

@@ -21,6 +21,7 @@ import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.CarValueCalculator;
+import net.stormdev.ucars.utils.Displays;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.InputMenu;
 import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
@@ -39,7 +40,6 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -48,6 +48,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -63,7 +64,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.MetadataValue;
 
+import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
@@ -347,7 +350,13 @@ public class UTradeListener implements Listener {
 		}
 		Entity clicked = event.getRightClicked();
 		if(!(clicked instanceof Minecart)){
-			return;
+			Minecart m = isEntityInCar(clicked);
+			if(m != null){
+				clicked = m;
+			}
+			else{
+				return;
+			}
 		}
 		Minecart car = (Minecart) clicked;
 		if(car.getPassenger() == null
@@ -505,6 +514,60 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	
+	@EventHandler
+	void carDestroy(EntityDamageByEntityEvent event){
+		if(event.getEntity() instanceof Minecart
+				|| !(event.getDamager() instanceof Player)){
+			return; //uCars can handle it, or they're not a player
+		}
+		final Player player = (Player) event.getDamager();
+		final Minecart car = isEntityInCar(event.getEntity());
+		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
+			return;
+		}
+		Runnable onDeath = new Runnable() {
+			// @Override
+			public void run() {
+				plugin.getServer().getPluginManager()
+						.callEvent(new ucarDeathEvent(car));
+			}
+		};
+		CarHealthData health = new CarHealthData(
+				ucars.config.getDouble("general.cars.health.default"), onDeath,
+				plugin);
+		if (car.hasMetadata("carhealth")) {
+			List<MetadataValue> vals = car.getMetadata("carhealth");
+			for (MetadataValue val : vals) {
+				if (val instanceof CarHealthData) {
+					health = (CarHealthData) val;
+				}
+			}
+		}
+		event.setDamage(0);
+		event.setCancelled(true);
+		double damage = ucars.config
+				.getDouble("general.cars.health.punchDamage");
+		if (damage > 0) {
+			double max = ucars.config.getDouble("general.cars.health.default");
+			double left = health.getHealth() - damage;
+			ChatColor color = ChatColor.YELLOW;
+			if (left > (max * 0.66)) {
+				color = ChatColor.GREEN;
+			}
+			if (left < (max * 0.33)) {
+				color = ChatColor.RED;
+			}
+			if (left < 0) {
+				left = 0;
+			}
+			player.sendMessage(ChatColor.RED + "-" + damage + ChatColor.YELLOW
+					+ "[" + player.getName() + "]" + color + " (" + left + ")");
+			health.damage(damage);
+			car.setMetadata("carhealth", health);
+		}
+		return;
+	}
+	
 	@EventHandler(priority = EventPriority.LOW)
 	void carPlace(PlayerInteractEvent event){
 		if(event.isCancelled()){
@@ -613,6 +676,8 @@ public class UTradeListener implements Listener {
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
+		c.stats.put("trade.display", new Stat(Displays.Entity_Blaze, main.plugin));
+		DisplayManager.fillCar(car, c, event.getPlayer());
 		//TODO Put correct displays into stack
 		return;
 	}
@@ -1394,6 +1459,20 @@ public class UTradeListener implements Listener {
 		event.getPlayer().sendMessage(plugin.alerts.get(name));
 		plugin.alerts.remove(name);
 		return;
+	}
+	
+	public Minecart isEntityInCar(Entity e){
+		if(e.getVehicle() == null){
+			return null;
+		}
+		Entity v = e.getVehicle();
+		while(v!=null && v.getVehicle() != null && !(v instanceof Minecart)){
+			v = v.getVehicle();
+		}
+		if(v == null || !(v instanceof Minecart)){
+			return null;
+		}
+		return (Minecart) v;
 	}
 
 }

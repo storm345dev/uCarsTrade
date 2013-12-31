@@ -466,8 +466,8 @@ public class UTradeListener implements Listener {
 	}
 	*/
 	
-	@EventHandler(priority = EventPriority.LOW)
-	void carDisplayDamage(EntityDamageEvent event){
+	@EventHandler(priority = EventPriority.LOWEST) //Call first
+ 	void carDisplayDamage(EntityDamageEvent event){
 		if(event.getEntity() instanceof Player){
 			return;
 		}
@@ -514,11 +514,12 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOW) //Call second
 	void carDestroy(EntityDamageByEntityEvent event){
 		if(event.getEntity() instanceof Minecart
-				|| !(event.getDamager() instanceof Player)){
-			return; //uCars can handle it, or they're not a player
+				|| !(event.getDamager() instanceof Player)
+				|| event.isCancelled()){
+			return; //uCars can handle it, or they're not a player, or falling
 		}
 		final Player player = (Player) event.getDamager();
 		final Minecart car = isEntityInCar(event.getEntity());
@@ -676,7 +677,8 @@ public class UTradeListener implements Listener {
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
-		c.stats.put("trade.display", new Stat(Displays.Entity_Blaze, main.plugin));
+		//TODO V - Debug stat
+		c.stats.put("trade.display", new Stat(Displays.Entity_Boat, main.plugin));
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		//TODO Put correct displays into stack
 		return;

@@ -1,7 +1,12 @@
 package net.stormdev.ucars.utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import net.stormdev.ucars.trade.main;
+
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Minecart;
@@ -14,63 +19,91 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.PIG);
 					return;
-					}});
+					}}, false, 2, Material.PORK, Material.PORK, 5, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A pig that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 5 porkchops")));
 	public static DisplayType Entity_Sheep = 
 			new DisplayType("Sheep", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SHEEP);
 					return;
-					}});
+					}}, false, 2, Material.WOOL, Material.WOOL, 5, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A sheep that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 5 wool")));
 	public static DisplayType Entity_Chicken = 
 			new DisplayType("Chicken", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.CHICKEN);
 					return;
-					}});
+					}}, false, 2, Material.EGG, Material.EGG, 5, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A chicken that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 5 eggs")));
 	public static DisplayType Entity_Blaze = 
 			new DisplayType("Blaze", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BLAZE);
 					return;
-					}});
+					}}, true, 2, Material.BLAZE_ROD, Material.BLAZE_ROD, 10, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A blaze that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 10 blaze rods",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_Bat = 
 			new DisplayType("Bat", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BAT);
 					return;
-					}});
-	public static DisplayType Entity_Boat = 
-			new DisplayType("Boat", new CarFiller(){
-				private static final long serialVersionUID = 1L;
-				public void putInCar(Minecart car, Player player) {
-					DisplayType.putEntityInCar(car, EntityType.BOAT);
-					return;
-					}});
+					}}, false, 2, Material.COAL_BLOCK, Material.COAL_BLOCK, 2, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A bat that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 2 coal blocks")));
 	public static DisplayType Entity_Cow = 
-			new DisplayType("Chicken", new CarFiller(){
+			new DisplayType("Cow", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.COW);
 					return;
-					}});
+					}}, true, 2, Material.COOKED_BEEF, Material.COOKED_BEEF, 5, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A cow that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 5 cooked beef",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_Spider = 
 			new DisplayType("Spider", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SPIDER);
 					return;
-					}});
+					}}, true, 2, Material.STRING, Material.STRING, 10, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A spider that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 10 string",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_Zombie = 
-			new DisplayType("Zombie", new CarFiller(){
+			new DisplayType("Cow", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.ZOMBIE);
 					return;
-					}});
+					}}, false, 2, Material.COOKED_BEEF, Material.COOKED_BEEF, 5, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A cow that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 5 cooked beef")));
 	public static DisplayType Entity_Horse = 
 			new DisplayType("Horse", new CarFiller(){
 				private static final long serialVersionUID = 1L;
@@ -80,26 +113,55 @@ public class Displays implements Serializable {
 					h.setOwner(player);
 					DisplayType.putEntityInCar(car, h);
 					return;
-					}});
+					}}, true, 2, Material.SADDLE, Material.SADDLE, 2, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A horse that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 2 saddles",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_IronGolem = 
 			new DisplayType("Iron Golem", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.IRON_GOLEM);
 					return;
-					}});
+					}}, true, 2, Material.IRON_LEGGINGS, Material.IRON_LEGGINGS, 2, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"An Iron Golem that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 2 iron leggings",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_MagmaCube = 
 			new DisplayType("Magma Cube", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.MAGMA_CUBE);
 					return;
-					}});
+					}}, true, 2, Material.MAGMA_CREAM, Material.MAGMA_CREAM, 2, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A Magma Cube that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 2 magma creams",
+									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_Slime = 
 			new DisplayType("Slime", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SLIME);
+					return;
+					}}, true, 2, Material.SLIME_BALL, Material.SLIME_BALL, 20, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A Slime that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 20 slimeballs",
+									main.colors.getError()+"-Reduced ascending")));
+	//TODO Write the rest in the new format
+	/*
+	public static DisplayType Entity_Boat = 
+			new DisplayType("Boat", new CarFiller(){
+				private static final long serialVersionUID = 1L;
+				public void putInCar(Minecart car, Player player) {
+					DisplayType.putEntityInCar(car, EntityType.BOAT);
 					return;
 					}});
 	public static DisplayType Entity_Skeleton = 
@@ -151,4 +213,5 @@ public class Displays implements Serializable {
 					DisplayType.putEntityInCar(car, EntityType.OCELOT);
 					return;
 					}});
+					*/
 }

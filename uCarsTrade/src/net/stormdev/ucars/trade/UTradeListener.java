@@ -677,7 +677,7 @@ public class UTradeListener implements Listener {
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
 		//TODO V - Debug stat
-		c.stats.put("trade.display", new Stat(Displays.Entity_Boat, main.plugin));
+		c.stats.put("trade.display", new Stat(Displays.Entity_Bat, main.plugin));
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		//TODO Put correct displays into stack
 		return;

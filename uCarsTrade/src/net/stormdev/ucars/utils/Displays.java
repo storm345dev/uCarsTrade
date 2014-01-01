@@ -13,6 +13,7 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 public class Displays implements Serializable {
+	private static final long serialVersionUID = 1L;
 	public static DisplayType Entity_Pig = 
 			new DisplayType("Pig", new CarFiller(){
 				private static final long serialVersionUID = 1L;
@@ -155,6 +156,29 @@ public class Displays implements Serializable {
 									main.colors.getInfo()+"your car with you", 
 									main.colors.getInfo()+"-Make with 20 slimeballs",
 									main.colors.getError()+"-Reduced ascending")));
+	public static DisplayType Entity_Skeleton = 
+			new DisplayType("Skeleton", new CarFiller(){
+				private static final long serialVersionUID = 1L;
+				public void putInCar(Minecart car, Player player) {
+					DisplayType.putEntityInCar(car, EntityType.SKELETON);
+					return;
+					}}, false, 2, Material.BONE, Material.BONE, 20, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A Skeleton that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 20 bones")));
+	public static DisplayType Entity_Squid = 
+			new DisplayType("Squid", new CarFiller(){
+				private static final long serialVersionUID = 1L;
+				public void putInCar(Minecart car, Player player) {
+					DisplayType.putEntityInCar(car, EntityType.SQUID);
+					return;
+					}}, true, 2, Material.INK_SACK, Material.INK_SACK, 20, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"A Squid that rides", 
+									main.colors.getInfo()+"your car with you", 
+									main.colors.getInfo()+"-Make with 20 inc sacs",
+									main.colors.getError()+"-Reduced ascending")));
 	//TODO Write the rest in the new format
 	/*
 	public static DisplayType Entity_Boat = 
@@ -162,20 +186,6 @@ public class Displays implements Serializable {
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BOAT);
-					return;
-					}});
-	public static DisplayType Entity_Skeleton = 
-			new DisplayType("Skeleton", new CarFiller(){
-				private static final long serialVersionUID = 1L;
-				public void putInCar(Minecart car, Player player) {
-					DisplayType.putEntityInCar(car, EntityType.SKELETON);
-					return;
-					}});
-	public static DisplayType Entity_Squid = 
-			new DisplayType("Squid", new CarFiller(){
-				private static final long serialVersionUID = 1L;
-				public void putInCar(Minecart car, Player player) {
-					DisplayType.putEntityInCar(car, EntityType.SQUID);
 					return;
 					}});
 	public static DisplayType Entity_SnowMan = 

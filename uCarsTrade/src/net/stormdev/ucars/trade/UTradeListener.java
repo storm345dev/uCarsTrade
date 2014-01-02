@@ -21,6 +21,7 @@ import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.CarValueCalculator;
+import net.stormdev.ucars.utils.DisplayType;
 import net.stormdev.ucars.utils.Displays;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.InputMenu;
@@ -408,8 +409,19 @@ public class UTradeListener implements Listener {
 				upgrade.setAmount(0);
 			}
 			else{
-				//Invalid item
-				return;
+				//Apply display upgrades
+				DisplayType type = Displays.canAdd(upgrade);
+				if(type == null){
+					//Invalid item
+					return;
+				}
+				stats.put("trade.display", new Stat(type, main.plugin));
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "1");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "Modifier");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), type.getName());
+				player.sendMessage(upgradeMsg);
+				upgrade.setAmount(0);
 			}
 			i.clear(1);
 			if(update){
@@ -808,10 +820,7 @@ public class UTradeListener implements Listener {
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
-		//TODO V - Debug stat
-		c.stats.put("trade.display", new Stat(Displays.Upgrade_Hover, main.plugin));
 		DisplayManager.fillCar(car, c, event.getPlayer());
-		//TODO Put correct displays into stack
 		return;
 	}
 	@EventHandler (priority=EventPriority.HIGH)

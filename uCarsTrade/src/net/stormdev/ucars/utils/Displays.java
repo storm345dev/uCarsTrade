@@ -1,8 +1,10 @@
 package net.stormdev.ucars.utils;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import net.stormdev.ucars.trade.main;
 
@@ -11,11 +13,13 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.useful.ucarsCommon.StatValue;
 
 public class Displays implements Serializable {
 	private static final long serialVersionUID = 1L;
+	private static HashMap<ItemStack, DisplayType> displays = new HashMap<ItemStack, DisplayType>();
 	public static DisplayType Entity_Pig = 
 			new DisplayType("Pig", new CarFiller(){
 				private static final long serialVersionUID = 1L;
@@ -264,4 +268,36 @@ public class Displays implements Serializable {
 							Arrays.asList(
 									main.colors.getInfo()+"Makes your car hover", 
 									main.colors.getInfo()+"-Make with 64 feathers")));
+	public static DisplayType canAdd(ItemStack items){
+		if(displays.size() < 1){
+			listDisplays();
+		}
+		//Compare to displayType stuff
+		for(ItemStack i:displays.keySet()){
+			if(i.getType() == items.getType()
+					&& i.getDurability() == items.getDurability()
+					&& i.getAmount() == items.getAmount()){
+				return displays.get(i);
+			}
+		}
+		return null;
+	}
+	public static void listDisplays(){
+		//For each display type add the item stack
+		Field[] fields = Displays.class.getDeclaredFields();
+		for(Field f:fields){
+			f.setAccessible(true);
+			if(f.getType().equals(DisplayType.class)){
+				DisplayType t = Displays.Entity_Pig;
+				try {
+					t = (DisplayType) f.get(t);
+				} catch (Exception e) {
+					// Error occured
+					e.printStackTrace();
+				}
+				ItemStack items = t.getUpgradeItemStack();
+				displays.put(items, t);
+			}
+		}
+	}
 }

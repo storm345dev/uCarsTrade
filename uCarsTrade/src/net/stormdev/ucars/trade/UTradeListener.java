@@ -24,11 +24,11 @@ import net.stormdev.ucars.utils.CarValueCalculator;
 import net.stormdev.ucars.utils.Displays;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.InputMenu;
+import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.InputMenuClickEvent;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
-import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -38,6 +38,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -61,15 +62,18 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.util.Vector;
 
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
+import com.useful.ucars.ClosestFace;
 import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
 import com.useful.ucars.ucarDeathEvent;
@@ -80,6 +84,42 @@ public class UTradeListener implements Listener {
 	main plugin = null;
 	public UTradeListener(main plugin){
 		this.plugin = plugin;
+	}
+	@EventHandler
+	void displayUpgrades(VehicleUpdateEvent event){
+		Vehicle veh = event.getVehicle();
+		if(!(veh instanceof Minecart)){
+			return;
+		}
+		Minecart car = (Minecart) veh;
+		Location loc = car.getLocation();
+		if(car.getPassenger() instanceof Boat){
+			Block b = loc.getBlock();
+			Vector vel = car.getVelocity();
+			Boolean inWater = false;
+			if(b.isLiquid()){
+				inWater = true;
+				if(vel.getY() < 0.5){
+					vel.setY(0.5);
+				}
+			}
+			else if(b.getRelative(BlockFace.DOWN).isLiquid()){
+				inWater = true;
+				vel.setY(0);
+			}
+			if(inWater){
+			BlockFace f = ClosestFace.getClosestFace(loc.getYaw());
+			if(f != BlockFace.UP && f != BlockFace.DOWN){
+				Block toGo = b.getRelative(f);
+				if(!toGo.isLiquid() && !toGo.isEmpty()){
+					//Let the car re-enter land
+					vel.setY(0.1);
+				}
+			}
+			}
+			car.setVelocity(vel);
+		}
+		return;
 	}
 	@EventHandler(priority = EventPriority.MONITOR)
 	void itemCraft(CraftItemEvent event){

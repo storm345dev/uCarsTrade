@@ -7,12 +7,10 @@ import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.DisplayType;
-import net.stormdev.ucars.utils.Displays;
 
-import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Minecart;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 import com.useful.uCarsAPI.CarCheck;
@@ -35,11 +33,12 @@ public class CarCalculations {
 				return isAuCar(car);
 			}};
 		api.registerCarCheck(main.plugin, isACar);
-		CarSpeedModifier modifier = new CarSpeedModifier(){
+		CarSpeedModifier mod = new CarSpeedModifier(){
 			public Vector getModifiedSpeed(Minecart car, Vector travelVector, double currentMult) {
-				return getVelocity(car, travelVector, currentMult);
+				Vector v = getVelocity(car, travelVector, currentMult);
+				return v;
 			}};
-		api.registerSpeedMod(main.plugin, modifier);
+		api.registerSpeedMod(main.plugin, mod);
 		return;
 	}
 	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
@@ -78,21 +77,6 @@ public class CarCalculations {
 					}
 					current.setX(x);
 					current.setZ(z);
-				}
-			}
-		}
-		if(stats.containsKey("trade.display")){
-			DisplayType display = (DisplayType) stats.get("trade.display").getValue();
-			if(display.getName() == "Floatation Upgrade"){
-				//Make it float
-				Block in = cart.getLocation().getBlock();
-				if(in.getType() == Material.AIR){
-					if(current.getY() < 0){
-						current = current.setY(Double.MAX_VALUE);
-					}
-					else{
-						current = current.setY(Double.MAX_VALUE);
-					}
 				}
 			}
 		}

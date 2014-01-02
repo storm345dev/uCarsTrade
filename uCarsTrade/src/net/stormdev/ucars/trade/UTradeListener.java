@@ -31,6 +31,7 @@ import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -38,6 +39,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Bat;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -93,7 +95,12 @@ public class UTradeListener implements Listener {
 		}
 		Minecart car = (Minecart) veh;
 		Location loc = car.getLocation();
-		if(car.getPassenger() instanceof Boat){
+		Entity passenger = car.getPassenger();
+		if(passenger == null){
+			return;
+		}
+		if(passenger instanceof Boat){
+			//Float
 			Block b = loc.getBlock();
 			Vector vel = car.getVelocity();
 			Boolean inWater = false;
@@ -118,6 +125,32 @@ public class UTradeListener implements Listener {
 			}
 			}
 			car.setVelocity(vel);
+			return;
+		}
+		else if(passenger instanceof Bat && car.hasMetadata("trade.hover")){
+			//Hover
+			Block b = loc.getBlock();
+			Vector vel = car.getVelocity();
+			Block under = b.getRelative(BlockFace.DOWN);
+			Block under2 = b.getRelative(BlockFace.DOWN,2);
+			int count = 0;
+			if(!b.isEmpty()){
+				count++;
+			}
+			if(!under.isEmpty()){
+				count++;
+			}
+			if(!under2.isEmpty()){
+				count++;
+			}
+			switch(count){
+			case 0:vel.setY(0);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			case 1:vel.setY(2); break;
+			case 2:vel.setY(1); break;
+			case 3:vel.setY(0.1);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			}
+			car.setVelocity(vel);
+			return;
 		}
 		return;
 	}
@@ -745,7 +778,7 @@ public class UTradeListener implements Listener {
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
 		//TODO V - Debug stat
-		c.stats.put("trade.display", new Stat(Displays.Upgrade_Floatation, main.plugin));
+		c.stats.put("trade.display", new Stat(Displays.Upgrade_Hover, main.plugin));
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		//TODO Put correct displays into stack
 		return;

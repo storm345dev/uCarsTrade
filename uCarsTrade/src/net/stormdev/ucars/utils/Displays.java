@@ -12,6 +12,8 @@ import org.bukkit.entity.Horse;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
+import com.useful.ucarsCommon.StatValue;
+
 public class Displays implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static DisplayType Entity_Pig = 
@@ -222,7 +224,7 @@ public class Displays implements Serializable {
 					DisplayType.putEntityInCar(car, EntityType.WOLF);
 					return;
 					}}, true, 2, Material.BONE, Material.BONE, 8, new ArrayList<String>(
-							Arrays.asList( //TODO
+							Arrays.asList(
 									main.colors.getInfo()+"A Wolf that rides", 
 									main.colors.getInfo()+"your car with you", 
 									main.colors.getInfo()+"-Make with 8 bones",
@@ -246,8 +248,19 @@ public class Displays implements Serializable {
 					DisplayType.putEntityInCar(car, EntityType.BOAT);
 					return;
 					}}, false, 2, Material.BOAT, Material.BOAT, 1, new ArrayList<String>(
-							Arrays.asList( //TODO
+							Arrays.asList(
 									main.colors.getInfo()+"Makes your car float", 
 									main.colors.getInfo()+"on liquid.", 
 									main.colors.getInfo()+"-Make with a boat")));
+	public static DisplayType Upgrade_Hover = 
+			new DisplayType("Hover Upgrade", new CarFiller(){
+				private static final long serialVersionUID = 1L;
+				public void putInCar(Minecart car, Player player) {
+					DisplayType.putEntityInCar(car, EntityType.BAT);
+					car.setMetadata("trade.hover", new StatValue(true, main.plugin));
+					return;
+					}}, false, 2, Material.FEATHER, Material.FEATHER, 64, new ArrayList<String>(
+							Arrays.asList(
+									main.colors.getInfo()+"Makes your car hover", 
+									main.colors.getInfo()+"-Make with 64 feathers")));
 }

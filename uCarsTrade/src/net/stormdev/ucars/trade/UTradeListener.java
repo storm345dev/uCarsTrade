@@ -91,26 +91,6 @@ public class UTradeListener implements Listener {
 		hovercarHeightLimit = main.config.getDouble("general.hoverCar.heightLimit");
 	}
 	@EventHandler
-	void noFlyingCars(VehicleExitEvent event){
-		Entity e = event.getVehicle();
-		Entity v = isEntityInCar(e);
-		Entity ex = event.getExited();
-		if(!(ex instanceof Player)){
-			return;
-		}
-		Player player = (Player) ex;
-		if(v == null || !v.hasMetadata("trade.hover")){
-			return;
-		}
-		if(v.hasMetadata("car.braking")){
-			return; //Car safely landed, they can exit
-		}
-		//Tell them they may not leave the car
-		player.sendMessage(main.colors.getInfo()+Lang.get("hoverCar.leave.disallowed"));
-		event.setCancelled(true);
-		return;
-	}
-	@EventHandler
 	void displayUpgrades(VehicleUpdateEvent event){
 		Vehicle veh = event.getVehicle();
 		if(!(veh instanceof Minecart)){
@@ -151,6 +131,10 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		else if(passenger instanceof Bat && car.hasMetadata("trade.hover")){
+			if(passenger.getPassenger() == null){
+				//No empty hovercars allowed to fly
+				return;
+			}
 			//Hover
 			Block b = loc.getBlock();
 			Vector vel = car.getVelocity();

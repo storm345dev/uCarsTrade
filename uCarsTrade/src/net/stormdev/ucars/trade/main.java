@@ -141,9 +141,6 @@ public class main extends JavaPlugin {
 			if(!lang.contains("title.trade.sellUpgrades")){
 				lang.set("title.trade.sellUpgrades", "Sell Upgrades");
 			}
-			if(!lang.contains("hoverCar.leave.disallowed")){
-				lang.set("hoverCar.leave.disallowed", "You may not exit midair, please be landing (Fly and hold 'd') when attempting to exit.");
-			}
 			if(!lang.contains("hoverCar.heightLimit")){
 				lang.set("hoverCar.heightLimit", "You may not hover beyond this height!");
 			}

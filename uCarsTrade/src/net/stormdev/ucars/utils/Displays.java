@@ -258,7 +258,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BAT);
 					car.setMetadata("trade.hover", new StatValue(true, main.plugin)); //A hover car
-					car.setMetadata("car.braking", new StatValue(true, main.plugin)); //Landed ATM
+					//car.setMetadata("car.braking", new StatValue(true, main.plugin)); //Landed ATM
 					return;
 					}}, false, 2, Material.FEATHER, Material.FEATHER, 64, new ArrayList<String>(
 							Arrays.asList(

@@ -44,6 +44,7 @@ import org.bukkit.entity.Bat;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
@@ -56,6 +57,7 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -89,6 +91,22 @@ public class UTradeListener implements Listener {
 	public UTradeListener(main plugin){
 		this.plugin = plugin;
 		hovercarHeightLimit = main.config.getDouble("general.hoverCar.heightLimit");
+	}
+	@EventHandler
+	void lostCars(ItemDespawnEvent event){
+		Item i = event.getEntity();
+		ItemStack is = i.getItemStack();
+		if(is.getType() != Material.MINECART){
+			return;
+		}
+		ItemMeta im = is.getItemMeta();
+		if(im.getLore() == null || im.getLore().size() < 1){
+			return;
+		}
+		String id = ChatColor.stripColor(im.getLore().get(0));
+		UUID carId = UUID.fromString(id);
+		plugin.carSaver.removeCar(carId);
+		return;
 	}
 	@EventHandler
 	void displayUpgrades(VehicleUpdateEvent event){

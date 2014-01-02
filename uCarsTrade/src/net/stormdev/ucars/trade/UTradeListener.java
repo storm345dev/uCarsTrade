@@ -1258,7 +1258,12 @@ public class UTradeListener implements Listener {
 				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
-				CarForSale saleItem = new CarForSale(c.id, player.getName(), purchase, price);
+				DisplayType display = null;
+				if(c.getStats().containsKey("trade.display")){
+					display = (DisplayType) c.getStats().get("trade.display").getValue();
+				}
+				CarForSale saleItem = new CarForSale(c.id, player.getName(), 
+						purchase, price, display);
 				if(!plugin.salesManager.carsForSale.containsKey(c.id)){
 					plugin.salesManager.carsForSale.put(c.id, saleItem);
 					plugin.salesManager.saveCars();

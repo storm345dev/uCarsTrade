@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -131,7 +132,18 @@ public class CarSaver {
 	        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
 	        Object result = ois.readObject();
 	        ois.close();
-			return (ConcurrentHashMap<UUID, Car>) result;
+			try {
+				return (ConcurrentHashMap<UUID, Car>) result;
+			} catch (Exception e) {
+				try {
+					HashMap<UUID, Car> oldFormat = (HashMap<UUID, Car>) result;
+					ConcurrentHashMap<UUID, Car> rm = new ConcurrentHashMap<UUID, Car>();
+					rm.putAll(oldFormat);
+					return rm;
+				} catch (Exception e1) {
+					return new ConcurrentHashMap<UUID, Car>();
+				}
+			}
 		}
 		catch(Exception e)
 		{

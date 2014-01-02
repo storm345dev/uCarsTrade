@@ -186,6 +186,9 @@ public class main extends JavaPlugin {
 				config.set("general.cars.names", names);
 			}
         	//Setup the colour scheme
+        	if (!config.contains("general.car.damage")) {
+				config.set("general.car.damage", true);
+			}
         	if (!config.contains("general.carTrading.enable")) {
 				config.set("general.carTrading.enable", true);
 			}

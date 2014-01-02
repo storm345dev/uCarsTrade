@@ -835,7 +835,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		car.isPlaced = false;
-		if(main.random.nextBoolean()){
+		if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
 			if(main.random.nextBoolean()){
 				if(main.random.nextBoolean()){
 				    car.stats.put("trade.handling", new HandlingDamagedStat(true, plugin));

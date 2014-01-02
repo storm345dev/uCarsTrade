@@ -1,7 +1,7 @@
 package net.stormdev.ucars.trade;
 
-import net.stormdev.ucarsTrade.utils.Car;
-import net.stormdev.ucarsTrade.utils.CarGenerator;
+import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucars.utils.CarGenerator;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

@@ -5,9 +5,9 @@ import java.util.UUID;
 
 import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.Stat;
-import net.stormdev.ucarsTrade.utils.Car;
-import net.stormdev.ucarsTrade.utils.DisplayType;
-import net.stormdev.ucarsTrade.utils.Displays;
+import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucars.utils.DisplayType;
+import net.stormdev.ucars.utils.Displays;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -88,10 +88,10 @@ public class CarCalculations {
 				Block in = cart.getLocation().getBlock();
 				if(in.getType() == Material.AIR){
 					if(current.getY() < 0){
-						current.setY(Double.MAX_VALUE);
+						current = current.setY(Double.MAX_VALUE);
 					}
 					else{
-						current.setY(Double.MAX_VALUE);
+						current = current.setY(Double.MAX_VALUE);
 					}
 				}
 			}

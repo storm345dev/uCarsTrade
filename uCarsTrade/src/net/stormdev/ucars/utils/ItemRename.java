@@ -1,4 +1,4 @@
-package net.stormdev.ucarsTrade.utils;
+package net.stormdev.ucars.utils;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

@@ -1,4 +1,4 @@
-package net.stormdev.ucarsTrade.utils;
+package net.stormdev.ucars.utils;
 
 import java.util.Arrays;
 import java.util.List;

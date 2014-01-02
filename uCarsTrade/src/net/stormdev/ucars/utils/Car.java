@@ -66,9 +66,9 @@ public class Car implements Serializable {
 			else{
 				if(stat.getValue() instanceof DisplayType){
 					DisplayType t = (DisplayType) stat.getValue();
-					extra.add("-[Modifier:] "+main.colors.getInfo()+t.getName());
+					extra.add("-Modifier: "+main.colors.getInfo()+t.getName());
 					if(t.isJumpingRestriced()){
-						extra.add("-[Modifier:] "+main.colors.getError()+"Modifer has limited ascending");
+						extra.add("-Modifier: "+main.colors.getError()+"Modifer has limited ascending");
 					}
 				}
 				else{

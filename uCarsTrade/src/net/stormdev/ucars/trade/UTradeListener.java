@@ -162,10 +162,10 @@ public class UTradeListener implements Listener {
 				vel.setY(0);
 			}
 			else if(descending){
-				vel.setY(-0.5);
+				vel.setY(-0.6); //uCar gravity for road convenience
 			}
 			else if(ascending){
-			    vel.setY(0.5);	
+			    vel.setY(0.6);	
 			}
 			if((loc.getY() < hovercarHeightLimit) || descending){
 				car.setVelocity(vel);

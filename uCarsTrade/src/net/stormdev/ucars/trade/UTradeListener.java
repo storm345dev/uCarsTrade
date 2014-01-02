@@ -133,6 +133,8 @@ public class UTradeListener implements Listener {
 			Vector vel = car.getVelocity();
 			Block under = b.getRelative(BlockFace.DOWN);
 			Block under2 = b.getRelative(BlockFace.DOWN,2);
+			Boolean descending = car.hasMetadata("car.braking");
+			Boolean ascending = car.hasMetadata("car.action");
 			int count = 0;
 			if(!b.isEmpty()){
 				count++;
@@ -144,10 +146,19 @@ public class UTradeListener implements Listener {
 				count++;
 			}
 			switch(count){
-			case 0:vel.setY(0);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			case 0:vel.setY(-0.3);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
 			case 1:vel.setY(2); break;
 			case 2:vel.setY(1); break;
 			case 3:vel.setY(0.1);under.getWorld().playEffect(under.getLocation(), Effect.SMOKE, 1); break;
+			}
+			if(descending && ascending){
+				vel.setY(0);
+			}
+			else if(descending){
+				vel.setY(-0.5);
+			}
+			else if(ascending){
+			    vel.setY(0.5);	
 			}
 			car.setVelocity(vel);
 			return;

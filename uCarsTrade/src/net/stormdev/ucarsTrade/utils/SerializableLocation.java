@@ -1,8 +1,10 @@
-package net.stormdev.ucars.utils;
+package net.stormdev.ucarsTrade.utils;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.stormdev.ucars.utils.SerializableLocation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

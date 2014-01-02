@@ -5,8 +5,13 @@ import java.util.UUID;
 
 import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.Stat;
-import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucarsTrade.utils.Car;
+import net.stormdev.ucarsTrade.utils.DisplayType;
+import net.stormdev.ucarsTrade.utils.Displays;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Minecart;
 import org.bukkit.util.Vector;
 
@@ -73,6 +78,21 @@ public class CarCalculations {
 					}
 					current.setX(x);
 					current.setZ(z);
+				}
+			}
+		}
+		if(stats.containsKey("trade.display")){
+			DisplayType display = (DisplayType) stats.get("trade.display").getValue();
+			if(display.getName() == "Floatation Upgrade"){
+				//Make it float
+				Block in = cart.getLocation().getBlock();
+				if(in.getType() == Material.AIR){
+					if(current.getY() < 0){
+						current.setY(Double.MAX_VALUE);
+					}
+					else{
+						current.setY(Double.MAX_VALUE);
+					}
 				}
 			}
 		}

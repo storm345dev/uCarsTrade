@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucarsTrade.utils.Car;
 
 public class CarSaver {
 	public HashMap<UUID, Car> cars = new HashMap<UUID, Car>();

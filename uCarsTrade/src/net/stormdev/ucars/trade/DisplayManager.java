@@ -1,8 +1,8 @@
 package net.stormdev.ucars.trade;
 
 import net.stormdev.ucars.stats.Stat;
-import net.stormdev.ucars.utils.Car;
-import net.stormdev.ucars.utils.DisplayType;
+import net.stormdev.ucarsTrade.utils.Car;
+import net.stormdev.ucarsTrade.utils.DisplayType;
 
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;

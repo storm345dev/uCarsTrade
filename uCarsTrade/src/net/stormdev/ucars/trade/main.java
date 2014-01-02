@@ -17,11 +17,11 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
-import net.stormdev.ucars.utils.IconMenu;
-import net.stormdev.ucars.utils.ItemRename;
-import net.stormdev.ucars.utils.SalesManager;
-import net.stormdev.ucars.utils.TradeBoothClickEvent;
-import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucarsTrade.utils.IconMenu;
+import net.stormdev.ucarsTrade.utils.ItemRename;
+import net.stormdev.ucarsTrade.utils.SalesManager;
+import net.stormdev.ucarsTrade.utils.TradeBoothClickEvent;
+import net.stormdev.ucarsTrade.utils.TradeBoothMenuType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

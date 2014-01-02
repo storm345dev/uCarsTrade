@@ -64,7 +64,16 @@ public class Car implements Serializable {
 				name = ""+stat.getValue();
 			}
 			else{
-				extra.add("-"+stat.getValue());
+				if(stat.getValue() instanceof DisplayType){
+					DisplayType t = (DisplayType) stat.getValue();
+					extra.add("-[Modifier:] "+main.colors.getInfo()+t.getName());
+					if(t.isJumpingRestriced()){
+						extra.add("-[Modifier:] "+main.colors.getError()+"Modifer has limited ascending");
+					}
+				}
+				else{
+					extra.add("-"+stat.getValue());
+				}
 			}	
 		}
 		lore.add(""+this.id);

@@ -22,7 +22,7 @@ public class SalesManager {
 		this.upgradeSaveFile = upgradeSaveFile;
 		load();
 	}
-	public void load(){
+	public synchronized void load(){
 		if(carSaveFile.length() < 1 || !carSaveFile.exists()){
 			try {
 				carSaveFile.createNewFile();
@@ -52,7 +52,7 @@ public class SalesManager {
 	    saveCars();
 	    saveUpgrades();
 	}
-	public void saveCars(){
+	public synchronized void saveCars(){
 		if(!this.carSaveFile.exists() || this.carSaveFile.length() < 1){
 			try {
 				carSaveFile.createNewFile();
@@ -63,7 +63,7 @@ public class SalesManager {
 		}
 		saveHashMapCars(carsForSale, carSaveFile.getAbsolutePath());
 	}
-	public void saveUpgrades(){
+	public synchronized void saveUpgrades(){
 		if(!this.upgradeSaveFile.exists() || this.upgradeSaveFile.length() < 1){
 			try {
 				upgradeSaveFile.createNewFile();

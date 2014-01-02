@@ -45,7 +45,7 @@ public class CarValueCalculator {
 		}
 		if(stats.containsKey("trade.display")){
 			DisplayType t = (DisplayType) stats.get("trade.display").getValue();
-			bonus += t.getCarValueRatingBonus();
+			bonus += (t.getCarValueRatingBonus()*30);
 		}
 		rating += bonus;
 		if(handlingDamaged){

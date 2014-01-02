@@ -1458,6 +1458,7 @@ public class UTradeListener implements Listener {
 	        }
 	        else{
 	        	plugin.salesManager.carsForSale.remove(carId);
+	        	plugin.salesManager.saveCars();
 	        }
 		}
 		return menu;

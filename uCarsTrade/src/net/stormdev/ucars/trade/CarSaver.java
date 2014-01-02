@@ -14,7 +14,7 @@ import net.stormdev.ucars.utils.Car;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class CarSaver {
-	public ConcurrentHashMap<UUID, Car> cars = new ConcurrentHashMap<UUID, Car>();
+	private ConcurrentHashMap<UUID, Car> cars = new ConcurrentHashMap<UUID, Car>();
 	public ConcurrentHashMap<UUID, Car> cache = new ConcurrentHashMap<UUID, Car>();
 	File saveFile = null;
 	public CarSaver(File saveFile){
@@ -99,7 +99,7 @@ public class CarSaver {
 			this.cars = new ConcurrentHashMap<UUID, Car>();
 		}
 	}
-	public void save(){
+	private void save(){
 		if(!this.saveFile.exists() || this.saveFile.length() < 1){
 			try {
 				this.saveFile.createNewFile();

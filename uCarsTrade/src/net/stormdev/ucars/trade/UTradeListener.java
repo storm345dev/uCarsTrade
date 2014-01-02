@@ -200,8 +200,7 @@ public class UTradeListener implements Listener {
 		}
 		Car car = CarGenerator.gen();
         event.setCurrentItem(car.getItem());
-        main.plugin.carSaver.cars.put(car.getId(), car);
-        main.plugin.carSaver.save();
+        main.plugin.carSaver.setCar(car.getId(), car);
 		return;
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
@@ -264,11 +263,10 @@ public class UTradeListener implements Listener {
 		} catch (Exception e) {
 			return;
 		}
-		Car car = null;
-		if(!plugin.carSaver.cars.containsKey(id)){
+		Car car = plugin.carSaver.getCar(id);
+		if(car == null){
 			return;
 		}
-		car = plugin.carSaver.cars.get(id);
 		final HashMap<String, Stat> stats = car.getStats();
         if(save && slotNumber ==2){
 			//They are renaming it
@@ -276,9 +274,7 @@ public class UTradeListener implements Listener {
         	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
         	stats.put("trade.name", new NameStat(name, plugin));
         	car.setStats(stats);
-        	plugin.carSaver.cars.remove(id);
-        	plugin.carSaver.cars.put(id, car);
-        	plugin.carSaver.save();
+        	plugin.carSaver.setCar(id, car);
         	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed car to: '"+name+"'");
         	return;
 		}
@@ -427,9 +423,7 @@ public class UTradeListener implements Listener {
 			if(update){
 				car.setStats(stats);
 				i.setItem(0, car.getItem());
-				plugin.carSaver.cars.remove(carId);
-				plugin.carSaver.cars.put(carId, car);
-				plugin.carSaver.save();
+				plugin.carSaver.setCar(carId, car);
 				player.updateInventory();
 			}
 			return;
@@ -760,10 +754,10 @@ public class UTradeListener implements Listener {
 		Car c = null;
 		if(lore.size() > 0){
 		UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-		if(!plugin.carSaver.cars.containsKey(carId)){
+		c = plugin.carSaver.getCar(carId);
+		if(c == null){
 			return;
 		}
-		c = plugin.carSaver.cars.get(carId);
 		}
 		else{
 			return;
@@ -799,20 +793,19 @@ public class UTradeListener implements Listener {
 			placed.setAmount(0);
 			event.getPlayer().getInventory().setItemInHand(placed);
 		event.setCancelled(true);
-		while(plugin.carSaver.cars.containsKey(id)){
-			Car cr = plugin.carSaver.cars.get(id);
-			plugin.carSaver.cars.remove(id);
+		while(plugin.carSaver.isACar(id)){
+			Car cr = plugin.carSaver.getCar(id);
+			plugin.carSaver.removeCar(id);
 		    UUID newId = UUID.randomUUID();
-		    while(plugin.carSaver.cars.containsKey(newId)){
+		    while(plugin.carSaver.isACar(newId)){
 		    	newId = UUID.randomUUID();
 		    }
-		    plugin.carSaver.cars.put(newId, cr);
+		    plugin.carSaver.setCar(newId, cr);
 		}
-		plugin.carSaver.cars.remove(c.getId());
+		plugin.carSaver.removeCar(c.getId());
 		c.setId(id); //Bind car id to minecart id
 		c.isPlaced = true;
-		plugin.carSaver.cars.put(id, c);
-		plugin.carSaver.save();
+		plugin.carSaver.setCar(id, c);
 		String name = "Unnamed";
 		if(stats.containsKey("trade.name")){
 			name = stats.get("trade.name").getValue().toString();
@@ -827,10 +820,10 @@ public class UTradeListener implements Listener {
 	void carRemoval(ucarDeathEvent event){
 		Minecart cart = event.getCar();
 		UUID id = cart.getUniqueId();
-		if(!plugin.carSaver.cars.containsKey(id)){
+		Car car = plugin.carSaver.getCar(id);
+		if(car == null){
 			return;
 		}
-		Car car = plugin.carSaver.cars.get(id);
 		if(!car.isPlaced){
 			return;
 		}
@@ -842,8 +835,7 @@ public class UTradeListener implements Listener {
 				}
 			}
 		}
-		plugin.carSaver.cars.put(id, car);
-		plugin.carSaver.save();
+		plugin.carSaver.setCar(id, car);;
 		Location loc = cart.getLocation();
 		Entity top = cart;
 		while(top.getPassenger() != null
@@ -1063,7 +1055,7 @@ public class UTradeListener implements Listener {
 				//Give them the car and remove it from the list
 				UUID carId = car.getCarId();
 				plugin.salesManager.saveCars();
-				Car c = plugin.carSaver.cars.get(carId);
+				Car c = plugin.carSaver.getCar(carId);
 				c.isPlaced = false;
 				player.getInventory().addItem(c.getItem());
 				player.sendMessage(main.colors.getSuccess()+msg);
@@ -1239,10 +1231,10 @@ public class UTradeListener implements Listener {
 				Car c = null;
 				if(lore.size() > 0){
 				UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-				if(!plugin.carSaver.cars.containsKey(carId)){
+				c = plugin.carSaver.getCar(carId);
+				if(c == null){
 					return;
 				}
-				c = plugin.carSaver.cars.get(carId);
 				}
 				else{
 					player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
@@ -1293,10 +1285,10 @@ public class UTradeListener implements Listener {
 						Car c = null;
 						if(lore.size() > 0){
 						UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-						if(!plugin.carSaver.cars.containsKey(carId)){
+						c = plugin.carSaver.getCar(carId);
+						if(c == null){
 							return;
 						}
-						c = plugin.carSaver.cars.get(carId);
 						}
 						else{
 							player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
@@ -1437,8 +1429,8 @@ public class UTradeListener implements Listener {
 	        ItemStack item = new ItemStack(Material.AIR);
 	        String name = "Car";
 	        List<String> lore = new ArrayList<String>();
-	        if(plugin.carSaver.cars.containsKey(carId)){
-	        	Car c = plugin.carSaver.cars.get(carId);
+	        if(plugin.carSaver.isACar(carId)){
+	        	Car c = plugin.carSaver.getCar(carId);
 	        	if(c.getStats().containsKey("trade.name")){
 	        		name = c.getStats().get("trade.name").getValue().toString();
 	        	}

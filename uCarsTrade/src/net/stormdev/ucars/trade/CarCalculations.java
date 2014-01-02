@@ -6,11 +6,8 @@ import java.util.UUID;
 import net.stormdev.ucars.stats.HandlingDamagedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.utils.Car;
-import net.stormdev.ucars.utils.DisplayType;
 
-import org.bukkit.block.Block;
 import org.bukkit.entity.Minecart;
-import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
 import com.useful.uCarsAPI.CarCheck;
@@ -43,10 +40,10 @@ public class CarCalculations {
 	}
 	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
 		UUID id = cart.getUniqueId();
-		if(!main.plugin.carSaver.cars.containsKey(id)){
+		Car car = main.plugin.carSaver.getCar(id);
+		if(car == null){
 			return current;
 		}
-		Car car = main.plugin.carSaver.cars.get(id);
 		HashMap<String, Stat> stats = car.getStats();
 		if(stats.containsKey("trade.speed")){
 			Stat stat = stats.get("trade.speed");
@@ -83,7 +80,7 @@ public class CarCalculations {
 		return current;
 	}
 	public Boolean isAuCar(Minecart car){
-		if(main.plugin.carSaver.cars.containsKey(car.getUniqueId())){
+		if(main.plugin.carSaver.isACar(car.getUniqueId())){
 			return true;
 		}
 		if(car.hasMetadata("kart.racing")){

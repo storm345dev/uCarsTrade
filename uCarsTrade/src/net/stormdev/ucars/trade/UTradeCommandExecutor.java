@@ -39,8 +39,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					//Generate and give a random car
 					Car car = CarGenerator.gen();
 					ItemStack item = car.getItem();
-			        main.plugin.carSaver.cars.put(car.getId(), car);
-			        main.plugin.carSaver.save();
+			        main.plugin.carSaver.setCar(car.getId(), car);
 			        player.getInventory().addItem(item);
 			        sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.give"));
 					return true;
@@ -71,8 +70,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					//Generate and give a random car
 					Car car = CarGenerator.gen(speed, health, name);
 					ItemStack item = car.getItem();
-			        main.plugin.carSaver.cars.put(car.getId(), car);
-			        main.plugin.carSaver.save();
+			        main.plugin.carSaver.setCar(car.getId(), car);
 			        player.getInventory().addItem(item);
 			        sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.give"));
 					return true;

@@ -59,7 +59,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BLAZE);
 					return;
-					}}, true, 2, Material.BLAZE_ROD, Material.BLAZE_ROD, 10, new ArrayList<String>(
+					}}, true, 10, Material.BLAZE_ROD, Material.BLAZE_ROD, 10, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A blaze that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -71,7 +71,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BAT);
 					return;
-					}}, false, 2, Material.COAL_BLOCK, Material.COAL_BLOCK, 2, new ArrayList<String>(
+					}}, false, 4, Material.COAL_BLOCK, Material.COAL_BLOCK, 2, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A bat that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -94,7 +94,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SPIDER);
 					return;
-					}}, true, 2, Material.STRING, Material.STRING, 10, new ArrayList<String>(
+					}}, true, 4, Material.STRING, Material.STRING, 10, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A spider that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -106,7 +106,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.ZOMBIE);
 					return;
-					}}, false, 2, Material.COOKED_BEEF, Material.COOKED_BEEF, 5, new ArrayList<String>(
+					}}, false, 4, Material.COOKED_BEEF, Material.COOKED_BEEF, 5, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A cow that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -120,7 +120,7 @@ public class Displays implements Serializable {
 					h.setOwner(player);
 					DisplayType.putEntityInCar(car, h);
 					return;
-					}}, true, 2, Material.SADDLE, Material.SADDLE, 2, new ArrayList<String>(
+					}}, true, 10, Material.SADDLE, Material.SADDLE, 2, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A horse that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -132,7 +132,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.IRON_GOLEM);
 					return;
-					}}, true, 2, Material.IRON_LEGGINGS, Material.IRON_LEGGINGS, 2, new ArrayList<String>(
+					}}, true, 20, Material.IRON_LEGGINGS, Material.IRON_LEGGINGS, 2, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"An Iron Golem that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -144,7 +144,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.MAGMA_CUBE);
 					return;
-					}}, true, 2, Material.MAGMA_CREAM, Material.MAGMA_CREAM, 2, new ArrayList<String>(
+					}}, true, 4, Material.MAGMA_CREAM, Material.MAGMA_CREAM, 2, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Magma Cube that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -156,7 +156,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SLIME);
 					return;
-					}}, true, 2, Material.SLIME_BALL, Material.SLIME_BALL, 20, new ArrayList<String>(
+					}}, true, 4, Material.SLIME_BALL, Material.SLIME_BALL, 20, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Slime that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -168,7 +168,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SKELETON);
 					return;
-					}}, false, 2, Material.ARROW, Material.ARROW, 20, new ArrayList<String>(
+					}}, false, 4, Material.ARROW, Material.ARROW, 20, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Skeleton that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -179,7 +179,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SQUID);
 					return;
-					}}, true, 2, Material.INK_SACK, Material.INK_SACK, 20, new ArrayList<String>(
+					}}, true, 4, Material.INK_SACK, Material.INK_SACK, 20, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Squid that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -191,7 +191,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.SNOWMAN);
 					return;
-					}}, true, 2, Material.SNOW_BALL, Material.SNOW_BALL, 64, new ArrayList<String>(
+					}}, true, 4, Material.SNOW_BALL, Material.SNOW_BALL, 64, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Snowman that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -203,7 +203,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.VILLAGER);
 					return;
-					}}, true, 2, Material.EMERALD, Material.EMERALD, 15, new ArrayList<String>(
+					}}, true, 5, Material.EMERALD, Material.EMERALD, 15, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Villager that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -215,7 +215,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.WITCH);
 					return;
-					}}, true, 2, Material.GLASS_BOTTLE, Material.GLASS_BOTTLE, 15, new ArrayList<String>(
+					}}, true, 6, Material.GLASS_BOTTLE, Material.GLASS_BOTTLE, 15, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Witch that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -227,7 +227,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.WOLF);
 					return;
-					}}, true, 2, Material.BONE, Material.BONE, 8, new ArrayList<String>(
+					}}, true, 4, Material.BONE, Material.BONE, 8, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"A Wolf that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -239,7 +239,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.OCELOT);
 					return;
-					}}, true, 2, Material.RAW_FISH, Material.RAW_FISH, 8, new ArrayList<String>(
+					}}, true, 4, Material.RAW_FISH, Material.RAW_FISH, 8, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"An ocelot that rides", 
 									main.colors.getInfo()+"your car with you", 
@@ -251,7 +251,7 @@ public class Displays implements Serializable {
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BOAT);
 					return;
-					}}, false, 2, Material.BOAT, Material.BOAT, 1, new ArrayList<String>(
+					}}, false, 20, Material.BOAT, Material.BOAT, 1, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"Makes your car float", 
 									main.colors.getInfo()+"on liquid.", 
@@ -264,7 +264,7 @@ public class Displays implements Serializable {
 					car.setMetadata("trade.hover", new StatValue(true, main.plugin)); //A hover car
 					//car.setMetadata("car.braking", new StatValue(true, main.plugin)); //Landed ATM
 					return;
-					}}, false, 2, Material.FEATHER, Material.FEATHER, 64, new ArrayList<String>(
+					}}, false, 30, Material.FEATHER, Material.FEATHER, 64, new ArrayList<String>(
 							Arrays.asList(
 									main.colors.getInfo()+"Makes your car hover", 
 									main.colors.getInfo()+"-Make with 64 feathers")));

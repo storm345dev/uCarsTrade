@@ -18,6 +18,7 @@ public class CarValueCalculator {
 		double defaultHealth = ucars.config.getDouble("general.cars.health.default");
 		double maxHealth = ucars.config.getDouble("general.cars.health.max");
 		double health = defaultHealth;
+		double bonus = 0;
 		if(stats.containsKey("trade.handling")){
 			try {
 				handlingDamaged = (Boolean) stats.get("trade.handling").getValue();
@@ -42,6 +43,11 @@ public class CarValueCalculator {
 				//Use default health
 			}
 		}
+		if(stats.containsKey("trade.display")){
+			DisplayType t = (DisplayType) stats.get("trade.display").getValue();
+			bonus += t.getCarValueRatingBonus();
+		}
+		rating += bonus;
 		if(handlingDamaged){
 			rating = rating - 50;
 		}

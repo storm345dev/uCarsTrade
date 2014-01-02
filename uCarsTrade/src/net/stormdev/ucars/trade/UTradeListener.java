@@ -1450,12 +1450,15 @@ public class UTradeListener implements Listener {
 	        	iml.remove(0);
 	        	lore.addAll(2, iml);
 	        	im.setLore(lore);
-	        	item.setItemMeta(im);
-	        }   
+	        	item.setItemMeta(im); 
 	        if(pos < 52){
         		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
         		pos++;
         	}
+	        }
+	        else{
+	        	plugin.salesManager.carsForSale.remove(carId);
+	        }
 		}
 		return menu;
 	}

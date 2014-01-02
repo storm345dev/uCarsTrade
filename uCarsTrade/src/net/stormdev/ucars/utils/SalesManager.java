@@ -43,6 +43,9 @@ public class SalesManager {
 		else{
 			this.upgradeForSale = loadHashMapUpgrades(upgradeSaveFile.getAbsolutePath());
 		}
+		if(this.carsForSale == null){
+			this.carsForSale = new HashMap<UUID,CarForSale>();
+		}
 		return;
 	}
 	public void saveAll(){

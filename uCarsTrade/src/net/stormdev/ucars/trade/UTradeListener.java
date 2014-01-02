@@ -65,7 +65,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
-import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -835,7 +834,7 @@ public class UTradeListener implements Listener {
 				}
 			}
 		}
-		plugin.carSaver.setCar(id, car);;
+		plugin.carSaver.setCar(id, car);
 		Location loc = cart.getLocation();
 		Entity top = cart;
 		while(top.getPassenger() != null

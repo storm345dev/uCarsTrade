@@ -177,7 +177,8 @@ public class UTradeListener implements Listener {
 					p = p.getPassenger();
 				}
 				if(p!=null && p instanceof Player){
-					((Player)p).sendMessage(main.colors.getInfo()+Lang.get("hoverCar.heightLimit"));
+					String msg = Lang.get("general.hovercar.heightLimit");
+					((Player)p).sendMessage(main.colors.getInfo()+msg);
 				}
 			}
 			return;

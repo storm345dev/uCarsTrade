@@ -126,6 +126,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.cmd.give")){
 				lang.set("general.cmd.give", "Given you a car!");
 			}
+			if(!lang.contains("general.hovercar.heightLimit")){
+				lang.set("general.hovercar.heightLimit", "You may not hover beyond this height!");
+			}
 			if(!lang.contains("title.carTrading")){
 				lang.set("title.carTrading", "Car Trading");
 			}
@@ -140,9 +143,6 @@ public class main extends JavaPlugin {
 			}
 			if(!lang.contains("title.trade.sellUpgrades")){
 				lang.set("title.trade.sellUpgrades", "Sell Upgrades");
-			}
-			if(!lang.contains("hoverCar.heightLimit")){
-				lang.set("hoverCar.heightLimit", "You may not hover beyond this height!");
 			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");

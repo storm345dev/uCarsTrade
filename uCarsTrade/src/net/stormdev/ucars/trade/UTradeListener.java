@@ -48,6 +48,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -58,6 +59,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -466,20 +468,14 @@ public class UTradeListener implements Listener {
 	}
 	*/
 	
-	@EventHandler(priority = EventPriority.LOWEST) //Call first
+	@EventHandler(priority = EventPriority.HIGH) //Call first
  	void carDisplayDamage(EntityDamageEvent event){
 		if(event.getEntity() instanceof Player){
 			return;
 		}
 		Entity e = event.getEntity();
-		Entity v = e.getVehicle();
+		Entity v = isEntityInCar(e);
 		if(v == null){
-			return;
-		}
-		while(v.getVehicle() != null && !(v.getVehicle() instanceof Minecart)){
-			v = v.getVehicle();
-		}
-		if(!(v instanceof Minecart)){
 			return;
 		}
 		//Part of a car stack
@@ -495,14 +491,8 @@ public class UTradeListener implements Listener {
 				return;
 			}
 			Entity e = event.getEntity();
-			Entity v = e.getVehicle();
+			Entity v = isEntityInCar(e);
 			if(v == null){
-				return;
-			}
-			while(v.getVehicle() != null && !(v.getVehicle() instanceof Minecart)){
-				v = v.getVehicle();
-			}
-			if(!(v instanceof Minecart)){
 				return;
 			}
 			//Part of a car stack
@@ -511,6 +501,44 @@ public class UTradeListener implements Listener {
 		} catch (Exception e) {
 			//Entities already removed
 		}
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGH)
+	void carDestroy(VehicleDestroyEvent event){
+		if(event.getVehicle() instanceof Minecart){
+			return; //uCars can handle it
+		}
+		final Minecart car = isEntityInCar(event.getVehicle());
+		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
+			return;
+		}
+		event.setCancelled(true);
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGH)
+	void boatDestroy(EntityDamageByBlockEvent event){
+		final Minecart car = isEntityInCar(event.getEntity());
+		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
+			return;
+		}
+		event.setDamage(0);
+		event.setCancelled(true);
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGH)
+	void carDestroy(VehicleDamageEvent event){
+		if(event.getVehicle() instanceof Minecart){
+			return; //uCars can handle it
+		}
+		final Minecart car = isEntityInCar(event.getVehicle());
+		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
+			return;
+		}
+		event.setDamage(0);
+		event.setCancelled(true);
 		return;
 	}
 	
@@ -677,7 +705,7 @@ public class UTradeListener implements Listener {
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
 		//TODO V - Debug stat
-		c.stats.put("trade.display", new Stat(Displays.Entity_Bat, main.plugin));
+		c.stats.put("trade.display", new Stat(Displays.Upgrade_Floatation, main.plugin));
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		//TODO Put correct displays into stack
 		return;

@@ -25,11 +25,9 @@ import net.stormdev.ucars.utils.TradeBoothMenuType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -143,6 +141,12 @@ public class main extends JavaPlugin {
 			if(!lang.contains("title.trade.sellUpgrades")){
 				lang.set("title.trade.sellUpgrades", "Sell Upgrades");
 			}
+			if(!lang.contains("hoverCar.leave.disallowed")){
+				lang.set("hoverCar.leave.disallowed", "You may not exit midair, please be landing (Fly and hold 'd') when attempting to exit.");
+			}
+			if(!lang.contains("hoverCar.heightLimit")){
+				lang.set("hoverCar.heightLimit", "You may not hover beyond this height!");
+			}
 		} catch (Exception e1) {
 			getLogger().log(Level.WARNING, "Error creating/loading lang file! Regenerating..");
 		}
@@ -199,6 +203,9 @@ public class main extends JavaPlugin {
 			}
         	if (!config.contains("general.carTrading.VATPercent")) {
 				config.set("general.carTrading.VATPercent", 12.50);
+			}
+        	if (!config.contains("general.hoverCar.heightLimit")) {
+				config.set("general.hoverCar.heightLimit", 256.0);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");

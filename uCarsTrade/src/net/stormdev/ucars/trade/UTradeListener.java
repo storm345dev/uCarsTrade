@@ -64,6 +64,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -84,8 +85,30 @@ import com.useful.ucarsCommon.StatValue;
 
 public class UTradeListener implements Listener {
 	main plugin = null;
+	private double hovercarHeightLimit = 256;
 	public UTradeListener(main plugin){
 		this.plugin = plugin;
+		hovercarHeightLimit = main.config.getDouble("general.hoverCar.heightLimit");
+	}
+	@EventHandler
+	void noFlyingCars(VehicleExitEvent event){
+		Entity e = event.getVehicle();
+		Entity v = isEntityInCar(e);
+		Entity ex = event.getExited();
+		if(!(ex instanceof Player)){
+			return;
+		}
+		Player player = (Player) ex;
+		if(v == null || !v.hasMetadata("trade.hover")){
+			return;
+		}
+		if(v.hasMetadata("car.braking")){
+			return; //Car safely landed, they can exit
+		}
+		//Tell them they may not leave the car
+		player.sendMessage(main.colors.getInfo()+Lang.get("hoverCar.leave.disallowed"));
+		event.setCancelled(true);
+		return;
 	}
 	@EventHandler
 	void displayUpgrades(VehicleUpdateEvent event){
@@ -160,7 +183,19 @@ public class UTradeListener implements Listener {
 			else if(ascending){
 			    vel.setY(0.5);	
 			}
-			car.setVelocity(vel);
+			if((loc.getY() < hovercarHeightLimit) || descending){
+				car.setVelocity(vel);
+			}
+			else{
+				Entity p = car.getPassenger();
+				while(p!=null && !(p instanceof Player) 
+						&& p.getPassenger() != null){
+					p = p.getPassenger();
+				}
+				if(p!=null && p instanceof Player){
+					((Player)p).sendMessage(main.colors.getInfo()+Lang.get("hoverCar.heightLimit"));
+				}
+			}
 			return;
 		}
 		return;

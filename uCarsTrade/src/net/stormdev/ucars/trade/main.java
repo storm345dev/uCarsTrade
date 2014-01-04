@@ -105,6 +105,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.place.msg")){
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
+			if(!lang.contains("general.noExit.msg")){
+				lang.set("general.noExit.msg", "You may only exit in a 3x3 clear area!");
+			}
 			if(!lang.contains("general.sell.msg")){
 				lang.set("general.sell.msg", "Selling %item% for %price% on the market!");
 			}
@@ -188,6 +191,9 @@ public class main extends JavaPlugin {
         	//Setup the colour scheme
         	if (!config.contains("general.car.damage")) {
 				config.set("general.car.damage", true);
+			}
+        	if (!config.contains("general.car.safeExit")) {
+				config.set("general.car.safeExit", true);
 			}
         	if (!config.contains("general.carTrading.enable")) {
 				config.set("general.carTrading.enable", true);

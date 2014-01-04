@@ -213,6 +213,12 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.hoverCar.heightLimit")) {
 				config.set("general.hoverCar.heightLimit", 256.0);
 			}
+        	if (!config.contains("general.ai.enable")) {
+				config.set("general.ai.enable", false);
+			}
+        	if (!config.contains("general.ai.trackerBlock")) {
+				config.set("general.ai.trackerBlock", "DIAMOND_ORE");
+			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");
 			}

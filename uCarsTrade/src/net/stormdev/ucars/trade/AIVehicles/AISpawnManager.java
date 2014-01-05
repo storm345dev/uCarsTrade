@@ -30,7 +30,7 @@ public class AISpawnManager {
 	private Material roadEdge;
 	private Material junction;
 	private BukkitTask task = null;
-	private long spawnRate = 5l;
+	private long spawnRate = 6l;
 	private List<String> aiNames;
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;

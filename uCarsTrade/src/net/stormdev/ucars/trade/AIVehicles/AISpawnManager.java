@@ -2,7 +2,10 @@ package net.stormdev.ucars.trade.AIVehicles;
 
 import java.util.List;
 
+import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucars.utils.CarGenerator;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,6 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+
+import com.useful.ucarsCommon.StatValue;
 
 public class AISpawnManager {
 	private main plugin;
@@ -241,8 +246,17 @@ public class AISpawnManager {
 				v.setCustomName(randomName());
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
-				//TODO Make it a car and move
-				//TODO Set it as an NPC car and set direction
+				Car c = CarGenerator.gen();
+				if(c.stats.containsKey("trade.handling")){
+					c.stats.remove("trade.handling");
+				}
+				//Make it a car
+				c.id = m.getUniqueId();
+				c.isPlaced = true;
+				//Set it as an NPC car and set direction
+				c.stats.put("trade.npc", new Stat(true, plugin));
+				plugin.carSaver.setCar(m.getUniqueId(), c);
+				m.setMetadata("trade.npc", new StatValue(currentDirection, plugin));
 				return;
 			}});
 		return;

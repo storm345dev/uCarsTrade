@@ -96,6 +96,13 @@ public class UTradeListener implements Listener {
 		hovercarHeightLimit = main.config.getDouble("general.hoverCar.heightLimit");
 		safeExit = main.config.getBoolean("general.car.safeExit");
 	}
+	
+	@EventHandler
+	void NpcController(VehicleUpdateEvent event){
+		//TODO Use AIRouter to route it
+		return;
+	}
+	
     @EventHandler (priority = EventPriority.LOW) //Call early
     void vehicleExit(VehicleExitEvent event){
     	//Safe exit

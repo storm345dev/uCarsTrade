@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
@@ -40,7 +41,7 @@ public class AIRouter {
 		double speed = 1;
 		BlockFace direction = BlockFace.NORTH;
 		Location loc = car.getLocation();
-		Block under = loc.getBlock().getRelative(BlockFace.DOWN);
+		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
 		Vector vel = car.getVelocity();
 		double cx = loc.getX();
 		double cy = loc.getY();
@@ -50,24 +51,10 @@ public class AIRouter {
 			//Not an npc
 			return;
 		}
-		
-		if(under.getType() != trackBlock){
-			car.setVelocity(vel.multiply(-1)); //Reverse
-			return;
-		}
-		
-		List<Entity> nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
-		for(Entity e:nearby){
-			if(e instanceof Minecart){ //Avoid driving into another car
-				car.setVelocity(new Vector(0,0,0)); //Stop
-				return;
-			}
-		}
-		
+		List<Entity> nearby = car.getNearbyEntities(30, 10, 30); //20x20 radius
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			//Check if players nearby
 			boolean nearbyPlayers = false;
-			nearby = car.getNearbyEntities(20, 10, 20); //20x20 radius
 			for(Entity e:nearby){
 				if(e instanceof Player){
 					nearbyPlayers = true;
@@ -80,6 +67,60 @@ public class AIRouter {
 				car.remove();
 				return;
 			}
+		}
+		
+		nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
+		Boolean stop = false;
+		for(Entity e:nearby){
+			if(e.getType() == EntityType.MINECART){ //Avoid driving into another car
+				Location l = e.getLocation();
+				//Compare 'l' and 'loc' to see who is in front
+				//West = -x, East = +x, South = +z, North = -z
+				double lx = l.getX();
+				double lz = l.getZ();
+				
+				if(direction == BlockFace.EAST){
+					//Heading east
+					if(cx < lx){
+						stop = true;
+					}
+				}
+				else if(direction == BlockFace.WEST){
+					//Heading west
+					if(cx > lx){
+						stop = true;
+					}
+				}
+				else if(direction == BlockFace.NORTH){
+					//Heading north
+					if(cz > lz){
+						stop = true;
+					}
+				}
+				else if(direction == BlockFace.SOUTH){
+					//Heading south
+					if(cz < lz){
+						stop = true;
+					}
+				}
+			}
+		}
+		
+		if(stop || car.hasMetadata("car.frozen")){
+			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
+			return;
+		}
+		
+		if(under.getType() != trackBlock){
+			Block u= under.getRelative(BlockFace.DOWN);
+			if(u.getType() != trackBlock){
+				u = under.getRelative(BlockFace.UP);
+				if(u.getType() != trackBlock){
+					relocateRoad(car, under, loc);
+					return;
+				}
+			}
+			under = u;
 		}
 		
 		if(c.stats.containsKey("trade.speed")){
@@ -96,7 +137,8 @@ public class AIRouter {
 		}
 		
 		if(direction == null){ //Not on a road
- 			//Pretend we're a parked car as we're pushed of course...
+			//Try to recover
+			relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc);	
  			return;
 		}
 		
@@ -125,7 +167,7 @@ public class AIRouter {
 		
 		double x = tx - cx;
 		double y = ty - cy;
-		double z = tz = cz;
+		double z = tz - cz;
 		
 		Boolean ux = true;
 		double px = Math.abs(x);
@@ -134,20 +176,90 @@ public class AIRouter {
 			ux = false;
 		}
 
-		if (ux) {
-			// x is smaller
-			// long mult = (long) (pz/speed);
-			x = (x / pz) * speed;
-			z = (z / pz) * speed;
-		} else {
-			// z is smaller
-			// long mult = (long) (px/speed);
-			x = (x / px) * speed;
-			z = (z / px) * speed;
+		if(y<0.15){
+			if (ux) {
+				// x is smaller
+				// long mult = (long) (pz/speed);
+				x = (x / pz) * speed;
+				z = (z / pz) * speed;
+			} else {
+				// z is smaller
+				// long mult = (long) (px/speed);
+				x = (x / px) * speed;
+				z = (z / px) * speed;
+			}
+		}
+		if(y>0){
+			y = 3;
+			x*= 10;
+			x*= 10;
 		}
 		vel = new Vector(x,y,z); //Go to block
 		
 		car.setVelocity(vel);
+		return;
+	}
+	
+	public void relocateRoad(Minecart car, Block under, Location currentLoc){
+		
+		Vector vel = car.getVelocity();
+		double cx = currentLoc.getX();
+		double cy = currentLoc.getY();
+		double cz = currentLoc.getZ();
+		
+		//Find track block
+		Block N = under.getRelative(BlockFace.NORTH);
+		Block E = under.getRelative(BlockFace.EAST);
+		Block S = under.getRelative(BlockFace.SOUTH);
+		Block W = under.getRelative(BlockFace.WEST);
+		Block toGo = null;
+		
+		if(N.getType() == trackBlock){
+			toGo = N;
+		}
+		else if(E.getType() == trackBlock){
+			toGo = E;
+		}
+		else if(S.getType() == trackBlock){
+			toGo = S;
+		}
+		else if(W.getType() == trackBlock){
+			toGo = W;
+		}
+		
+		if(toGo == null){
+			car.setVelocity(vel.multiply(-1)); //Reverse
+			return;
+		}
+		
+		toGo = toGo.getRelative(BlockFace.UP,2);
+		if(!toGo.isEmpty()){
+			//Invalid
+			toGo = toGo.getRelative(BlockFace.UP);
+			if(!toGo.isEmpty()){
+				//Invalid still
+				main.logger.info("Car NPC: "+car.getUniqueId()+" LOST the road!");
+				return;
+			}
+		}
+		
+		//Calculate vector to get there...
+		double tx = toGo.getX();
+		double ty = toGo.getY();
+		double tz = toGo.getZ();
+		
+		double x = tx - cx;
+		double y = ty - cy;
+		double z = tz - cz;
+
+		vel = new Vector(x,y,z); //Go to block
+		
+		car.setVelocity(vel);
+		
+		BlockFace direction = main.plugin.aiSpawns.carriagewayDirection(under);
+		//Update direction stored on car...
+		car.removeMetadata("trade.npc", main.plugin);
+		car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
 		return;
 	}
 }

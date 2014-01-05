@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
+import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
@@ -61,6 +62,7 @@ public class main extends JavaPlugin {
 	public HashMap<String, String> alerts = new HashMap<String, String>();
 	File alertsFile = null;
 	public AISpawnManager aiSpawns = null;
+	public AIRouter aiController = null;
 	
 	protected boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -361,6 +363,7 @@ public class main extends JavaPlugin {
 		}
 		
 		this.aiSpawns = new AISpawnManager(this, config.getBoolean("general.ai.enable"));
+		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
 		
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}

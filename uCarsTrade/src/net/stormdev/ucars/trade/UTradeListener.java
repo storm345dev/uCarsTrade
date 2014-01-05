@@ -99,7 +99,22 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler
 	void NpcController(VehicleUpdateEvent event){
-		//TODO Use AIRouter to route it
+		try {
+			Vehicle v = event.getVehicle();
+			if(!(v instanceof Minecart)){
+				return;
+			}
+			Minecart m = (Minecart) v;
+			Car c = plugin.carSaver.getCar(m.getUniqueId());
+			if(c == null
+					|| !c.stats.containsKey("trade.npc")){
+				return; //Not a car or not an npc car
+			}
+			//Use AIRouter to route it
+			plugin.aiController.route(m, c);
+		} catch (Exception e) {
+			//Removed by worldedit etc....
+		}
 		return;
 	}
 	

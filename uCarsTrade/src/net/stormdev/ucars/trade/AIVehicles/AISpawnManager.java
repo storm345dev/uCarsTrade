@@ -263,7 +263,7 @@ public class AISpawnManager {
 	}
 	
 	public int randomDistanceAmount(){
-		return main.random.nextInt(64-10)+10; //Between 10 and 64
+		return main.random.nextInt(30-10)+10; //Between 10 and 30
 	}
 	
 	public int randomDirAmount(){

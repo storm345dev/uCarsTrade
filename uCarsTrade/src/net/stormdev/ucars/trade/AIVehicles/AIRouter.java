@@ -42,7 +42,7 @@ public class AIRouter {
 	}
 	
 	public void route(Minecart car, Car c){
-		double speed = 1.6;
+		double speed = 2;
 		BlockFace direction = BlockFace.NORTH;
 		Location loc = car.getLocation();
 		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
@@ -55,7 +55,7 @@ public class AIRouter {
 			//Not an npc
 			return;
 		}
-		List<Entity> nearby = car.getNearbyEntities(30, 10, 30); //20x20 radius
+		List<Entity> nearby = car.getNearbyEntities(40, 10, 40); //40x40 radius
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			//Check if players nearby
 			boolean nearbyPlayers = false;
@@ -150,7 +150,7 @@ public class AIRouter {
 		}
 		
 		if(c.stats.containsKey("trade.speed")){
-			speed = ((SpeedStat) c.stats.get("trade.speed")).getSpeedMultiplier()*1.6;
+			speed = ((SpeedStat) c.stats.get("trade.speed")).getSpeedMultiplier()*2;
 		}
 		
 		if(car.hasMetadata("trade.npc")){

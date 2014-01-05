@@ -51,6 +51,12 @@ public class AISpawnManager {
 
 				public void run() {
 					doSpawns();
+					if(main.random.nextBoolean()){
+						doSpawns();
+						if(main.random.nextBoolean()){
+							doSpawns();
+						}
+					}
 					return;
 				}}, spawnRate, spawnRate);
 		}

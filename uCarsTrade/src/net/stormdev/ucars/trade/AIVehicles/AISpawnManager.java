@@ -20,6 +20,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
 public class AISpawnManager {
@@ -95,7 +96,7 @@ public class AISpawnManager {
 				
 				Location check = new Location(w, x, y, z);
 				if(check.getBlock().getType() == trackBlock){
-					spawnFromTrackBlock(check);
+					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
 				}
 				
 				y--;
@@ -104,11 +105,10 @@ public class AISpawnManager {
 		return;
 	}
 	
-	public void spawnFromTrackBlock(Location location){
+	public void spawnFromTrackBlock(Location location, BlockFace currentDir){
 		//Track road and spawn in an AI
 		Block current = location.getBlock();
 		int distance = randomDistanceAmount();
-		BlockFace currentDir = AITrackFollow.randomCompassDir();
 		while(distance > 0){
 			//Need to follow the road
 			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock, junction);

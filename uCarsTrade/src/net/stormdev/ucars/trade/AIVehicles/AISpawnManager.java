@@ -1,5 +1,7 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import java.util.List;
+
 import net.stormdev.ucars.trade.main;
 
 import org.bukkit.Location;
@@ -7,9 +9,11 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -20,14 +24,17 @@ public class AISpawnManager {
 	private Material roadEdge;
 	private BukkitTask task = null;
 	private long spawnRate = 5l;
+	private List<String> aiNames;
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
 		this.enabled = enabled;
 		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
+		aiNames = main.config.getStringList("general.ai.names");
 		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
 		if(trackBlock == null || roadEdge == null){
+			main.logger.info("Didn't enable AIs as configuration is invalid!");
 			enabled = false;
 		}
 		if(enabled){
@@ -90,8 +97,7 @@ public class AISpawnManager {
 	}
 	
 	public void spawnFromTrackBlock(Location location){
-		main.logger.info("Running spawn thing");
-		//TODO Track road and spawn in an AI
+		//Track road and spawn in an AI
 		Block current = location.getBlock();
 		int distance = randomDistanceAmount();
 		BlockFace currentDir = BlockFace.NORTH;
@@ -110,6 +116,10 @@ public class AISpawnManager {
 		}
 		//toSpawn is the road surface
 		Location spawnLoc = toSpawn.getLocation().add(0, 1.5, 0); //Position to spawn car
+		if(!spawnLoc.getBlock().isEmpty()){
+			//Must spawn car in an air block
+			return;
+		}
 		BlockFace carDirection = currentDir;
 		carDirection = carriagewayDirection(current);
 		if(carDirection == null){
@@ -125,8 +135,8 @@ public class AISpawnManager {
 		//Find road edges
 		RoadEdge north = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
 		RoadEdge east = findRoadEdge(roadSpawnBlock, BlockFace.EAST);
-		RoadEdge south = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
-		RoadEdge west = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
+		RoadEdge south = findRoadEdge(roadSpawnBlock, BlockFace.SOUTH);
+		RoadEdge west = findRoadEdge(roadSpawnBlock, BlockFace.WEST);
 		
 		//Choose if N/S bound or E/W bound
 		north = south == null ? null:north;
@@ -134,7 +144,44 @@ public class AISpawnManager {
 		west = east == null ? null:west;
 		east = west == null ? null:east;
 		
-		if(east != null){ //Road is N/S bound
+		if(east != null && west != null
+				&& north != null && south != null){
+			//At a corner or junction or whatever where road is not square
+			RoadEdge NE = findRoadEdge(roadSpawnBlock, BlockFace.NORTH_EAST);
+			RoadEdge SE = findRoadEdge(roadSpawnBlock, BlockFace.SOUTH_EAST);
+			RoadEdge SW = findRoadEdge(roadSpawnBlock, BlockFace.SOUTH_WEST);
+			RoadEdge NW = findRoadEdge(roadSpawnBlock, BlockFace.NORTH_WEST);
+			
+			NE = SW == null ? null:NE;
+			SW = NE == null ? null:SW;
+			SE = NW == null ? null:SE;
+			NW = SE == null ? null:NW;
+			
+			if(NE != null && SW != null
+					&& SE != null && NW != null){
+				//At some complex junction some give up trying to spawn here
+				return null;
+			}
+			//  '/' = NW + SE edges
+			//  '\' = SW + NE edges
+			else if(NW != null){ //Road is SW/NE bound ('/')
+				dir = BlockFace.NORTH_EAST;
+				if(NW.distance < SE.distance){ //On left of road
+					dir = BlockFace.SOUTH_WEST;
+				}
+			}
+			else if(SW != null){ //Road is NW/SE bound ('\')
+				dir = BlockFace.NORTH_WEST;
+				if(SW.distance < NE.distance){
+					dir = BlockFace.SOUTH_EAST;
+				}
+			}
+			else{
+				//Unable to find any road elements
+				return null;
+			}
+		}
+		else if(east != null){ //Road is N/S bound
 			if(west.distance < east.distance){ //On left of road
 				dir = BlockFace.SOUTH; //Go southbound
 			}
@@ -157,7 +204,7 @@ public class AISpawnManager {
 		int distance = 1;
 		int z = 1;
 		while(z<20 && edge == null){
-			Block b = roadSpawnBlock.getRelative(dir, 0);
+			Block b = roadSpawnBlock.getRelative(dir, z);
 			if(b.getType() == roadEdge){
 				edge = b;
 				distance = z;
@@ -175,6 +222,23 @@ public class AISpawnManager {
 
 			public void run() {
 				Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+				List<Entity> es = m.getNearbyEntities(2, 2, 2);
+				for(Entity e:es){
+					if(e.getType() == EntityType.MINECART){
+						m.remove();
+						return; //Already a car in close proximity
+					}
+				}
+				//Is valid
+				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+				v.setAdult();
+				v.setBreed(false);
+				v.setAgeLock(true);
+				v.setCanPickupItems(false);
+				v.setCustomName(randomName());
+				v.setCustomNameVisible(true);
+				m.setPassenger(v);
+				//TODO Make it a car and move
 				//TODO Set it as an NPC car and set direction
 				return;
 			}});
@@ -207,5 +271,11 @@ public class AISpawnManager {
 		case 7:return BlockFace.NORTH_WEST;
 		default: return BlockFace.NORTH;
 		}
+	}
+	public String randomName(){
+		if(aiNames == null){
+			return "Citizen";
+		}
+		return aiNames.get(main.random.nextInt(aiNames.size())); //Select a random name
 	}
 }

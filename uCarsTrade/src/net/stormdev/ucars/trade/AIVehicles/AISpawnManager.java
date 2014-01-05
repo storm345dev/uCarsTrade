@@ -117,8 +117,11 @@ public class AISpawnManager {
 		//toSpawn is the road surface
 		Location spawnLoc = toSpawn.getLocation().add(0, 1.5, 0); //Position to spawn car
 		if(!spawnLoc.getBlock().isEmpty()){
-			//Must spawn car in an air block
-			return;
+			spawnLoc = spawnLoc.add(0, 0.6, 0);
+			if(!spawnLoc.getBlock().isEmpty()){
+				//Must spawn car in an air block
+				return;
+			}
 		}
 		BlockFace carDirection = currentDir;
 		carDirection = carriagewayDirection(current);
@@ -246,7 +249,7 @@ public class AISpawnManager {
 	}
 	
 	public int randomDistanceAmount(){
-		return main.random.nextInt(33-6)+6; //Between 6 and 32
+		return main.random.nextInt(64-10)+10; //Between 10 and 64
 	}
 	
 	public int randomDirAmount(){

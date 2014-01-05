@@ -35,11 +35,6 @@ public class AITrackFollow {
 			rightCheck = nextRightFace(rightCheck);
 		}
 		
-		Block cameFrom = current.getRelative(behind);
-		if(cameFrom.getType() == trackBlock){ //Cannot follow road so return where we came from
-			return new TrackingData(cameFrom, behind);
-		}
-		
 		return new TrackingData(current, dir); //Where we came from isnt road, stay where we are
 	}
 	public static Block checkIfTracker(Block current, Block check, Material trackBlock){
@@ -67,7 +62,7 @@ public class AITrackFollow {
 		case SOUTH_WEST: return BlockFace.WEST;
 		case WEST: return BlockFace.NORTH_WEST;
 		case NORTH_WEST: return BlockFace.NORTH;
-		default: return face.getOppositeFace();
+		default: return face;
 		}
 	}
 	public static BlockFace nextLeftFace(BlockFace face){
@@ -80,7 +75,7 @@ public class AITrackFollow {
 		case SOUTH_EAST: return BlockFace.EAST;
 		case EAST: return BlockFace.NORTH_EAST;
 		case NORTH_EAST: return BlockFace.NORTH;
-		default: return face.getOppositeFace();
+		default: return face;
 		}
 	}
 	public static BlockFace nextCompassPointRight(BlockFace face){

@@ -247,7 +247,7 @@ public class AISpawnManager {
 					}
 				}
 				List<Entity> nearby = m.getNearbyEntities(10, 3, 10);
-				if(nearby.size() > 5){
+				if(nearby.size() > 4){
 					//Too many in area
 					m.remove();
 					return;

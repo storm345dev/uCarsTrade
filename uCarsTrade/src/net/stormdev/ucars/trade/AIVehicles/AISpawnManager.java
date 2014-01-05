@@ -27,6 +27,7 @@ public class AISpawnManager {
 	private boolean enabled;
 	private Material trackBlock;
 	private Material roadEdge;
+	private Material junction;
 	private BukkitTask task = null;
 	private long spawnRate = 5l;
 	private List<String> aiNames;
@@ -35,10 +36,12 @@ public class AISpawnManager {
 		this.enabled = enabled;
 		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
+		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
 		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
-		if(trackBlock == null || roadEdge == null){
+		junction = Material.getMaterial(junRaw);
+		if(trackBlock == null || roadEdge == null || junction == null){
 			main.logger.info("Didn't enable AIs as configuration is invalid!");
 			enabled = false;
 		}
@@ -105,10 +108,10 @@ public class AISpawnManager {
 		//Track road and spawn in an AI
 		Block current = location.getBlock();
 		int distance = randomDistanceAmount();
-		BlockFace currentDir = BlockFace.NORTH;
+		BlockFace currentDir = AITrackFollow.randomCompassDir();
 		while(distance > 0){
 			//Need to follow the road
-			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock);
+			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock, junction);
 			
 			current = data.nextBlock;
 			currentDir = data.dir;
@@ -236,6 +239,12 @@ public class AISpawnManager {
 						m.remove();
 						return; //Already a car in close proximity
 					}
+				}
+				List<Entity> nearby = m.getNearbyEntities(10, 3, 10);
+				if(nearby.size() > 5){
+					//Too many in area
+					m.remove();
+					return;
 				}
 				//Is valid
 				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);

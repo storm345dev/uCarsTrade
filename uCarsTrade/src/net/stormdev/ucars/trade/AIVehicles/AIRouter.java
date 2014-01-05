@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
+import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
@@ -24,21 +25,24 @@ public class AIRouter {
 	private boolean enabled;
 	private Material trackBlock;
 	private Material roadEdge;
+	private Material junction;
 	
 	public AIRouter(boolean enabled){
 		this.enabled = enabled;
 		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
+		String junRaw = main.config.getString("general.ai.junctionBlock");
 		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
-		if(trackBlock == null || roadEdge == null){
+		junction = Material.getMaterial(junRaw);
+		if(trackBlock == null || roadEdge == null || junction == null){
 			main.logger.info("Didn't enable AIs routing as configuration is invalid!");
 			enabled = false;
 		}
 	}
 	
 	public void route(Minecart car, Car c){
-		double speed = 1;
+		double speed = 1.6;
 		BlockFace direction = BlockFace.NORTH;
 		Location loc = car.getLocation();
 		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
@@ -111,20 +115,42 @@ public class AIRouter {
 			return;
 		}
 		
-		if(under.getType() != trackBlock){
+		Material ut = under.getType();
+		
+		if(ut != trackBlock && ut != junction){
 			Block u= under.getRelative(BlockFace.DOWN);
-			if(u.getType() != trackBlock){
+			ut = u.getType();
+			if(ut != trackBlock && ut != junction){
 				u = under.getRelative(BlockFace.UP);
-				if(u.getType() != trackBlock){
-					relocateRoad(car, under, loc);
+				ut = u.getType();
+				if(ut != trackBlock && ut != junction){
+					relocateRoad(car, under, loc, ut==junction);
 					return;
 				}
 			}
 			under = u;
+			ut = under.getType();
+		}
+		
+		Boolean atJ = false;
+		if(ut == junction){
+			atJ = true;
+			if(!car.hasMetadata("car.needRouteCheck")){
+				car.setMetadata("car.needRouteCheck", new StatValue(null, main.plugin));
+			}
+		}
+		else{
+			if(car.hasMetadata("car.needRouteCheck")){
+				car.removeMetadata("car.needRouteCheck", main.plugin);
+				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+				//Update direction stored on car...
+				car.removeMetadata("trade.npc", main.plugin);
+				car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
+			}
 		}
 		
 		if(c.stats.containsKey("trade.speed")){
-			speed = ((SpeedStat) c.stats.get("trade.speed")).getSpeedMultiplier();
+			speed = ((SpeedStat) c.stats.get("trade.speed")).getSpeedMultiplier()*1.6;
 		}
 		
 		if(car.hasMetadata("trade.npc")){
@@ -133,17 +159,19 @@ public class AIRouter {
 		}
 		else{
 			//Calculate direction from road
-			direction = main.plugin.aiSpawns.carriagewayDirection(under);
+			if(!atJ){
+				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+			}
 		}
 		
 		if(direction == null){ //Not on a road
 			//Try to recover
-			relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc);	
- 			return;
+			relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, atJ);
+			return;
 		}
 		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock);
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction);
 		if(direction != nextTrack.dir){
 			direction = nextTrack.dir;
 			//Update direction stored on car...
@@ -200,7 +228,7 @@ public class AIRouter {
 		return;
 	}
 	
-	public void relocateRoad(Minecart car, Block under, Location currentLoc){
+	public void relocateRoad(Minecart car, Block under, Location currentLoc, boolean atJunction){
 		
 		Vector vel = car.getVelocity();
 		double cx = currentLoc.getX();
@@ -214,16 +242,16 @@ public class AIRouter {
 		Block W = under.getRelative(BlockFace.WEST);
 		Block toGo = null;
 		
-		if(N.getType() == trackBlock){
+		if(N.getType() == trackBlock || N.getType() == junction){
 			toGo = N;
 		}
-		else if(E.getType() == trackBlock){
+		else if(E.getType() == trackBlock || E.getType() == junction){
 			toGo = E;
 		}
-		else if(S.getType() == trackBlock){
+		else if(S.getType() == trackBlock || S.getType() == junction){
 			toGo = S;
 		}
-		else if(W.getType() == trackBlock){
+		else if(W.getType() == trackBlock || W.getType() == junction){
 			toGo = W;
 		}
 		
@@ -238,7 +266,6 @@ public class AIRouter {
 			toGo = toGo.getRelative(BlockFace.UP);
 			if(!toGo.isEmpty()){
 				//Invalid still
-				main.logger.info("Car NPC: "+car.getUniqueId()+" LOST the road!");
 				return;
 			}
 		}
@@ -255,8 +282,15 @@ public class AIRouter {
 		vel = new Vector(x,y,z); //Go to block
 		
 		car.setVelocity(vel);
-		
-		BlockFace direction = main.plugin.aiSpawns.carriagewayDirection(under);
+		BlockFace direction = ClosestFace.getClosestFace(car.getLocation().getYaw());
+		if(!atJunction){
+			direction = main.plugin.aiSpawns.carriagewayDirection(under);
+		}
+		else{
+			if(!car.hasMetadata("car.needRouteCheck")){
+				car.setMetadata("car.needRouteCheck", new StatValue(null, main.plugin));
+			}
+		}
 		//Update direction stored on car...
 		car.removeMetadata("trade.npc", main.plugin);
 		car.setMetadata("trade.npc", new StatValue(direction, main.plugin));

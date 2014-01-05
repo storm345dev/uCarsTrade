@@ -226,6 +226,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.roadEdgeBlock")) {
 				config.set("general.ai.roadEdgeBlock", "IRON_ORE");
 			}
+        	if (!config.contains("general.ai.junctionBlock")) {
+				config.set("general.ai.junctionBlock", "COAL_ORE");
+			}
         	if (!config.contains("general.ai.names")) {
 				config.set("general.ai.names", new String[]{"Jeff", "Bob", "Todd", "Jimmy", "Peter"
 						, "Fred"});

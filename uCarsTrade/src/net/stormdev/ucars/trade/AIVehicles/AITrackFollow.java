@@ -7,11 +7,20 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class AITrackFollow {
-	public static TrackingData nextBlock(Block current, BlockFace dir, Material trackBlock){
+	public static TrackingData nextBlock(Block current, BlockFace dir, Material trackBlock, Material junctionBlock){
 		Block cr = current.getRelative(dir);
-		Block check = checkIfTracker(current, cr, trackBlock);
-		if(check != null){
-			return new TrackingData(check, dir);
+		TrackBlock ch = checkIfTracker(current, cr, trackBlock, junctionBlock);
+		boolean turn = false;
+		if(ch != null){
+			Block check = ch.block;
+			if(check != null){
+				if(ch.junction && main.random.nextBoolean() && main.random.nextBoolean()){
+					turn = true;
+				}
+				else{
+					return new TrackingData(check, dir, false);
+				}
+			}
 		}
 		
 		//Need to get right/left of it
@@ -23,32 +32,46 @@ public class AITrackFollow {
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
 			
-			Block clb = checkIfTracker(current, lb, trackBlock);
-			Block crb = checkIfTracker(current, rb, trackBlock);
-			if(clb != null){
-				return new TrackingData(clb, leftCheck);
+			TrackBlock clb = checkIfTracker(current, lb, trackBlock, junctionBlock);
+			TrackBlock crb = checkIfTracker(current, rb, trackBlock, junctionBlock);
+			if(crb != null) {
+				return new TrackingData(crb.block, rightCheck, 
+						crb.junction);
 			}
-			else if(crb != null) {
-				return new TrackingData(crb, rightCheck);
+			else if(clb != null){
+				return new TrackingData(clb.block, leftCheck, 
+						clb.junction);
 			}
 			leftCheck = nextLeftFace(leftCheck);
 			rightCheck = nextRightFace(rightCheck);
 		}
 		
-		return new TrackingData(current, dir); //Where we came from isnt road, stay where we are
+		return new TrackingData(current, dir, false); //Where we came from isnt road, stay where we are
 	}
-	public static Block checkIfTracker(Block current, Block check, Material trackBlock){
+	public static TrackBlock checkIfTracker(Block current, Block check, Material trackBlock, Material junction){
 		if(check.getType() == trackBlock){
 			current = check;
-			return current;
+			return new TrackBlock(current, false);
+		}
+		else if(check.getType() == junction){
+			current = check;
+			return new TrackBlock(current, true);
 		}
 		else if(check.getRelative(BlockFace.UP).getType() == trackBlock){
 			current = check.getRelative(BlockFace.UP);
-			return current;
+			return new TrackBlock(current, false);
+		}
+		else if(check.getRelative(BlockFace.UP).getType() == junction){
+			current = check.getRelative(BlockFace.UP);
+			return new TrackBlock(current, true);
 		}
 		else if(check.getRelative(BlockFace.DOWN).getType() == trackBlock){
 			current = check.getRelative(BlockFace.DOWN);
-			return current;
+			return new TrackBlock(current, false);
+		}
+		else if(check.getRelative(BlockFace.DOWN).getType() == junction){
+			current = check.getRelative(BlockFace.DOWN);
+			return new TrackBlock(current, true);
 		}
 		return null;
 	}

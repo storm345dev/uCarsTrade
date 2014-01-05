@@ -1,5 +1,7 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import net.stormdev.ucars.trade.main;
+
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -79,6 +81,34 @@ public class AITrackFollow {
 		case EAST: return BlockFace.NORTH_EAST;
 		case NORTH_EAST: return BlockFace.NORTH;
 		default: return face.getOppositeFace();
+		}
+	}
+	public static BlockFace nextCompassPointRight(BlockFace face){
+		switch(face){
+		case NORTH: return BlockFace.EAST;
+		case EAST: return BlockFace.SOUTH;
+		case SOUTH: return BlockFace.WEST;
+		case WEST: return BlockFace.NORTH;
+		default: return face.getOppositeFace();
+		}
+	}
+	public static BlockFace nextCompassPointLeft(BlockFace face){
+		switch(face){
+		case NORTH: return BlockFace.WEST;
+		case WEST: return BlockFace.SOUTH;
+		case SOUTH: return BlockFace.EAST;
+		case EAST: return BlockFace.NORTH;
+		default: return face.getOppositeFace();
+		}
+	}
+	public static BlockFace randomCompassDir(){
+		int rand = main.random.nextInt(4); //0-3
+		switch(rand){
+		case 0:return BlockFace.NORTH;
+		case 1:return BlockFace.EAST;
+		case 2:return BlockFace.WEST;
+		case 3:return BlockFace.SOUTH;
+		default: return BlockFace.SOUTH;
 		}
 	}
 }

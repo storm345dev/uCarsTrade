@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -16,14 +17,17 @@ public class AISpawnManager {
 	private main plugin;
 	private boolean enabled;
 	private Material trackBlock;
+	private Material roadEdge;
 	private BukkitTask task = null;
 	private long spawnRate = 5l;
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
 		this.enabled = enabled;
 		String trackRaw = main.config.getString("general.ai.trackerBlock");
+		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		trackBlock = Material.getMaterial(trackRaw);
-		if(trackBlock == null){
+		roadEdge = Material.getMaterial(edgeRaw);
+		if(trackBlock == null || roadEdge == null){
 			enabled = false;
 		}
 		if(enabled){
@@ -106,8 +110,75 @@ public class AISpawnManager {
 		}
 		//toSpawn is the road surface
 		Location spawnLoc = toSpawn.getLocation().add(0, 1.5, 0); //Position to spawn car
-		//TODO Debug, spawn a villager
-		spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+		BlockFace carDirection = currentDir;
+		carDirection = carriagewayDirection(current);
+		if(carDirection == null){
+			//Not a valid road structure
+			return;
+		}
+		spawnNPC(spawnLoc, carDirection);
+	}
+	
+	public BlockFace carriagewayDirection(Block roadSpawnBlock){
+		BlockFace dir = BlockFace.NORTH; //By default, north bound
+		
+		//Find road edges
+		RoadEdge north = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
+		RoadEdge east = findRoadEdge(roadSpawnBlock, BlockFace.EAST);
+		RoadEdge south = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
+		RoadEdge west = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
+		
+		//Choose if N/S bound or E/W bound
+		north = south == null ? null:north;
+		south = north == null ? null:south;
+		west = east == null ? null:west;
+		east = west == null ? null:east;
+		
+		if(east != null){ //Road is N/S bound
+			if(west.distance < east.distance){ //On left of road
+				dir = BlockFace.SOUTH; //Go southbound
+			}
+		}
+		else if(north != null){ //Road is E/W bound
+			dir = BlockFace.EAST;
+			if(north.distance < south.distance){ //On left of road
+				dir = BlockFace.WEST; //Go westbound
+			}
+		}
+		else{
+			return null;
+		}
+		
+		return dir;
+	}
+	
+	public RoadEdge findRoadEdge(Block roadSpawnBlock, BlockFace dir){
+		Block edge = null;
+		int distance = 1;
+		int z = 1;
+		while(z<20 && edge == null){
+			Block b = roadSpawnBlock.getRelative(dir, 0);
+			if(b.getType() == roadEdge){
+				edge = b;
+				distance = z;
+			}
+			z++;
+		}
+		if(edge != null){
+			return new RoadEdge(edge, distance);
+		}
+		return null;
+	}
+	
+	public void spawnNPC(final Location spawnLoc, final BlockFace currentDirection){
+		plugin.getServer().getScheduler().runTask(plugin, new BukkitRunnable(){
+
+			public void run() {
+				Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+				//TODO Set it as an NPC car and set direction
+				return;
+			}});
+		return;
 	}
 	
 	public int randomDistanceAmount(){

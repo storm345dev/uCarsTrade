@@ -5,16 +5,20 @@ import net.stormdev.ucars.trade.main;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+
+import com.useful.ucarsCommon.StatValue;
 
 public class AITrackFollow {
-	public static TrackingData nextBlock(Block current, BlockFace dir, Material trackBlock, Material junctionBlock){
+	public static TrackingData nextBlock(Block current, BlockFace dir, Material trackBlock, Material junctionBlock, Entity vehicle){
 		Block cr = current.getRelative(dir);
 		TrackBlock ch = checkIfTracker(current, cr, trackBlock, junctionBlock);
 		boolean turn = false;
 		if(ch != null){
 			Block check = ch.block;
 			if(check != null){
-				if(ch.junction && main.random.nextBoolean() && main.random.nextBoolean()){
+				if(ch.junction && main.random.nextBoolean() && main.random.nextBoolean()
+						&& (vehicle != null && !vehicle.hasMetadata("npc.turning"))){
 					turn = true;
 				}
 				else{
@@ -31,17 +35,38 @@ public class AITrackFollow {
 		while(leftCheck != behind && rightCheck != behind){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
-			
 			TrackBlock clb = checkIfTracker(current, lb, trackBlock, junctionBlock);
 			TrackBlock crb = checkIfTracker(current, rb, trackBlock, junctionBlock);
+			//Check right first
 			if(crb != null) {
+				if(vehicle != null){
+					if(!crb.junction){
+						vehicle.removeMetadata("npc.turning", main.plugin);
+					}
+					else if(turn){
+						if(!vehicle.hasMetadata("npc,turning")){
+							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
+						}
+					}
+				}
 				return new TrackingData(crb.block, rightCheck, 
 						crb.junction);
 			}
 			else if(clb != null){
+				if(vehicle != null){
+					if(!clb.junction){
+						vehicle.removeMetadata("npc.turning", main.plugin);
+					}
+					else if(turn){
+						if(!vehicle.hasMetadata("npc,turning")){
+							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
+						}
+					}
+				}
 				return new TrackingData(clb.block, leftCheck, 
 						clb.junction);
 			}
+			//Didn't find a block to follow on
 			leftCheck = nextLeftFace(leftCheck);
 			rightCheck = nextRightFace(rightCheck);
 		}

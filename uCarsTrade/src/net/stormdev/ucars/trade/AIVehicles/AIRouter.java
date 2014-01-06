@@ -174,7 +174,7 @@ public class AIRouter {
 		}
 		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction);
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction, car);
 		if(direction != nextTrack.dir){
 			direction = nextTrack.dir;
 			//Update direction stored on car...
@@ -196,18 +196,15 @@ public class AIRouter {
 		double ty = toDrive.getY();
 		double tz = toDrive.getZ();
 		
-		double x = tx - cx;
+		double x = tx - cx + 0.5;
 		double y = ty - cy;
-		double z = tz - cz;
+		double z = tz - cz + 0.5;
 		
-		Boolean ux = true;
 		double px = Math.abs(x);
 		double pz = Math.abs(z);
-		if (px > pz) {
-			ux = false;
-		}
+		boolean ux = px > pz ? false:true;
 
-		if(y<0.15){
+		if(y<0.15 && isCompassDir(direction)){
 			if (ux) {
 				// x is smaller
 				// long mult = (long) (pz/speed);
@@ -278,9 +275,9 @@ public class AIRouter {
 		double ty = toGo.getY();
 		double tz = toGo.getZ();
 		
-		double x = tx - cx;
+		double x = tx - cx + 0.5;
 		double y = ty - cy;
-		double z = tz - cz;
+		double z = tz - cz + 0.5;
 
 		vel = new Vector(x,y,z); //Go to block
 		
@@ -298,5 +295,15 @@ public class AIRouter {
 		car.removeMetadata("trade.npc", main.plugin);
 		car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
 		return;
+	}
+	
+	public boolean isCompassDir(BlockFace face){
+		switch(face){
+		case NORTH: return true;
+		case EAST: return true;
+		case SOUTH: return true;
+		case WEST: return true;
+		default: return false;
+		}
 	}
 }

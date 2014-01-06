@@ -117,7 +117,7 @@ public class AISpawnManager {
 		int distance = randomDistanceAmount();
 		while(distance > 0){
 			//Need to follow the road
-			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock, junction);
+			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock, junction, null);
 			
 			current = data.nextBlock;
 			currentDir = data.dir;

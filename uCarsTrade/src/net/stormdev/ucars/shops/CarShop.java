@@ -91,6 +91,8 @@ public class CarShop {
 		ItemStack i = c.getItem();
 		player.getInventory().addItem(i);
 		
+		plugin.carSaver.setCar(c.id, c);
+		
 		return;
 	}
 	

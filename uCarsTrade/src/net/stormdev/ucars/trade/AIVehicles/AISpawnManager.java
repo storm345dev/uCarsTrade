@@ -52,7 +52,7 @@ public class AISpawnManager {
 				public void run() {
 					doSpawns();
 					if(main.random.nextBoolean()){
-						doSpawns();
+						doLongSpawns();
 						if(main.random.nextBoolean()){
 							doSpawns();
 						}
@@ -65,6 +65,48 @@ public class AISpawnManager {
 		if(task != null){
 			task.cancel();
 		}
+	}
+	public void doLongSpawns(){
+		if(!enabled){
+			return;
+		}
+		Player[] online = plugin.getServer().getOnlinePlayers().clone();
+		for(Player player:online){
+			if(main.random.nextBoolean()){
+				continue; //Next iteration
+			}
+			if(player == null || !player.isOnline()){
+				continue; //Next iteration
+			}
+			Block tracked = null;
+			boolean stopSearch = false;
+			
+			Location playerLoc = player.getLocation();
+			Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
+			Block br = b.getRelative(randomFace(), randomDir3Amount());
+			World w = b.getWorld();
+			int y = br.getY();
+			int x = br.getX();
+			int z = br.getZ();
+			
+			int minY = y-10;
+			
+			tracked = b.getType() == trackBlock ? b : null;
+			tracked = br.getType() == trackBlock ? br : null;
+			
+			while(tracked == null
+					&& !stopSearch
+					&& y>minY){
+				
+				Location check = new Location(w, x, y, z);
+				if(check.getBlock().getType() == trackBlock){
+					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+				}
+				
+				y--;
+			}
+		}
+		return;
 	}
 	public void doSpawns(){
 		if(!enabled){
@@ -286,7 +328,11 @@ public class AISpawnManager {
 	}
 	
 	public int randomDir2Amount(){
-		return main.random.nextInt(10)+5; //5 to 10
+		return main.random.nextInt(10-5)+5; //5 to 10
+	}
+	
+	public int randomDir3Amount(){
+		return main.random.nextInt(40-30)+30; //30 to 40
 	}
 	
 	public BlockFace randomFace(){

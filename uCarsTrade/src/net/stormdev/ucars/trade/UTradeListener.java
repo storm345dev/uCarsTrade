@@ -121,16 +121,7 @@ public class UTradeListener implements Listener {
 		if(e != null){
 			//Has an NPC riding it
 			vehicle.eject();
-			plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
-
-				public void run() {
-					try {
-						e.remove();
-					} catch (Exception e) {
-						//NPC despawned
-					}
-					return;
-				}}, 20l); //1 second later
+			e.remove();
 		}
 		if(player.getVehicle() != null){
 			player.getVehicle().eject();
@@ -146,12 +137,15 @@ public class UTradeListener implements Listener {
 				vehicle.setPassenger(player);
 				player.sendMessage(main.colors.getInfo()+net.stormdev.ucars.trade.Lang.get("general.steal.taken"));
 				return;
-			}}, 2l);
+			}}, 3l);
 		return;
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST) //Get called first
 	void vehicleEntry(PlayerInteractEntityEvent event){
+		if(!stealNPC){
+			return;
+		}
 		final Player player = event.getPlayer();
 		Entity i = event.getRightClicked();
 		Entity cart = i;
@@ -159,8 +153,10 @@ public class UTradeListener implements Listener {
 			cart = this.isEntityInCar(cart);
 		}
 		if(cart == null || !(cart instanceof Minecart)){
-		return;
+			return;
 		}
+		
+		event.setCancelled(true);
 		
 		if(cart.hasMetadata("trade.npc")){
 			final Car c = plugin.carSaver.getCar(i.getUniqueId());
@@ -174,7 +170,7 @@ public class UTradeListener implements Listener {
 				public void run() {
 					npcCarSteal(m, player, c);
 					return;
-				}}, 3l);
+				}}, 4l);
 		}
 		return;
 	}

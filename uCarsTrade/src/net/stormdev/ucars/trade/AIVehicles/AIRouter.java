@@ -76,7 +76,7 @@ public class AIRouter {
 		nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;
 		for(Entity e:nearby){
-			if(e.getType() == EntityType.MINECART){ //Avoid driving into another car
+			if(e.getType() == EntityType.MINECART && e.hasMetadata("trade.npc")){ //Avoid driving into another car
 				Location l = e.getLocation();
 				//Compare 'l' and 'loc' to see who is in front
 				//West = -x, East = +x, South = +z, North = -z

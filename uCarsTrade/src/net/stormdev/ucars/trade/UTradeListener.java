@@ -17,6 +17,7 @@ import net.stormdev.ucars.stats.NameStat;
 import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.stats.StatType;
+import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
@@ -91,10 +92,91 @@ public class UTradeListener implements Listener {
 	main plugin = null;
 	private double hovercarHeightLimit = 256;
 	private boolean safeExit = false;
+	private boolean stealNPC;
 	public UTradeListener(main plugin){
 		this.plugin = plugin;
 		hovercarHeightLimit = main.config.getDouble("general.hoverCar.heightLimit");
+		stealNPC = main.config.getBoolean("general.ai.canSteal");
 		safeExit = main.config.getBoolean("general.car.safeExit");
+	}
+	
+	void npcCarSteal(final Minecart vehicle, final Player player, final Car c){
+		if(!vehicle.hasMetadata("trade.npc") || !c.stats.containsKey("trade.npc")){
+			return; //Not an npc
+		}
+		if(!stealNPC){
+			if(player.getVehicle() != null){
+				final Location loc = player.getVehicle().getLocation();
+				player.getVehicle().eject();
+				plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+
+					public void run() {
+						player.teleport(loc.add(0, 0.5, 0));
+						return;
+					}}, 2l);
+			}
+			return;
+		}
+		final Entity e = vehicle.getPassenger();
+		if(e != null){
+			//Has an NPC riding it
+			vehicle.eject();
+			plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+
+				public void run() {
+					try {
+						e.remove();
+					} catch (Exception e) {
+						//NPC despawned
+					}
+					return;
+				}}, 20l); //1 second later
+		}
+		if(player.getVehicle() != null){
+			player.getVehicle().eject();
+		}
+		plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+
+			public void run() {
+				c.stats.remove("trade.npc");
+				vehicle.removeMetadata("trade.npc", plugin);
+				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
+				plugin.getServer().getPluginManager().callEvent(evt);
+				plugin.carSaver.setCar(c.id, c); //Update changes to car, aka it's not an npc
+				vehicle.setPassenger(player);
+				player.sendMessage(main.colors.getInfo()+net.stormdev.ucars.trade.Lang.get("general.steal.taken"));
+				return;
+			}}, 2l);
+		return;
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST) //Get called first
+	void vehicleEntry(PlayerInteractEntityEvent event){
+		final Player player = event.getPlayer();
+		Entity i = event.getRightClicked();
+		Entity cart = i;
+		if(!(cart instanceof Minecart)){
+			cart = this.isEntityInCar(cart);
+		}
+		if(cart == null || !(cart instanceof Minecart)){
+		return;
+		}
+		
+		if(cart.hasMetadata("trade.npc")){
+			final Car c = plugin.carSaver.getCar(i.getUniqueId());
+			if(c == null){
+				return;
+			}
+			event.setCancelled(true);
+			final Minecart m = (Minecart) cart;
+			plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+
+				public void run() {
+					npcCarSteal(m, player, c);
+					return;
+				}}, 3l);
+		}
+		return;
 	}
 	
 	@EventHandler
@@ -902,6 +984,10 @@ public class UTradeListener implements Listener {
 	@EventHandler (priority=EventPriority.HIGH)
 	void carRemoval(ucarDeathEvent event){
 		Minecart cart = event.getCar();
+		if(cart.hasMetadata("trade.npc")){
+			event.setCancelled(true);
+			return; //Don't destroy the car
+		}
 		UUID id = cart.getUniqueId();
 		Car car = plugin.carSaver.getCar(id);
 		if(car == null){

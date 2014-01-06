@@ -118,6 +118,9 @@ public class main extends JavaPlugin {
 			if(!lang.contains("general.buy.notEnoughMoney")){
 				lang.set("general.buy.notEnoughMoney", "You cannot afford that item! You only have %balance%!");
 			}
+			if(!lang.contains("general.steal.taken")){
+				lang.set("general.steal.taken", "Car stolen, watch out for the cops!");
+			}
 			if(!lang.contains("general.buy.taken")){
 				lang.set("general.buy.taken", "Sorry, somebody else just bought that item.");
 			}
@@ -232,6 +235,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.names")) {
 				config.set("general.ai.names", new String[]{"Jeff", "Bob", "Todd", "Jimmy", "Peter"
 						, "Fred"});
+			}
+        	if (!config.contains("general.ai.canSteal")) {
+				config.set("general.ai.canSteal", true);
 			}
         	if (!config.contains("colorScheme.success")) {
 				config.set("colorScheme.success", "&a");

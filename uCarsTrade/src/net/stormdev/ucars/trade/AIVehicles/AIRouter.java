@@ -162,6 +162,9 @@ public class AIRouter {
 			if(!atJ){
 				direction = main.plugin.aiSpawns.carriagewayDirection(under);
 			}
+			else{
+				relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, atJ);
+			}
 		}
 		
 		if(direction == null){ //Not on a road

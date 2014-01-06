@@ -81,7 +81,7 @@ public class CarShop {
 		
 		String currency = main.config.getString("general.carTrading.currencySign");
 		String msg = Lang.get("general.buy.success");
-		msg = msg.replaceAll(Pattern.quote("%item%"), " a car");
+		msg = msg.replaceAll(Pattern.quote("%item%"), "a car");
 		msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(currency+cost));
 		msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(currency+rem));
 		player.sendMessage(main.colors.getSuccess()+msg);

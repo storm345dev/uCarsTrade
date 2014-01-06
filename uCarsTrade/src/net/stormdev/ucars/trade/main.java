@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.milkbowl.vault.economy.Economy;
+import net.stormdev.ucars.shops.CarShop;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.utils.IconMenu;
@@ -63,8 +64,9 @@ public class main extends JavaPlugin {
 	File alertsFile = null;
 	public AISpawnManager aiSpawns = null;
 	public AIRouter aiController = null;
+	public CarShop carShop = null;
 	
-	protected boolean setupEconomy() {
+	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
 				.getServicesManager().getRegistration(
 						net.milkbowl.vault.economy.Economy.class);
@@ -355,7 +357,10 @@ public class main extends JavaPlugin {
         tradeMenu.setOption(2, new ItemStack(Material.MINECART, 1), colors.getTitle()+"Sell Cars", colors.getInfo()+"Sell cars!");
         tradeMenu.setOption(3, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Buy Upgrades", colors.getInfo()+"Buy upgrades for your cars!");
         tradeMenu.setOption(4, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Sell Upgrades", colors.getInfo()+"Sell upgrades for cars!");
-		File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");
+		
+        this.carShop = new CarShop(this);
+        
+        File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");
 		File upgradesMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "upgradesMarket.marketData");
 		this.salesManager = new SalesManager(carsMarketSaveFile, upgradesMarketSaveFile);
 		if(config.getBoolean("general.carTrading.enable")){
@@ -391,6 +396,7 @@ public class main extends JavaPlugin {
 			ucars.unHookPlugin(this);
 			}
 			this.aiSpawns.end();
+			this.carShop.destroy();
 			logger.info("uCarsTrade has been disabled!");
 		} catch (Exception e) {
 			//Disabled without being enabled

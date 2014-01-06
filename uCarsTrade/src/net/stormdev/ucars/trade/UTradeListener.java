@@ -1036,6 +1036,12 @@ public class UTradeListener implements Listener {
 			lines[2] = "Place chest";
 			lines[3] = "above";
 		}
+		if(ChatColor.stripColor(lines[0]).equalsIgnoreCase("[Shop]")){
+			lines[0] = ChatColor.GREEN+"[Shop]";
+			lines[1] = ChatColor.RED + ChatColor.stripColor(lines[1]);
+			lines[2] = "Place chest";
+			lines[3] = "above";
+		}
 		return;
 	}
 	@EventHandler
@@ -1071,6 +1077,11 @@ public class UTradeListener implements Listener {
 		}
 		Sign sign = (Sign) underBlock.getState();
 		if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Trade]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
+			if((ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
+				event.getView().close();
+				event.setCancelled(true); //Cancel the event
+				plugin.carShop.open((Player)event.getPlayer());
+			}
 			return;
 		}
 		//A trade sign for cars

@@ -69,6 +69,9 @@ public class CarShop {
 		}
 		double bal = main.economy.getBalance(player.getName());
 		double cost = value;
+		if(cost < 1){
+			return;
+		}
 		double rem = bal-cost;
 		if(rem<0){
 			player.sendMessage(main.colors.getError()+Lang.get("general.buy.notEnoughMoney"));

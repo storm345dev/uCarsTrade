@@ -44,7 +44,7 @@ public class AITrackFollow {
 						vehicle.removeMetadata("npc.turning", main.plugin);
 					}
 					else if(turn){
-						if(!vehicle.hasMetadata("npc,turning")){
+						if(!vehicle.hasMetadata("npc.turning")){
 							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
 						}
 					}
@@ -58,7 +58,7 @@ public class AITrackFollow {
 						vehicle.removeMetadata("npc.turning", main.plugin);
 					}
 					else if(turn){
-						if(!vehicle.hasMetadata("npc,turning")){
+						if(!vehicle.hasMetadata("npc.turning")){
 							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
 						}
 					}

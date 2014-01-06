@@ -79,8 +79,8 @@ public class main extends JavaPlugin {
 	public void onEnable(){
 		try {
 			if(Double.parseDouble(com.useful.ucars.ucars.plugin.getDescription().getVersion())
-					< 16.2){
-				getLogger().log(Level.SEVERE, "uCarsTrade needs uCars v16.2 or newer to function with the new API!"
+					< 17){
+				getLogger().log(Level.SEVERE, "uCarsTrade needs uCars v17 or newer to function with the new API!"
 						+ "(Installed version: "+com.useful.ucars.ucars.plugin.getDescription().getVersion()+")");
 				try {
 					Thread.sleep(3000);

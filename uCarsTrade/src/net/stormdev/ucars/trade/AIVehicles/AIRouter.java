@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
+import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
@@ -26,6 +27,7 @@ public class AIRouter {
 	private Material trackBlock;
 	private Material roadEdge;
 	private Material junction;
+	private uCarsAPI api;
 	
 	public AIRouter(boolean enabled){
 		this.enabled = enabled;
@@ -39,6 +41,7 @@ public class AIRouter {
 			main.logger.info("Didn't enable AIs routing as configuration is invalid!");
 			enabled = false;
 		}
+		api = uCarsAPI.getAPI();
 	}
 	
 	public void route(Minecart car, Car c){
@@ -110,7 +113,7 @@ public class AIRouter {
 			}
 		}
 		
-		if(stop || car.hasMetadata("car.frozen")){
+		if(stop || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}

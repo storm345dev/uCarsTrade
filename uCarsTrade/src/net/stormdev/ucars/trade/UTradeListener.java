@@ -156,9 +156,8 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		
-		event.setCancelled(true);
-		
 		if(cart.hasMetadata("trade.npc")){
+			
 			final Car c = plugin.carSaver.getCar(i.getUniqueId());
 			if(c == null){
 				return;

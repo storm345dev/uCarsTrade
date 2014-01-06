@@ -1077,7 +1077,7 @@ public class UTradeListener implements Listener {
 		}
 		Sign sign = (Sign) underBlock.getState();
 		if(!(ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Trade]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
-			if((ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") || !(ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
+			if((ChatColor.stripColor(sign.getLines()[0])).equalsIgnoreCase("[Shop]") && (ChatColor.stripColor(sign.getLines()[1])).equalsIgnoreCase("cars")){
 				event.getView().close();
 				event.setCancelled(true); //Cancel the event
 				plugin.carShop.open((Player)event.getPlayer());

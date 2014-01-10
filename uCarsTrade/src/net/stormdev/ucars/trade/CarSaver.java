@@ -76,7 +76,7 @@ public class CarSaver {
 		main.plugin.getServer().getScheduler().runTaskAsynchronously(main.plugin, new BukkitRunnable(){
 
 			public void run() {
-				save();
+				saveIt();
 				return;
 			}});
 	}
@@ -100,7 +100,11 @@ public class CarSaver {
 			this.cars = new ConcurrentHashMap<UUID, Car>();
 		}
 	}
-	private void save(){
+	public void save(){
+		asyncSave();
+		return;
+	}
+	private void saveIt(){
 		if(!this.saveFile.exists() || this.saveFile.length() < 1){
 			try {
 				this.saveFile.createNewFile();

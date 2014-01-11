@@ -3,8 +3,6 @@ package net.stormdev.ucars.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import net.stormdev.ucars.race.main;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

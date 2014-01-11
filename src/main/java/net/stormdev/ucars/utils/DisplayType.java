@@ -3,7 +3,7 @@ package net.stormdev.ucars.utils;
 import java.io.Serializable;
 import java.util.List;
 
-import net.stormdev.mario.mariokart.main;
+import net.stormdev.ucars.trade.main;
 
 import org.bukkit.Chunk;
 import org.bukkit.Material;

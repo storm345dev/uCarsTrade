@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.stormdev.ucars.race.main;
+import net.stormdev.ucars.trade.main;
 
 public class SalesManager {
 	

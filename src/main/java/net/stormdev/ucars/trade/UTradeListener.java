@@ -212,14 +212,7 @@ public class UTradeListener implements Listener {
         
         if(!b.isEmpty()
         		|| !b.getRelative(BlockFace.UP).isEmpty()
-        		|| !b.getRelative(BlockFace.NORTH).isEmpty()
-        		|| !b.getRelative(BlockFace.NORTH_EAST).isEmpty()
-        		|| !b.getRelative(BlockFace.EAST).isEmpty()
-        		|| !b.getRelative(BlockFace.SOUTH_EAST).isEmpty()
-        		|| !b.getRelative(BlockFace.SOUTH).isEmpty()
-        		|| !b.getRelative(BlockFace.SOUTH_WEST).isEmpty()
-        	    || !b.getRelative(BlockFace.WEST).isEmpty()
-        	    || !b.getRelative(BlockFace.NORTH_WEST).isEmpty()){
+        		|| !b.getRelative(BlockFace.UP, 2).isEmpty()){
         	//Not allowed to exit
         	player.sendMessage(main.colors.getError()+net.stormdev.ucars.trade.Lang.get("general.noExit.msg"));
         	event.setCancelled(true);

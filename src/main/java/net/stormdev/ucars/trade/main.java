@@ -112,7 +112,7 @@ public class main extends JavaPlugin {
 				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
 			}
 			if(!lang.contains("general.noExit.msg")){
-				lang.set("general.noExit.msg", "You may only exit in a 3x3 clear area!");
+				lang.set("general.noExit.msg", "You may only exit in a clear area!");
 			}
 			if(!lang.contains("general.sell.msg")){
 				lang.set("general.sell.msg", "Selling %item% for %price% on the market!");

@@ -210,9 +210,9 @@ public class UTradeListener implements Listener {
         }
         Player player = (Player) exited;
         
-        if(!b.isEmpty()
-        		|| !b.getRelative(BlockFace.UP).isEmpty()
-        		|| !b.getRelative(BlockFace.UP, 2).isEmpty()){
+        if((!b.isEmpty() && !b.isLiquid()) 
+        		|| (!b.getRelative(BlockFace.UP).isEmpty() && !b.getRelative(BlockFace.UP).isLiquid())
+        		|| (!b.getRelative(BlockFace.UP, 2).isEmpty() && !b.getRelative(BlockFace.UP, 2).isLiquid())){
         	//Not allowed to exit
         	player.sendMessage(main.colors.getError()+net.stormdev.ucars.trade.Lang.get("general.noExit.msg"));
         	event.setCancelled(true);

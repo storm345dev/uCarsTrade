@@ -58,7 +58,7 @@ public class AIRouter {
 			//Not an npc
 			return;
 		}
-		List<Entity> nearby = car.getNearbyEntities(40, 10, 40); //40x40 radius
+		List<Entity> nearby = car.getNearbyEntities(20, 10, 20); //20x20 radius
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			//Check if players nearby
 			boolean nearbyPlayers = false;

@@ -296,20 +296,14 @@ public class AISpawnManager {
 					return;
 				}
 				//Is valid
-				final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
 				v.setAdult();
 				v.setBreed(false);
 				v.setAgeLock(true);
 				v.setCanPickupItems(false);
 				v.setCustomName(randomName());
 				v.setCustomNameVisible(true);
-				Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
-
-					@Override
-					public void run() {
-						m.setPassenger(v);
-						return;
-					}}, 1l);
+				m.setPassenger(v);
 				
 				Car c = CarGenerator.gen();
 				if(c.stats.containsKey("trade.handling")){

@@ -7,6 +7,7 @@ import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -280,7 +281,7 @@ public class AISpawnManager {
 		plugin.getServer().getScheduler().runTask(plugin, new BukkitRunnable(){
 
 			public void run() {
-				Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
 				List<Entity> es = m.getNearbyEntities(2, 2, 2);
 				for(Entity e:es){
 					if(e.getType() == EntityType.MINECART){
@@ -295,14 +296,21 @@ public class AISpawnManager {
 					return;
 				}
 				//Is valid
-				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+				final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
 				v.setAdult();
 				v.setBreed(false);
 				v.setAgeLock(true);
 				v.setCanPickupItems(false);
 				v.setCustomName(randomName());
 				v.setCustomNameVisible(true);
-				m.setPassenger(v);
+				Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						m.setPassenger(v);
+						return;
+					}}, 1l);
+				
 				Car c = CarGenerator.gen();
 				if(c.stats.containsKey("trade.handling")){
 					c.stats.remove("trade.handling");

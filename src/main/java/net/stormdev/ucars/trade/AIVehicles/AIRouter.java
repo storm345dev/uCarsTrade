@@ -152,10 +152,6 @@ public class AIRouter {
 			}
 		}
 		
-		if(c.stats.containsKey("trade.speed")){
-			speed = ((SpeedStat) c.stats.get("trade.speed")).getSpeedMultiplier()*2;
-		}
-		
 		if(car.hasMetadata("trade.npc")){
 			List<MetadataValue> ms = car.getMetadata("trade.npc");
 			direction = (BlockFace) ms.get(0).value();

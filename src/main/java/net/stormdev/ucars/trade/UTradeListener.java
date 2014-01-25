@@ -548,15 +548,15 @@ public class UTradeListener implements Listener {
 				speed = speed * 100; //0.05 -> 5
 				speed = Math.round(speed);
 				speed = speed / 100; //5 -> 0.05
-				if(speed > 5){
-					speed = 5;
+				if(speed > 4){
+					speed = 4;
 				}
 				speedStat.setSpeedMultiplier(speed);
 				stats.put("trade.speed", speedStat);
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), (0.05*upgrade.getAmount())+"x");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "speed");
-				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+5+"x)");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+4+"x)");
 				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
 			}

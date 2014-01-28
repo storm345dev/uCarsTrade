@@ -101,16 +101,16 @@ public class Displays implements Serializable {
 									main.colors.getInfo()+"-Make with 10 string",
 									main.colors.getError()+"-Reduced ascending")));
 	public static DisplayType Entity_Zombie = 
-			new DisplayType("Cow", new CarFiller(){
+			new DisplayType("Zombie", new CarFiller(){
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.ZOMBIE);
 					return;
-					}}, false, 4, Material.COOKED_BEEF, Material.COOKED_BEEF, 5, new ArrayList<String>(
+					}}, false, 4, Material.ROTTEN_FLESH, Material.ROTTEN_FLESH, 5, new ArrayList<String>(
 							Arrays.asList(
-									main.colors.getInfo()+"A cow that rides", 
+									main.colors.getInfo()+"A zombie that rides", 
 									main.colors.getInfo()+"your car with you", 
-									main.colors.getInfo()+"-Make with 5 cooked beef")));
+									main.colors.getInfo()+"-Make with 5 rotten flesh")));
 	public static DisplayType Entity_Horse = 
 			new DisplayType("Horse", new CarFiller(){
 				private static final long serialVersionUID = 1L;

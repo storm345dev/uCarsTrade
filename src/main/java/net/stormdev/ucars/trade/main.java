@@ -472,7 +472,7 @@ public class main extends JavaPlugin {
 			nmsEntity = Class.forName(NMSversion + ".Entity");
 			cb = Class.forName(CBversion + ".entity.CraftEntity");
 			Method carId = nms.getMethod("k", int.class);
-			Method carData = nms.getMethod("l", int.class);
+			Method carData = nms.getMethod("l", int.class); //Method 'm' is for height/offset
 			Method getNMSEntity = cb.getMethod("getHandle");
 			carId.setAccessible(true);
 			carData.setAccessible(true);

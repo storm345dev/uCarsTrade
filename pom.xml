@@ -2,7 +2,6 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.stormdev</groupId>
     <artifactId>uCarsTrade</artifactId>
-    <version>4</version>
     <name>uCarsTrade</name>
     <url>http://dev.bukkit.org/bukkit-plugins/uCarsTrade</url>
     <issueManagement>
@@ -112,4 +111,5 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <version>5.1</version>
 </project>

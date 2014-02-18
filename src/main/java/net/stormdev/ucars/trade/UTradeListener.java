@@ -202,6 +202,9 @@ public class UTradeListener implements Listener {
     		return; //Don't bother
     	}
     	Vehicle veh = event.getVehicle();
+    	if(veh.hasMetadata("safeExit.ignore")){
+    		return;
+    	}
     	final Location loc = veh.getLocation();
         Block b = loc.getBlock();
         final Entity exited = event.getExited();
@@ -592,6 +595,9 @@ public class UTradeListener implements Listener {
 		}
 		Vehicle v = event.getVehicle();
 		if(v instanceof Minecart){
+			if(!uCarsAPI.getAPI().checkIfCar((Minecart)v)){
+				return; //Stop poking our nose in
+			}
 			//Read up the stack and remove all
 			Minecart car = (Minecart)v;
 			Entity top = car;
@@ -862,6 +868,7 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.LOW)
 	void carPlace(PlayerInteractEvent event){
 		if(event.isCancelled()){
@@ -879,11 +886,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		// Its a minecart!
-		int iar = block.getTypeId();
-		if (iar == 66 || iar == 28 || iar == 27) {
-			return;
-		}
-		if(!PlaceManager.placeableOn(iar, block.getData())){
+		if(!PlaceManager.placeableOn(block.getType().name(), block.getData())){
 			return;
 		}
 		if (!ucars.config.getBoolean("general.cars.enable")) {

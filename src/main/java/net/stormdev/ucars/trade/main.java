@@ -39,6 +39,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.useful.uCarsAPI.ItemCarCheck;
+import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.Colors;
 import com.useful.ucars.ucars;
 
@@ -359,6 +361,13 @@ public class main extends JavaPlugin {
         tradeMenu.setOption(4, new ItemStack(Material.IRON_INGOT, 1), colors.getTitle()+"Sell Upgrades", colors.getInfo()+"Sell upgrades for cars!");
 		
         this.carShop = new CarShop(this);
+        
+        uCarsAPI.getAPI().registerItemCarCheck(this, new ItemCarCheck(){
+
+			@Override
+			public Boolean isACar(ItemStack arg0) {
+				return false; //Let us handle it
+			}});
         
         File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");
 		File upgradesMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "upgradesMarket.marketData");

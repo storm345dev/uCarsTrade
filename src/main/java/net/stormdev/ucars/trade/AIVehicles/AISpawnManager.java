@@ -79,32 +79,36 @@ public class AISpawnManager {
 			if(player == null || !player.isOnline()){
 				continue; //Next iteration
 			}
-			Block tracked = null;
-			boolean stopSearch = false;
-			
-			Location playerLoc = player.getLocation();
-			Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
-			Block br = b.getRelative(randomFace(), randomDir3Amount());
-			World w = b.getWorld();
-			int y = br.getY();
-			int x = br.getX();
-			int z = br.getZ();
-			
-			int minY = y-10;
-			
-			tracked = b.getType() == trackBlock ? b : null;
-			tracked = br.getType() == trackBlock ? br : null;
-			
-			while(tracked == null
-					&& !stopSearch
-					&& y>minY){
+			try {
+				Block tracked = null;
+				boolean stopSearch = false;
 				
-				Location check = new Location(w, x, y, z);
-				if(check.getBlock().getType() == trackBlock){
-					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+				Location playerLoc = player.getLocation();
+				Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
+				Block br = b.getRelative(randomFace(), randomDir3Amount());
+				World w = b.getWorld();
+				int y = br.getY();
+				int x = br.getX();
+				int z = br.getZ();
+				
+				int minY = y-10;
+				
+				tracked = b.getType() == trackBlock ? b : null;
+				tracked = br.getType() == trackBlock ? br : null;
+				
+				while(tracked == null
+						&& !stopSearch
+						&& y>minY){
+					
+					Location check = new Location(w, x, y, z);
+					if(check.getBlock().getType() == trackBlock){
+						spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+					}
+					
+					y--;
 				}
-				
-				y--;
+			} catch (Exception e) {
+				//They just joined
 			}
 		}
 		return;

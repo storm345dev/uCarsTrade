@@ -2,7 +2,6 @@ package net.stormdev.ucars.trade.AIVehicles;
 
 import java.util.List;
 
-import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.Car;
 

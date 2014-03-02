@@ -48,7 +48,7 @@ public class AISpawnManager {
 			enabled = false;
 		}
 		if(enabled){
-			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
+			task = main.plugin.getServer().getScheduler().runTaskTimer(plugin, new BukkitRunnable(){
 
 				public void run() {
 					doSpawns();

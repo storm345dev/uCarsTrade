@@ -979,17 +979,17 @@ public class UTradeListener implements Listener {
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		return;
 	}
-	@EventHandler (priority=EventPriority.HIGH)
+	@EventHandler (priority=EventPriority.HIGHEST)
 	void carRemoval(ucarDeathEvent event){
+		event.setCancelled(true);
 		Minecart cart = event.getCar();
-		if(cart.hasMetadata("trade.npc")){
-			event.setCancelled(true);
+		if(cart.hasMetadata("trade.npc") || cart.hasMetadata("car.destroyed")){
 			return; //Don't destroy the car
 		}
 		UUID id = cart.getUniqueId();
 		Car car = plugin.carSaver.getCar(id);
 		if(car == null){
-			event.setCancelled(true);
+			cart.remove(); //IDK
 			return;
 		}
 		/*
@@ -997,6 +997,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		*/
+		cart.setMetadata("car.destroyed", new StatValue(true, ucars.plugin));
 		event.setCancelled(true);
 		
 		car.isPlaced = false;

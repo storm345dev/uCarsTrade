@@ -596,6 +596,7 @@ public class UTradeListener implements Listener {
 		Vehicle v = event.getVehicle();
 		if(v instanceof Minecart){
 			if(!uCarsAPI.getAPI().checkIfCar((Minecart)v)){
+				v.remove();
 				return; //Stop poking our nose in
 			}
 			//Read up the stack and remove all
@@ -802,6 +803,9 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	void carDestroy(VehicleDamageEvent event){
+		if(event.isCancelled()){
+			return;
+		}
 		if(event.getVehicle() instanceof Minecart){
 			return; //uCars can handle it
 		}
@@ -985,11 +989,16 @@ public class UTradeListener implements Listener {
 		UUID id = cart.getUniqueId();
 		Car car = plugin.carSaver.getCar(id);
 		if(car == null){
+			event.setCancelled(true);
 			return;
 		}
+		/*
 		if(!car.isPlaced){
 			return;
 		}
+		*/
+		event.setCancelled(true);
+		
 		car.isPlaced = false;
 		if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
 			if(main.random.nextBoolean()){
@@ -1017,7 +1026,6 @@ public class UTradeListener implements Listener {
 		cart.remove();
 		loc.getWorld().dropItemNaturally(loc, new ItemStack(car.getItem()));
 		//Remove car and get back item
-		event.setCancelled(true);
 		return;
 	}
 	//Add extra functions; eg. Car trade station, etc...

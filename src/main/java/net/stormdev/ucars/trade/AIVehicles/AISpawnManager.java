@@ -1,5 +1,7 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.stormdev.ucars.stats.Stat;
@@ -51,11 +53,16 @@ public class AISpawnManager {
 			task = main.plugin.getServer().getScheduler().runTaskTimer(plugin, new BukkitRunnable(){
 
 				public void run() {
-					doSpawns();
-					if(main.random.nextBoolean()){
-						doLongSpawns();
-						if(main.random.nextBoolean()){
-							doSpawns();
+					boolean longSpawns = main.random.nextBoolean();
+					boolean doubleSpawns = longSpawns && main.random.nextBoolean();
+					
+					for(Player player:new ArrayList<Player>(Arrays.asList(Bukkit.getOnlinePlayers()))){
+						doSpawns(player);
+						if(longSpawns){
+							doLongSpawns(player);
+						}
+						if(doubleSpawns){
+							doSpawns(player);
 						}
 					}
 					return;
@@ -66,6 +73,49 @@ public class AISpawnManager {
 		if(task != null){
 			task.cancel();
 		}
+	}
+	public void doLongSpawns(Player player){
+		if(!enabled){
+			return;
+		}
+		if(main.random.nextBoolean()){
+			return; //Next iteration
+		}
+		if(player == null || !player.isOnline()){
+			return; //Next iteration
+		}
+		try {
+			Block tracked = null;
+			boolean stopSearch = false;
+			
+			Location playerLoc = player.getLocation();
+			Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
+			Block br = b.getRelative(randomFace(), randomDir3Amount());
+			World w = b.getWorld();
+			int y = br.getY();
+			int x = br.getX();
+			int z = br.getZ();
+			
+			int minY = y-10;
+			
+			tracked = b.getType() == trackBlock ? b : null;
+			tracked = br.getType() == trackBlock ? br : null;
+			
+			while(tracked == null
+					&& !stopSearch
+					&& y>minY){
+				
+				Location check = new Location(w, x, y, z);
+				if(check.getBlock().getType() == trackBlock){
+					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+				}
+				
+				y--;
+			}
+		} catch (Exception e) {
+			//They just joined
+		}
+		return;
 	}
 	public void doLongSpawns(){
 		if(!enabled){
@@ -154,6 +204,48 @@ public class AISpawnManager {
 				
 				y--;
 			}
+		}
+		return;
+	}
+	
+	public void doSpawns(Player player){
+		if(!enabled){
+			return;
+		}
+		if(main.random.nextBoolean()){
+			return; //Next iteration
+		}
+		if(player == null || !player.isOnline()){
+			return;//Next iteration
+		}
+		Block tracked = null;
+		boolean stopSearch = false;
+		
+		Location playerLoc = player.getLocation();
+		Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
+		Block br = b.getRelative(randomFace(), randomDirAmount());
+		Block br2 = b.getRelative(randomFace(), randomDir2Amount());
+		World w = b.getWorld();
+		int y = br.getY();
+		int x = br.getX();
+		int z = br.getZ();
+		
+		int minY = y-10;
+		
+		tracked = b.getType() == trackBlock ? b : null;
+		tracked = br.getType() == trackBlock ? br : null;
+		tracked = br2.getType() == trackBlock ? br : null;
+		
+		while(tracked == null
+				&& !stopSearch
+				&& y>minY){
+			
+			Location check = new Location(w, x, y, z);
+			if(check.getBlock().getType() == trackBlock){
+				spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+			}
+			
+			y--;
 		}
 		return;
 	}

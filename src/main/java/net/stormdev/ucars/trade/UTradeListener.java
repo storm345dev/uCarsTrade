@@ -882,6 +882,9 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		Block block = event.getClickedBlock();
+		if(!block.isEmpty() && !block.isLiquid()){
+			return;
+		}
 		ItemStack inHand = event.getPlayer().getItemInHand().clone();
 		if(inHand == null ||
 				inHand.getItemMeta() == null ||

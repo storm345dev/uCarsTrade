@@ -32,6 +32,7 @@ import com.useful.ucarsCommon.StatValue;
 public class AISpawnManager {
 	private main plugin;
 	private boolean enabled;
+	private boolean fullEnable;
 	private Material trackBlock;
 	private Material roadEdge;
 	private Material junction;
@@ -39,6 +40,7 @@ public class AISpawnManager {
 	private static long spawnRate = 6l;
 	private List<String> aiNames;
 	private static int cap = 69;
+	private static int liveCap = 69;
 	private static int spawned = 0;
 	
 	public static void decrementSpawned(){
@@ -52,14 +54,35 @@ public class AISpawnManager {
 		spawned++;
 	}
 	
+	public static void setLiveCap(int cap){
+		liveCap = cap;
+	}
+	
+	public boolean NPCsEnabled(){
+		return fullEnable;
+	}
+	
+	public boolean NPCsCurrentlyEnabled(){
+		return enabled;
+	}
+	
+	public synchronized void setNPCsCurrentlyEnabled(boolean on){
+		this.enabled = on;
+	}
+	
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
 		this.enabled = enabled;
+		this.fullEnable = enabled;
 		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
 		cap = main.config.getInt("general.ai.limit");
+		liveCap = cap;
+		
+		new DynamicLagReducer().start();
+		
 		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
 		junction = Material.getMaterial(junRaw);
@@ -71,7 +94,7 @@ public class AISpawnManager {
 			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
 
 				public void run() {
-					if(spawned >= cap){
+					if(spawned >= liveCap || spawned >= cap){
 						return;
 					}
 					boolean longSpawns = main.random.nextBoolean();

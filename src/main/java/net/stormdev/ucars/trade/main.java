@@ -38,6 +38,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.useful.uCarsAPI.ItemCarCheck;
 import com.useful.uCarsAPI.uCarsAPI;
@@ -67,6 +68,7 @@ public class main extends JavaPlugin {
 	public AISpawnManager aiSpawns = null;
 	public AIRouter aiController = null;
 	public CarShop carShop = null;
+	public BukkitTask lagReducer = null;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()

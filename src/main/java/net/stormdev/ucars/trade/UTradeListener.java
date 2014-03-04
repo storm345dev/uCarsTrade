@@ -190,18 +190,7 @@ public class UTradeListener implements Listener {
 				return; //Not a car or not an npc car
 			}
 			//Use AIRouter to route it
-			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-
-				@Override
-				public void run() {
-					try {
-						plugin.aiController.route(m, c);
-					} catch (Exception e) {
-						e.printStackTrace();
-						//Error moving car... oops
-					}
-					return;
-				}});
+			plugin.aiController.route(m, c);
 		} catch (Exception e) {
 			//Removed by worldedit etc....
 		}

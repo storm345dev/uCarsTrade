@@ -4,9 +4,6 @@ import java.util.List;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.Car;
-import net.stormdev.ucars.utils.ReturnTask;
-import net.stormdev.ucars.utils.Scheduler;
-import net.stormdev.ucars.utils.SyncReturnTask;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -54,17 +51,8 @@ public class AIRouter {
 		BlockFace direction = BlockFace.NORTH;
 		Vector vel = car.getVelocity();
 		
-		SyncReturnTask<RoutingData> routingData = new SyncReturnTask<RoutingData>(new ReturnTask<RoutingData>(){
-			public RoutingData[] execute(){
-				Location loc = car.getLocation();
-				Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
-				return new RoutingData[]{new RoutingData(loc, under)};
-			}
-		}).executeOnce();
-		
-		RoutingData data = routingData.getResults()[0];
-		Location loc = data.getLoc();
-		Block under = data.getUnder();
+		Location loc = car.getLocation();
+		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
 		
 		double cx = loc.getX();
 		double cy = loc.getY();
@@ -85,18 +73,11 @@ public class AIRouter {
 			}
 			if(!nearbyPlayers){
 				//Remove me
-				Scheduler.runBlockingSyncTask(new Runnable(){
-
-					@Override
-					public void run() {
-						if(car.getPassenger() != null){
-							car.getPassenger().remove();
-						}
-						main.plugin.carSaver.removeCar(car.getUniqueId());
-						car.remove();
-						return;
-					}});
-				return;
+				if(car.getPassenger() != null){
+					car.getPassenger().remove();
+				}
+				main.plugin.carSaver.removeCar(car.getUniqueId());
+				car.remove();
 			}
 		}
 		
@@ -246,12 +227,19 @@ public class AIRouter {
 			x*= 10;
 		}
 		vel = new Vector(x,y,z); //Go to block
-		
+		car.removeMetadata("relocatingRoad", main.plugin);
 		car.setVelocity(vel);
 		return;
 	}
 	
 	public void relocateRoad(Minecart car, Block under, Location currentLoc, boolean atJunction){
+		
+		if(car.hasMetadata("relocatingRoad")){
+			car.removeMetadata("relocatingRoad", main.plugin);
+			return;
+		}
+		
+		car.setMetadata("relocatingRoad", new StatValue(true, main.plugin));
 		
 		Vector vel = car.getVelocity();
 		double cx = currentLoc.getX();

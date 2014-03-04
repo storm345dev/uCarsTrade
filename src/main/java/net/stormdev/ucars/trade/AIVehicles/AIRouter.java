@@ -78,6 +78,7 @@ public class AIRouter {
 				}
 				main.plugin.carSaver.removeCar(car.getUniqueId());
 				car.remove();
+				AISpawnManager.decrementSpawned();
 			}
 		}
 		

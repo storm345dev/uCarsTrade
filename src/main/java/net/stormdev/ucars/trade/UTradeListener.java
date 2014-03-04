@@ -17,6 +17,7 @@ import net.stormdev.ucars.stats.NameStat;
 import net.stormdev.ucars.stats.SpeedStat;
 import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.stats.StatType;
+import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
@@ -133,6 +134,7 @@ public class UTradeListener implements Listener {
 			public void run() {
 				c.stats.remove("trade.npc");
 				vehicle.removeMetadata("trade.npc", plugin);
+				AISpawnManager.decrementSpawned();
 				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
 				plugin.getServer().getPluginManager().callEvent(evt);
 				plugin.carSaver.setCar(c.id, c); //Update changes to car, aka it's not an npc

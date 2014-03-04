@@ -240,6 +240,9 @@ public class main extends JavaPlugin {
 				config.set("general.ai.names", new String[]{"Jeff", "Bob", "Todd", "Jimmy", "Peter"
 						, "Fred"});
 			}
+        	if (!config.contains("general.ai.limit")) {
+				config.set("general.ai.limit", 69);
+			}
         	if (!config.contains("general.ai.canSteal")) {
 				config.set("general.ai.canSteal", true);
 			}

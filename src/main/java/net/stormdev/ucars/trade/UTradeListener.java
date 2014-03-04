@@ -49,6 +49,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -882,10 +883,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		Block block = event.getClickedBlock();
-		if(!block.isEmpty() && !block.isLiquid()){
-			return;
-		}
-		ItemStack inHand = event.getPlayer().getItemInHand().clone();
+	    ItemStack inHand = event.getPlayer().getItemInHand().clone();
 		if(inHand == null ||
 				inHand.getItemMeta() == null ||
 				inHand.getItemMeta().getLore() == null ||
@@ -931,7 +929,27 @@ public class UTradeListener implements Listener {
 		HashMap<String, Stat> stats = c.getStats();
 		Location loc = block.getLocation().add(0, 1.5, 0);
 		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
+		Block in = loc.getBlock();
+		if(!in.isEmpty() && !in.isLiquid()){
+			return;
+		}
 		final Minecart car = (Minecart) event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
+		in = car.getLocation().getBlock();
+		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
+		Block w = in.getRelative(BlockFace.WEST);
+		Block nw = in.getRelative(BlockFace.NORTH_WEST);
+		Block ne = in.getRelative(BlockFace.NORTH_EAST);
+		Block sw = in.getRelative(BlockFace.SOUTH_WEST);
+		if((!in.isEmpty() && !in.isLiquid())
+				|| (!n.isEmpty() && !n.isLiquid())
+				|| (!w.isEmpty() && !w.isLiquid())
+				|| (!ne.isEmpty() && !ne.isLiquid())
+				|| (!nw.isEmpty() && !nw.isLiquid())
+				|| (!sw.isEmpty() && !sw.isLiquid())){
+			car.remove();
+			event.setUseItemInHand(Result.DENY);
+			return;
+		}
 		double health = ucars.config.getDouble("general.cars.health.default");
 		if(stats.containsKey("trade.health")){
 			try {

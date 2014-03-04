@@ -4,6 +4,9 @@ import java.util.List;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucars.utils.ReturnTask;
+import net.stormdev.ucars.utils.Scheduler;
+import net.stormdev.ucars.utils.SyncReturnTask;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -43,12 +46,26 @@ public class AIRouter {
 		api = uCarsAPI.getAPI();
 	}
 	
-	public void route(Minecart car, Car c){
+	public void route(final Minecart car, final Car c) throws Exception{
+		if(!enabled){
+			return;
+		}
 		double speed = 2;
 		BlockFace direction = BlockFace.NORTH;
-		Location loc = car.getLocation();
-		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
 		Vector vel = car.getVelocity();
+		
+		SyncReturnTask<RoutingData> routingData = new SyncReturnTask<RoutingData>(new ReturnTask<RoutingData>(){
+			public RoutingData[] execute(){
+				Location loc = car.getLocation();
+				Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
+				return new RoutingData[]{new RoutingData(loc, under)};
+			}
+		}).executeOnce();
+		
+		RoutingData data = routingData.getResults()[0];
+		Location loc = data.getLoc();
+		Block under = data.getUnder();
+		
 		double cx = loc.getX();
 		double cy = loc.getY();
 		double cz = loc.getZ();
@@ -68,9 +85,17 @@ public class AIRouter {
 			}
 			if(!nearbyPlayers){
 				//Remove me
-				car.getPassenger().remove();
-				main.plugin.carSaver.removeCar(car.getUniqueId());
-				car.remove();
+				Scheduler.runBlockingSyncTask(new Runnable(){
+
+					@Override
+					public void run() {
+						if(car.getPassenger() != null){
+							car.getPassenger().remove();
+						}
+						main.plugin.carSaver.removeCar(car.getUniqueId());
+						car.remove();
+						return;
+					}});
 				return;
 			}
 		}

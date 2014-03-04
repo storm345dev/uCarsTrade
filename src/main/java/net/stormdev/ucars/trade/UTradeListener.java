@@ -32,6 +32,7 @@ import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -182,14 +183,25 @@ public class UTradeListener implements Listener {
 			if(!(v instanceof Minecart)){
 				return;
 			}
-			Minecart m = (Minecart) v;
-			Car c = plugin.carSaver.getCar(m.getUniqueId());
+			final Minecart m = (Minecart) v;
+			final Car c = plugin.carSaver.getCar(m.getUniqueId());
 			if(c == null
 					|| !c.stats.containsKey("trade.npc")){
 				return; //Not a car or not an npc car
 			}
 			//Use AIRouter to route it
-			plugin.aiController.route(m, c);
+			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					try {
+						plugin.aiController.route(m, c);
+					} catch (Exception e) {
+						e.printStackTrace();
+						//Error moving car... oops
+					}
+					return;
+				}});
 		} catch (Exception e) {
 			//Removed by worldedit etc....
 		}

@@ -8,6 +8,9 @@ import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.ReturnTask;
+import net.stormdev.ucars.utils.Scheduler;
+import net.stormdev.ucars.utils.SyncReturnTask;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,7 +36,7 @@ public class AISpawnManager {
 	private Material roadEdge;
 	private Material junction;
 	private BukkitTask task = null;
-	private long spawnRate = 6l;
+	private static long spawnRate = 6l;
 	private List<String> aiNames;
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
@@ -50,7 +53,7 @@ public class AISpawnManager {
 			enabled = false;
 		}
 		if(enabled){
-			task = main.plugin.getServer().getScheduler().runTaskTimer(plugin, new BukkitRunnable(){
+			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
 
 				public void run() {
 					boolean longSpawns = main.random.nextBoolean();
@@ -74,7 +77,7 @@ public class AISpawnManager {
 			task.cancel();
 		}
 	}
-	public void doLongSpawns(Player player){
+	public void doLongSpawns(final Player player){
 		if(!enabled){
 			return;
 		}
@@ -88,13 +91,28 @@ public class AISpawnManager {
 			Block tracked = null;
 			boolean stopSearch = false;
 			
-			Location playerLoc = player.getLocation();
-			Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
-			Block br = b.getRelative(randomFace(), randomDir3Amount());
-			World w = b.getWorld();
-			int y = br.getY();
-			int x = br.getX();
-			int z = br.getZ();
+			SyncReturnTask<SpawnData> spawnData = new SyncReturnTask<SpawnData>(new ReturnTask<SpawnData>(){
+
+				@Override
+				public SpawnData[] execute() {
+					Block b = player.getLocation().getBlock().getRelative(BlockFace.UP);
+					Block br = b.getRelative(randomFace(), randomDir3Amount());
+					World w = b.getWorld();
+					int y = br.getY();
+					int x = br.getX();
+					int z = br.getZ();
+					
+					return new SpawnData[]{new SpawnData(b, br, w, x, y, z)};
+				}}).executeOnce();
+			SpawnData data = spawnData.getResults()[0];
+			
+			//Location playerLoc = data.getPlayerLoc();
+			Block b = data.getB();
+			Block br = data.getBr();
+			final World w = data.getWorld();
+			int y = data.getY();
+			final int x = data.getX();
+			final int z = data.getZ();
 			
 			int minY = y-10;
 			
@@ -104,16 +122,22 @@ public class AISpawnManager {
 			while(tracked == null
 					&& !stopSearch
 					&& y>minY){
-				
-				Location check = new Location(w, x, y, z);
-				if(check.getBlock().getType() == trackBlock){
-					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
-				}
+				final int yy = y;
+				Scheduler.runBlockingSyncTask(new Runnable(){
+
+					@Override
+					public void run() {
+						Location check = new Location(w, x, yy, z);
+						if(check.getBlock().getType() == trackBlock){
+							spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+						}
+						return;
+					}});
 				
 				y--;
 			}
 		} catch (Exception e) {
-			//They just joined
+			//They just joined, or error spawning
 		}
 		return;
 	}
@@ -122,7 +146,7 @@ public class AISpawnManager {
 			return;
 		}
 		Player[] online = plugin.getServer().getOnlinePlayers().clone();
-		for(Player player:online){
+		for(final Player player:online){
 			if(main.random.nextBoolean()){
 				continue; //Next iteration
 			}
@@ -133,13 +157,28 @@ public class AISpawnManager {
 				Block tracked = null;
 				boolean stopSearch = false;
 				
-				Location playerLoc = player.getLocation();
-				Block b = playerLoc.getBlock().getRelative(BlockFace.UP);
-				Block br = b.getRelative(randomFace(), randomDir3Amount());
-				World w = b.getWorld();
-				int y = br.getY();
-				int x = br.getX();
-				int z = br.getZ();
+				SyncReturnTask<SpawnData> spawnData = new SyncReturnTask<SpawnData>(new ReturnTask<SpawnData>(){
+
+					@Override
+					public SpawnData[] execute() {
+						Block b = player.getLocation().getBlock().getRelative(BlockFace.UP);
+						Block br = b.getRelative(randomFace(), randomDir3Amount());
+						World w = b.getWorld();
+						int y = br.getY();
+						int x = br.getX();
+						int z = br.getZ();
+						
+						return new SpawnData[]{new SpawnData(b, br, w, x, y, z)};
+					}}).executeOnce();
+				SpawnData data = spawnData.getResults()[0];
+				
+				//Location playerLoc = data.getPlayerLoc();
+				Block b = data.getB();
+				Block br = data.getBr();
+				final World w = data.getWorld();
+				int y = data.getY();
+				final int x = data.getX();
+				final int z = data.getZ();
 				
 				int minY = y-10;
 				
@@ -149,11 +188,17 @@ public class AISpawnManager {
 				while(tracked == null
 						&& !stopSearch
 						&& y>minY){
-					
-					Location check = new Location(w, x, y, z);
-					if(check.getBlock().getType() == trackBlock){
-						spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
-					}
+					final int yy = y;
+					Scheduler.runBlockingSyncTask(new Runnable(){
+
+						@Override
+						public void run() {
+							Location check = new Location(w, x, yy, z);
+							if(check.getBlock().getType() == trackBlock){
+								spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+							}
+							return;
+						}});
 					
 					y--;
 				}

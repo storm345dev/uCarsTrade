@@ -576,7 +576,7 @@ public class AISpawnManager {
 				//Set it as an NPC car and set direction
 				c.stats.put("trade.npc", new Stat(true, plugin));
 				plugin.carSaver.setCar(m.getUniqueId(), c);
-				m.setMetadata("trade.npc", new StatValue(currentDirection, plugin));
+				m.setMetadata("trade.npc", new StatValue(new VelocityData(currentDirection, null), plugin));
 				spawned++;
 				return;
 			}});

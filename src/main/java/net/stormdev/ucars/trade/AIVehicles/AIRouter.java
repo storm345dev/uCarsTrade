@@ -154,21 +154,36 @@ public class AIRouter {
 				direction = main.plugin.aiSpawns.carriagewayDirection(under);
 				//Update direction stored on car...
 				car.removeMetadata("trade.npc", main.plugin);
-				car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
+				car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 			}
 		}
 		
+		VelocityData data = new VelocityData(null, null);
+		boolean keepVel = data.hasMotion() && !atJ && !car.hasMetadata("npc.turning");
+		
 		if(car.hasMetadata("trade.npc")){
 			List<MetadataValue> ms = car.getMetadata("trade.npc");
-			direction = (BlockFace) ms.get(0).value();
+			data = (VelocityData) ms.get(0).value();
+			if(data.getDir() != null){
+				direction = data.getDir();
+			}
+			//direction = (BlockFace) ms.get(0).value();
 		}
 		else{
+			if(direction == null){
+				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+			}
 			//Calculate direction from road
 			if(!atJ){
-				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+				BlockFace face = main.plugin.aiSpawns.carriagewayDirection(under);
+				if(!direction.equals(face)){
+					direction = face;
+					keepVel = false;
+				}
 			}
 			else{
 				relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, atJ);
+				return;
 			}
 		}
 		
@@ -182,9 +197,10 @@ public class AIRouter {
 		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction, car);
 		if(direction != nextTrack.dir){
 			direction = nextTrack.dir;
+			keepVel = false;
 			//Update direction stored on car...
 			car.removeMetadata("trade.npc", main.plugin);
-			car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
+			car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		}
 		Block next = nextTrack.nextBlock;
 		Block road = next.getRelative(BlockFace.UP);
@@ -196,40 +212,50 @@ public class AIRouter {
 			//Car has hit a wall
 			return;
 		}
-		//Calculate vector to get there...
-		double tx = toDrive.getX();
-		double ty = toDrive.getY();
-		double tz = toDrive.getZ();
-		
-		double x = tx - cx + 0.5;
-		double y = ty - cy;
-		double z = tz - cz + 0.5;
-		
-		double px = Math.abs(x);
-		double pz = Math.abs(z);
-		boolean ux = px > pz ? false:true;
+		if(keepVel){
+			vel = data.getMotion();
+			car.removeMetadata("relocatingRoad", main.plugin);
+			car.setVelocity(vel);
+		}
+		else{
+			//Calculate vector to get there...
+			double tx = toDrive.getX();
+			double ty = toDrive.getY();
+			double tz = toDrive.getZ();
+			
+			double x = tx - cx + 0.5;
+			double y = ty - cy;
+			double z = tz - cz + 0.5;
+			
+			double px = Math.abs(x);
+			double pz = Math.abs(z);
+			boolean ux = px > pz ? false:true;
 
-		if(y<0.15 && isCompassDir(direction)){
-			if (ux) {
-				// x is smaller
-				// long mult = (long) (pz/speed);
-				x = (x / pz) * speed;
-				z = (z / pz) * speed;
-			} else {
-				// z is smaller
-				// long mult = (long) (px/speed);
-				x = (x / px) * speed;
-				z = (z / px) * speed;
+			if(y<0.15 && isCompassDir(direction)){
+				if (ux) {
+					// x is smaller
+					// long mult = (long) (pz/speed);
+					x = (x / pz) * speed;
+					z = (z / pz) * speed;
+				} else {
+					// z is smaller
+					// long mult = (long) (px/speed);
+					x = (x / px) * speed;
+					z = (z / px) * speed;
+				}
 			}
+			if(y>0){
+				y = 3;
+				x*= 10;
+				x*= 10;
+			}
+			vel = new Vector(x,y,z); //Go to block
+			car.removeMetadata("relocatingRoad", main.plugin);
+			data.setMotion(vel);
+			car.removeMetadata("trade.npc", main.plugin);
+			car.setMetadata("trade.npc", new StatValue(data, main.plugin));
+			car.setVelocity(vel);
 		}
-		if(y>0){
-			y = 3;
-			x*= 10;
-			x*= 10;
-		}
-		vel = new Vector(x,y,z); //Go to block
-		car.removeMetadata("relocatingRoad", main.plugin);
-		car.setVelocity(vel);
 		return;
 	}
 	
@@ -305,7 +331,7 @@ public class AIRouter {
 		}
 		//Update direction stored on car...
 		car.removeMetadata("trade.npc", main.plugin);
-		car.setMetadata("trade.npc", new StatValue(direction, main.plugin));
+		car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		return;
 	}
 	

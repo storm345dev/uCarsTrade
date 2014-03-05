@@ -54,6 +54,10 @@ public class AISpawnManager {
 		spawned++;
 	}
 	
+	public static int getLiveCap(){
+		return liveCap;
+	}
+	
 	public static void setLiveCap(int cap){
 		liveCap = cap;
 	}
@@ -80,6 +84,33 @@ public class AISpawnManager {
 		aiNames = main.config.getStringList("general.ai.names");
 		cap = main.config.getInt("general.ai.limit");
 		liveCap = cap;
+		// A task to dynamically change liveCap to match the server's current AI holdings
+		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				// Use resource score to get live cap
+				int score = DynamicLagReducer.getResourceScore();
+				int newCap = liveCap;
+				if(score > 84){
+					newCap++;
+				}
+				else if(score < 75){
+					newCap--;
+				}
+				
+				if(newCap != liveCap){
+					if(newCap > cap){
+						newCap = cap;
+					}
+					if(newCap < 2){
+						newCap = 2; //Min of 2
+					}
+					liveCap = newCap;
+				}
+				
+				return;
+			}}, 200l, 200l); //Every 10s
 		
 		new DynamicLagReducer().start();
 		

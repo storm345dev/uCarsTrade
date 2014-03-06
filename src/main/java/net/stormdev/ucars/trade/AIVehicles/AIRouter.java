@@ -141,7 +141,9 @@ public class AIRouter {
 			ut = under.getType();
 		}
 		
-		Boolean atJ = false;
+		boolean atJ = false;
+		boolean rerouting = false;
+		
 		if(ut == junction){
 			atJ = true;
 			if(!car.hasMetadata("car.needRouteCheck")){
@@ -155,11 +157,12 @@ public class AIRouter {
 				//Update direction stored on car...
 				car.removeMetadata("trade.npc", main.plugin);
 				car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
+				rerouting = true;
 			}
 		}
 		
 		VelocityData data = new VelocityData(null, null);
-		boolean keepVel = data.hasMotion() && !atJ && !car.hasMetadata("npc.turning");
+		boolean keepVel = !atJ && !car.hasMetadata("npc.turning") && !rerouting && !car.hasMetadata("relocatingRoad");
 		
 		if(car.hasMetadata("trade.npc")){
 			List<MetadataValue> ms = car.getMetadata("trade.npc");
@@ -167,11 +170,16 @@ public class AIRouter {
 			if(data.getDir() != null){
 				direction = data.getDir();
 			}
+			if(keepVel && !data.hasMotion()){
+				keepVel = false;
+			}
 			//direction = (BlockFace) ms.get(0).value();
 		}
 		else{
 			if(direction == null){
 				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+				keepVel = false;
+				data.setMotion(null);
 			}
 			//Calculate direction from road
 			if(!atJ){
@@ -179,6 +187,7 @@ public class AIRouter {
 				if(!direction.equals(face)){
 					direction = face;
 					keepVel = false;
+					data.setMotion(null);
 				}
 			}
 			else{
@@ -195,11 +204,15 @@ public class AIRouter {
 		
 		//Now we need to route it...
 		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction, car);
+		if(nextTrack.junction){
+			keepVel = false;
+		}
 		if(direction != nextTrack.dir){
 			direction = nextTrack.dir;
 			keepVel = false;
 			//Update direction stored on car...
 			car.removeMetadata("trade.npc", main.plugin);
+			data.setMotion(null);
 			car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		}
 		Block next = nextTrack.nextBlock;
@@ -211,6 +224,9 @@ public class AIRouter {
 		if(!toDrive.isEmpty()){
 			//Car has hit a wall
 			return;
+		}
+		if(toDrive.getLocation().distanceSquared(loc) >= 3.25){
+			keepVel = false;
 		}
 		if(keepVel){
 			vel = data.getMotion();
@@ -252,10 +268,11 @@ public class AIRouter {
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
-			car.removeMetadata("trade.npc", main.plugin);
-			car.setMetadata("trade.npc", new StatValue(data, main.plugin));
 			car.setVelocity(vel);
 		}
+		data.setDir(direction);
+		car.removeMetadata("trade.npc", main.plugin);
+		car.setMetadata("trade.npc", new StatValue(data, main.plugin));
 		return;
 	}
 	

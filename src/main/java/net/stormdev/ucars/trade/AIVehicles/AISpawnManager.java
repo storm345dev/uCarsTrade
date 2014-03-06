@@ -538,7 +538,9 @@ public class AISpawnManager {
 		return null;
 	}
 	
-	public void spawnNPC(final Location spawnLoc, final BlockFace currentDirection){
+	public void spawnNPC(Location spawn, final BlockFace currentDirection){
+		spawn = spawn.add(0.5, 0, 0.5);
+		final Location spawnLoc = spawn;
 		plugin.getServer().getScheduler().runTask(plugin, new BukkitRunnable(){
 
 			public void run() {
@@ -584,7 +586,7 @@ public class AISpawnManager {
 	}
 	
 	public int randomDistanceAmount(){
-		return main.random.nextInt(30-10)+10; //Between 10 and 30
+		return main.random.nextInt(25-10)+10; //Between 10 and 30
 	}
 	
 	public int randomDirAmount(){
@@ -596,7 +598,7 @@ public class AISpawnManager {
 	}
 	
 	public int randomDir3Amount(){
-		return main.random.nextInt(40-30)+30; //30 to 40
+		return main.random.nextInt(30-20)+20; //30 to 20
 	}
 	
 	public BlockFace randomFace(){

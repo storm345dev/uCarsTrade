@@ -225,7 +225,8 @@ public class AIRouter {
 			//Car has hit a wall
 			return;
 		}
-		if(toDrive.getLocation().distanceSquared(loc) >= 3.25){
+		if(toDrive.getLocation().distanceSquared(loc) >= 3.25 ||
+				toDrive.getY() > loc.getBlockY()){
 			keepVel = false;
 		}
 		if(keepVel){

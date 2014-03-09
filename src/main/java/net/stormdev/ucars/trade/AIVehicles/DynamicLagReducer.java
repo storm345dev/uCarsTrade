@@ -71,6 +71,9 @@ public class DynamicLagReducer implements Runnable {
 		if(mem < 300){
 			i -=20;
 		}
+		if(i > 84 && tps < 19){
+			i = 83;
+		}
 		return i;
 	}
 	

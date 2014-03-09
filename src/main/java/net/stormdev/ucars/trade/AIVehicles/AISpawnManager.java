@@ -92,10 +92,10 @@ public class AISpawnManager {
 				// Use resource score to get live cap
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
-				if(score > 84){
+				if(score > 84 && DynamicLagReducer.getTPS() > 19){
 					newCap++;
 				}
-				else if(score < 75){
+				else if(score < 75 || DynamicLagReducer.getTPS() < 18.5){
 					newCap--;
 				}
 				

@@ -10,6 +10,13 @@ public class DynamicLagReducer implements Runnable {
 	public static long LAST_TICK = 0L;
 	private long finalTime = 0L;
 	private static boolean running = false;
+	private static long lastFailMS = 0;
+	private static int failedSyncTasks = 0;
+	
+	public static void failedSyncTask(){
+		lastFailMS = System.currentTimeMillis();
+		failedSyncTasks++;
+	}
 
 	public static double getTPS() {
 		return getTPS(100);
@@ -70,6 +77,12 @@ public class DynamicLagReducer implements Runnable {
 	public static int getResourceScore(double requestedMemory){
 		if(main.random.nextInt(100) < 10){
 			overloadPrevention();
+		}
+		if(failedSyncTasks > 5){
+			if((System.currentTimeMillis() - lastFailMS) > 20000){
+				failedSyncTasks = 0;
+			}
+			return 10;
 		}
 		double tps = getTPS(100);
 		double mem = getAvailableMemory();
@@ -141,6 +154,7 @@ public class DynamicLagReducer implements Runnable {
 		TICKS = new long[600];
 		LAST_TICK = 0L;
 		running = false;
+		failedSyncTasks = 0;
 		main.plugin.lagReducer.cancel();
 		main.plugin.lagReducer = Bukkit.getScheduler().runTaskTimer(main.plugin,
 				new DynamicLagReducer(), 100L, 1L);

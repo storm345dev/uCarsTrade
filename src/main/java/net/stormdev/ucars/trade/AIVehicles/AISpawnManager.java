@@ -40,7 +40,7 @@ public class AISpawnManager {
 	private static long spawnRate = 6l;
 	private List<String> aiNames;
 	private static int cap = 69;
-	private static int liveCap = 69;
+	private static int liveCap = 5;
 	private static int spawned = 0;
 	
 	public static void decrementSpawned(){
@@ -83,7 +83,7 @@ public class AISpawnManager {
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
 		cap = main.config.getInt("general.ai.limit");
-		liveCap = cap;
+		liveCap = 5;
 		// A task to dynamically change liveCap to match the server's current AI holdings
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
 

@@ -48,6 +48,9 @@ public class DynamicLagReducer implements Runnable {
 	}
 	
 	public static int getResourceScore(){
+		if(main.random.nextInt(100) < 10){
+			overloadPrevention();
+		}
 		double tps = getTPS(100);
 		double mem = getAvailableMemory();
 		if(tps>19.5 && mem>400){
@@ -65,6 +68,9 @@ public class DynamicLagReducer implements Runnable {
 	}
 	
 	public static int getResourceScore(double requestedMemory){
+		if(main.random.nextInt(100) < 10){
+			overloadPrevention();
+		}
 		double tps = getTPS(100);
 		double mem = getAvailableMemory();
 		if(tps>19 && mem>requestedMemory+20){

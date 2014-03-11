@@ -92,10 +92,19 @@ public class AISpawnManager {
 				// Use resource score to get live cap
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
-				if(score > 84 && DynamicLagReducer.getTPS() > 19){
+				if(score > 84 && DynamicLagReducer.getTPS() > 19.5){
 					newCap++;
 				}
-				else if(score < 75 || DynamicLagReducer.getTPS() < 18.5){
+				else if(score < 70 || DynamicLagReducer.getTPS() < 17.5){
+					newCap *= 0.5; //Half
+				}
+				else if(score < 70 || DynamicLagReducer.getTPS() < 18){
+					newCap -= 10;
+				}
+				else if(score < 70 || DynamicLagReducer.getTPS() < 19){
+					newCap -= 5;
+				}
+				else if(score < 75 || DynamicLagReducer.getTPS() < 19){
 					newCap--;
 				}
 				
@@ -110,7 +119,7 @@ public class AISpawnManager {
 				}
 				
 				return;
-			}}, 200l, 200l); //Every 10s
+			}}, 100l, 100l); //Every 5s
 		
 		new DynamicLagReducer().start();
 		

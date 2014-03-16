@@ -414,10 +414,16 @@ public class AISpawnManager {
 				&& !stopSearch
 				&& y>minY){
 			
-			Location check = new Location(w, x, y, z);
-			if(check.getBlock().getType() == trackBlock){
-				spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
-			}
+			final Location check = new Location(w, x, y, z);
+			Scheduler.runBlockingSyncTask(new Runnable(){
+
+				@Override
+				public void run() {
+					if(check.getBlock().getType() == trackBlock){
+						spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
+					}
+					return;
+				}}, 60);
 			
 			y--;
 		}

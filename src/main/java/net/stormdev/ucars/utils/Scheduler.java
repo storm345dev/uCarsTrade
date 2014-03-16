@@ -23,7 +23,7 @@ public class Scheduler {
 				return;
 			}});
 		
-		int timeout = 40;
+		int timeout = 50;
 		while(latch.isLocked() && timeout > 0){
 			try {
 				Thread.sleep(250);

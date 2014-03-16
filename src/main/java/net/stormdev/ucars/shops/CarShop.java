@@ -74,7 +74,9 @@ public class CarShop {
 		}
 		double rem = bal-cost;
 		if(rem<0){
-			player.sendMessage(main.colors.getError()+Lang.get("general.buy.notEnoughMoney"));
+			String msg = Lang.get("general.buy.notEnoughMoney");
+			msg = msg.replaceAll(Pattern.quote("%balance%"), Matcher.quoteReplacement(bal+""));
+			player.sendMessage(main.colors.getError()+msg);
 			return;
 		}
 		main.economy.withdrawPlayer(player.getName(), cost);

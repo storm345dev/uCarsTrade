@@ -35,7 +35,7 @@ public class Scheduler {
 		if(timeout < 1){
 			//It timed out
 			DynamicLagReducer.failedSyncTask();
-			throw new Exception("Sync blocking task in uCarsTrade failed to finish in time and was timed out! This isn't a bug, it's just an operation failure.");
+			//throw new Exception("Sync blocking task in uCarsTrade failed to finish in time and was timed out! This isn't a bug, it's just an operation failure.");
 		}
 	}
 	
@@ -68,7 +68,7 @@ public class Scheduler {
 		if(timeout < 1){
 			//It timed out
 			DynamicLagReducer.failedSyncTask();
-			throw new Exception("Sync blocking task in uCarsTrade failed to finish in time and was timed out! This isn't a bug, it's just an operation failure.");
+			//throw new Exception("Sync blocking task in uCarsTrade failed to finish in time and was timed out! This isn't a bug, it's just an operation failure.");
 		}
 	}
 	

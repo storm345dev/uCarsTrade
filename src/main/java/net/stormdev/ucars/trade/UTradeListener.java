@@ -920,7 +920,13 @@ public class UTradeListener implements Listener {
 		List<String> lore = inHand.getItemMeta().getLore();
 		Car c = null;
 		if(lore.size() > 0){
-		UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		UUID carId;
+		try {
+			carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+		} catch (Exception e) {
+			// Invalid
+			return;
+		}
 		c = plugin.carSaver.getCar(carId);
 		if(c == null){
 			return;

@@ -828,6 +828,9 @@ public class UTradeListener implements Listener {
 				|| !(event.getDamager() instanceof Player)){
 			return; //uCars can handle it, or they're not a player
 		}
+		if(event.isCancelled() || event.getDamage() <= 0){
+			return;
+		}
 		final Player player = (Player) event.getDamager();
 		final Minecart car = isEntityInCar(event.getEntity());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){

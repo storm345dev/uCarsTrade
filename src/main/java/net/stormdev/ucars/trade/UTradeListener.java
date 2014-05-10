@@ -250,7 +250,13 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		String id = ChatColor.stripColor(im.getLore().get(0));
-		UUID carId = UUID.fromString(id);
+		UUID carId;
+		try {
+			carId = UUID.fromString(id);
+		} catch (Exception e) {
+			//Not a car
+			return;
+		}
 		plugin.carSaver.removeCar(carId);
 		return;
 	}
@@ -1446,7 +1452,13 @@ public class UTradeListener implements Listener {
 				List<String> lore = carItem.getItemMeta().getLore();
 				Car c = null;
 				if(lore.size() > 0){
-				UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+				UUID carId;
+				try {
+					carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+				} catch (Exception e) {
+					// invalid
+					return;
+				}
 				c = plugin.carSaver.getCar(carId);
 				if(c == null){
 					return;
@@ -1500,7 +1512,13 @@ public class UTradeListener implements Listener {
 						List<String> lore = carItem.getItemMeta().getLore();
 						Car c = null;
 						if(lore.size() > 0){
-						UUID carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+						UUID carId;
+						try {
+							carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
+						} catch (Exception e) {
+							//invalid
+							return;
+						}
 						c = plugin.carSaver.getCar(carId);
 						if(c == null){
 							return;

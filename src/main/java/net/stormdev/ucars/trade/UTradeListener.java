@@ -239,25 +239,31 @@ public class UTradeListener implements Listener {
     	return;
     }
 	@EventHandler
-	void lostCars(ItemDespawnEvent event){
-		Item i = event.getEntity();
-		ItemStack is = i.getItemStack();
-		if(is.getType() != Material.MINECART){
-			return;
-		}
-		ItemMeta im = is.getItemMeta();
-		if(im.getLore() == null || im.getLore().size() < 1){
-			return;
-		}
-		String id = ChatColor.stripColor(im.getLore().get(0));
-		UUID carId;
-		try {
-			carId = UUID.fromString(id);
-		} catch (Exception e) {
-			//Not a car
-			return;
-		}
-		plugin.carSaver.removeCar(carId);
+	void lostCars(final ItemDespawnEvent event){
+		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				Item i = event.getEntity();
+				ItemStack is = i.getItemStack();
+				if(is.getType() != Material.MINECART){
+					return;
+				}
+				ItemMeta im = is.getItemMeta();
+				if(im.getLore() == null || im.getLore().size() < 1){
+					return;
+				}
+				String id = ChatColor.stripColor(im.getLore().get(0));
+				UUID carId;
+				try {
+					carId = UUID.fromString(id);
+				} catch (Exception e) {
+					//Not a car
+					return;
+				}
+				plugin.carSaver.removeCar(carId);
+				return;
+			}});
 		return;
 	}
 	@EventHandler

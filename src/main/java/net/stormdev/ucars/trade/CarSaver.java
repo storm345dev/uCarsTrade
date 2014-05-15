@@ -61,7 +61,7 @@ public class CarSaver {
 		asyncSave();
 	}
 	public void cacheSize(){
-		while(cache.size() > 20){ //Maximum car cache
+		while(cache.size() > main.plugin.carCache){ //Maximum car cache
 			cache.remove(cache.keySet().toArray()[0]); //Clear it back to size
 		}
 		return;

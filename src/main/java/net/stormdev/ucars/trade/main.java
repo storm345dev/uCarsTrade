@@ -69,6 +69,7 @@ public class main extends JavaPlugin {
 	public AIRouter aiController = null;
 	public CarShop carShop = null;
 	public BukkitTask lagReducer = null;
+	public int carCache = 20;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -208,6 +209,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.car.safeExit")) {
 				config.set("general.car.safeExit", true);
 			}
+        	if (!config.contains("general.car.cache")) {
+				config.set("general.car.cache", 100);
+			}
         	if (!config.contains("general.carTrading.enable")) {
 				config.set("general.carTrading.enable", true);
 			}
@@ -271,6 +275,9 @@ public class main extends JavaPlugin {
 		} catch (IOException e1) {
 			getLogger().info("Error parsing lang file!");
 		}
+		
+		carCache = config.getInt("general.car.cache");
+		
 		//Load the colour scheme
 		colors = new Colors(config.getString("colorScheme.success"),
 				config.getString("colorScheme.error"),

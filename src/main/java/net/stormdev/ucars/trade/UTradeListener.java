@@ -1062,6 +1062,17 @@ public class UTradeListener implements Listener {
 		}
 		if(top.getPassenger() instanceof Player){
 			top.eject();
+			if(safeExit){
+				final Player pl = (Player) top.getPassenger();
+				final Location exitLoc = loc.clone().add(0, 0.5, 0);
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						pl.teleport(exitLoc);
+						return;
+					}}, 1l);
+			}
 		}
 		while(top.getVehicle() != null){
 			Entity veh = top.getVehicle();

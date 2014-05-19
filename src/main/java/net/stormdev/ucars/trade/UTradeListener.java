@@ -1061,9 +1061,9 @@ public class UTradeListener implements Listener {
 			top = top.getPassenger();
 		}
 		if(top.getPassenger() instanceof Player){
+			final Player pl = (Player) top.getPassenger();
 			top.eject();
 			if(safeExit){
-				final Player pl = (Player) top.getPassenger();
 				final Location exitLoc = loc.clone().add(0, 0.5, 0);
 				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
 

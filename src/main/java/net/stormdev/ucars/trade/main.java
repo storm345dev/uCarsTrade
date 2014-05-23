@@ -342,15 +342,16 @@ public class main extends JavaPlugin {
 		carRecipe.setIngredient('7', Material.IRON_INGOT);
 		carRecipe.setIngredient('8', Material.IRON_INGOT);
 		getServer().addRecipe(carRecipe);
-		File carSaveFile = new File(getDataFolder()+File.separator+".carData");
+		File carSaveFile = new File(getDataFolder()+File.separator+"cardata.cache");
 		if(carSaveFile.length() < 1 || !carSaveFile.exists()){
 			try {
+				carSaveFile.getParentFile().mkdirs();
 				carSaveFile.createNewFile();
 			} catch (IOException e) {
 				main.logger.info(colors.getError()+"Failed to create new car data file!");
 			}
 		}
-		this.carSaver = new CarSaver(carSaveFile);
+		this.carSaver = new CarSaver(new File(getDataFolder()+File.separator+".carData"), carSaveFile);
 		this.carSaver.load();
 		this.carCals = new CarCalculations();
 		if(getServer().getPluginManager().getPlugin("uCarsRace") != null){

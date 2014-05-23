@@ -11,66 +11,63 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class CarSaver {
-	private ConcurrentHashMap<UUID, Car> cars = new ConcurrentHashMap<UUID, Car>();
-	private ConcurrentHashMap<UUID, Car> cache = new ConcurrentHashMap<UUID, Car>();
+	private ConcurrentHashMap<UUID, Car> oldCars = new ConcurrentHashMap<UUID, Car>();
+	private ConcurrentHashMap<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
+	
 	File saveFile = null;
-	public CarSaver(File saveFile){
+	File newSaveFile = null;
+	public CarSaver(File saveFile, File newSaveFile){
 		this.saveFile = saveFile;
+		this.newSaveFile = newSaveFile;
 	}
-	public Boolean isACar(UUID carId){
-		if(cache.containsKey(carId)){
-			return true;
-		}
-		Boolean b = cars.containsKey(carId);
-		if(b){
-			cache.put(carId, cars.get(carId));
-			cacheSize();
+	
+	public boolean isAUCar(UUID carId){
+		boolean b = inUse.contains(carId);
+		if(!b){
+			return isACar(carId);
 		}
 		return b;
 	}
-	public Car getCar(UUID carId){
-		Car c = cache.get(carId);
-		if(c != null){
-			return c;
-		}
-		return cars.get(carId);
+	
+	public DrivenCar getCarInUse(UUID carId){
+		return inUse.get(carId);
 	}
-	public void setCar(UUID carId, Car car){
-		if(!car.isPlaced){
-			cache.remove(carId);
-		}
-		else{
-			cache.put(carId, car);
-		}
-		cars.put(carId, car);
-		cacheSize();
+	
+	public void carNoLongerInUse(DrivenCar car){
+		inUse.remove(car.getId());
 		asyncSave();
 	}
-	public void removeCar(UUID carId){
-		cache.remove(carId);
-		cars.remove(cars);
+	
+	public void carNoLongerInUse(UUID id){
+		inUse.remove(id);
 		asyncSave();
 	}
-	public void updateCar(UUID old, Car current){
-		removeCar(old);
-		setCar(current.id, current);
+	
+	public void carNowInUse(DrivenCar car){
+		inUse.put(car.getId(), car);
 		asyncSave();
 	}
-	public void cacheSize(){
-		while(cache.size() > main.plugin.carCache){ //Maximum car cache
-			cache.remove(cache.keySet().toArray()[0]); //Clear it back to size
-		}
-		return;
+	
+	
+	@Deprecated
+	public Boolean isACar(UUID carId){
+		Boolean b = oldCars.containsKey(carId);
+		return b;
 	}
-	public void removeFromCache(UUID carId){
-		cache.remove(carId);
+	@Deprecated
+	public Car getOldCar(UUID carId){
+		return oldCars.get(carId);
 	}
-	public void noLongerPlaced(UUID carId){
-		removeFromCache(carId);
+	@Deprecated
+	public void removeOldCar(UUID carId){
+		oldCars.remove(carId);
+		asyncSave();
 	}
 	public void asyncSave(){
 		main.plugin.getServer().getScheduler().runTaskAsynchronously(main.plugin, new BukkitRunnable(){
@@ -90,14 +87,33 @@ public class CarSaver {
 		}
 		else{
 			try {
-				this.cars = loadHashMap(this.saveFile.getAbsolutePath());
+				this.oldCars = loadOldHashMap(this.saveFile.getAbsolutePath());
 			} catch (Exception e) {
 				//Old format
-				this.cars = null;
+				this.oldCars = null;
 			}
 		}
-		if(this.cars == null){
-			this.cars = new ConcurrentHashMap<UUID, Car>();
+		if(this.oldCars == null){
+			this.oldCars = new ConcurrentHashMap<UUID, Car>();
+		}
+		
+		this.newSaveFile.getParentFile().mkdirs();
+		if(!this.newSaveFile.exists() || this.saveFile.length() < 1){
+			try {
+				this.newSaveFile.createNewFile();
+			} catch (IOException e) {
+			}
+		}
+		else{
+			try {
+				this.inUse = loadHashMap(this.saveFile.getAbsolutePath());
+			} catch (Exception e) {
+				//Bad format
+				this.inUse = null;
+			}
+		}
+		if(this.inUse == null){
+			this.inUse = new ConcurrentHashMap<UUID, DrivenCar>();
 		}
 	}
 	public void save(){
@@ -105,15 +121,15 @@ public class CarSaver {
 		return;
 	}
 	private void saveIt(){
-		if(!this.saveFile.exists() || this.saveFile.length() < 1){
+		if(!this.newSaveFile.exists() || this.newSaveFile.length() < 1){
 			try {
-				this.saveFile.createNewFile();
+				this.newSaveFile.createNewFile();
 			} catch (IOException e) {
 			}
 		}
-		saveHashMap(cars, this.saveFile.getAbsolutePath());
+		saveHashMap(inUse, this.newSaveFile.getAbsolutePath());
 	}
-	public static void saveHashMap(ConcurrentHashMap<UUID, Car> map, String path)
+	public static void saveHashMap(ConcurrentHashMap<UUID, DrivenCar> map, String path)
 	{
 		try
 		{
@@ -129,7 +145,42 @@ public class CarSaver {
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public static ConcurrentHashMap<UUID, Car> loadHashMap(String path)
+	public static ConcurrentHashMap<UUID, DrivenCar> loadHashMap(String path)
+	{
+		try
+		{
+	        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+	        Object result = ois.readObject();
+	        ois.close();
+			try {
+				return (ConcurrentHashMap<UUID, DrivenCar>) result;
+			} catch (Exception e) {
+				return new ConcurrentHashMap<UUID, DrivenCar>();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public static void saveOldHashMap(ConcurrentHashMap<UUID, Car> map, String path)
+	{
+		try
+		{
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+			oos.writeObject(map);
+			oos.flush();
+			oos.close();
+			//Handle I/O exceptions
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public static ConcurrentHashMap<UUID, Car> loadOldHashMap(String path)
 	{
 		try
 		{

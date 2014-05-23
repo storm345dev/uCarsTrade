@@ -1,7 +1,7 @@
 package net.stormdev.ucars.trade;
 
-import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -37,9 +37,8 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				String type = args[1];
 				if(type.equalsIgnoreCase("random")){
 					//Generate and give a random car
-					Car car = CarGenerator.gen();
-					ItemStack item = car.getItem();
-			        main.plugin.carSaver.setCar(car.getId(), car);
+					DrivenCar car = CarGenerator.gen();
+					ItemStack item = car.toItemStack();
 			        player.getInventory().addItem(item);
 			        sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.give"));
 					return true;
@@ -68,9 +67,8 @@ public class UTradeCommandExecutor implements CommandExecutor {
 						return false;
 					}
 					//Generate and give a random car
-					Car car = CarGenerator.gen(speed, health, name);
-					ItemStack item = car.getItem();
-			        main.plugin.carSaver.setCar(car.getId(), car);
+					DrivenCar car = CarGenerator.gen(speed, health, name);
+					ItemStack item = car.toItemStack();
 			        player.getInventory().addItem(item);
 			        sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.give"));
 					return true;

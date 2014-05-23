@@ -11,15 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.milkbowl.vault.economy.EconomyResponse;
-import net.stormdev.ucars.stats.HandlingDamagedStat;
-import net.stormdev.ucars.stats.HealthStat;
-import net.stormdev.ucars.stats.NameStat;
-import net.stormdev.ucars.stats.SpeedStat;
-import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.stats.StatType;
 import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
-import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.CarValueCalculator;
@@ -32,6 +26,8 @@ import net.stormdev.ucars.utils.InputMenuClickEvent;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
+import net.stormdev.ucarstrade.ItemCarValidation;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -103,8 +99,8 @@ public class UTradeListener implements Listener {
 		safeExit = main.config.getBoolean("general.car.safeExit");
 	}
 	
-	void npcCarSteal(final Minecart vehicle, final Player player, final Car c){
-		if(!vehicle.hasMetadata("trade.npc") || !c.stats.containsKey("trade.npc")){
+	void npcCarSteal(final Minecart vehicle, final Player player, final DrivenCar c){
+		if(!vehicle.hasMetadata("trade.npc") || !c.isNPC()){
 			return; //Not an npc
 		}
 		if(!stealNPC){
@@ -132,12 +128,12 @@ public class UTradeListener implements Listener {
 		plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
 
 			public void run() {
-				c.stats.remove("trade.npc");
+				c.setNPC(false);
 				vehicle.removeMetadata("trade.npc", plugin);
 				AISpawnManager.decrementSpawned();
 				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
 				plugin.getServer().getPluginManager().callEvent(evt);
-				plugin.carSaver.setCar(c.id, c); //Update changes to car, aka it's not an npc
+				plugin.carSaver.carNowInUse(c); //Update changes to car, aka it's not an npc
 				vehicle.setPassenger(player);
 				player.sendMessage(main.colors.getInfo()+net.stormdev.ucars.trade.Lang.get("general.steal.taken"));
 				return;
@@ -162,7 +158,7 @@ public class UTradeListener implements Listener {
 		
 		if(cart.hasMetadata("trade.npc")){
 			
-			final Car c = plugin.carSaver.getCar(i.getUniqueId());
+			final DrivenCar c = plugin.carSaver.getCarInUse(i.getUniqueId());
 			if(c == null){
 				return;
 			}
@@ -186,9 +182,9 @@ public class UTradeListener implements Listener {
 				return;
 			}
 			final Minecart m = (Minecart) v;
-			final Car c = plugin.carSaver.getCar(m.getUniqueId());
+			final DrivenCar c = plugin.carSaver.getCarInUse(m.getUniqueId());
 			if(c == null
-					|| !c.stats.containsKey("trade.npc")){
+					|| !c.isNPC()){
 				return; //Not a car or not an npc car
 			}
 			//Use AIRouter to route it
@@ -261,7 +257,7 @@ public class UTradeListener implements Listener {
 					//Not a car
 					return;
 				}
-				plugin.carSaver.removeCar(carId);
+				plugin.carSaver.carNoLongerInUse(carId);
 				return;
 			}});
 		return;
@@ -373,9 +369,8 @@ public class UTradeListener implements Listener {
 		if(!ChatColor.stripColor(recipe.getItemMeta().getDisplayName()).equalsIgnoreCase("car")){
 			return;
 		}
-		Car car = CarGenerator.gen();
-        event.setCurrentItem(car.getItem());
-        main.plugin.carSaver.setCar(car.getId(), car);
+		DrivenCar car = CarGenerator.gen();
+        event.setCurrentItem(car.toItemStack());
 		return;
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
@@ -427,29 +422,15 @@ public class UTradeListener implements Listener {
 			return; //Not a car
 		}
 		//Anvil contains a car in first slot.
-		ItemMeta meta = carItem.getItemMeta();
-		List<String> lore = meta.getLore();
-		final UUID id;
-		try {
-			if(lore.size() < 1){
-				return;
-			}
-			id = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-		} catch (Exception e) {
-			return;
-		}
-		Car car = plugin.carSaver.getCar(id);
+		DrivenCar car = ItemCarValidation.getCar(carItem);
 		if(car == null){
 			return;
 		}
-		final HashMap<String, Stat> stats = car.getStats();
         if(save && slotNumber ==2){
 			//They are renaming it
         	ItemStack result = event.getCurrentItem();
         	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
-        	stats.put("trade.name", new NameStat(name, plugin));
-        	car.setStats(stats);
-        	plugin.carSaver.setCar(id, car);
+        	car.setName(name);
         	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed car to: '"+name+"'");
         	return;
 		}
@@ -459,7 +440,7 @@ public class UTradeListener implements Listener {
 		final ItemStack up = upgrade;
 		final Boolean updat = update;
 		final Boolean sav = save;
-		final Car ca = car;
+		final DrivenCar ca = car;
 		if(slotNumber == 1 && (a==InventoryAction.PLACE_ALL || a==InventoryAction.PLACE_ONE || a==InventoryAction.PLACE_SOME) && event.getCursor().getType()!=Material.AIR){
 			//upgrade = event.getCursor().clone();
 			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
@@ -475,7 +456,7 @@ public class UTradeListener implements Listener {
 						return;
 					}
 					//A dirty trick to get the inventory to look correct on the client
-					applyUpgrades(upgrade, stats, ca, updat, sav, player, i, id);
+					applyUpgrades(upgrade, ca, updat, sav, player, i);
 					return;
 				}}, 1l);
 			set = true;
@@ -494,21 +475,16 @@ public class UTradeListener implements Listener {
 		if(pickup && slotNumber == 1){
 			return; //Don't bother tracking and updating, etc...
 		} 
-		applyUpgrades(upgrade, stats, car, update, save, player, i, id);
+		applyUpgrades(upgrade, car, update, save, player, i);
 		return;
 	}
 	@SuppressWarnings("deprecation")
-	public void applyUpgrades(ItemStack upgrade, HashMap<String, Stat> stats, Car car, Boolean update, Boolean save, Player player, Inventory i, UUID carId){
+	public void applyUpgrades(ItemStack upgrade, DrivenCar car, Boolean update, Boolean save, Player player, Inventory i){
 		   String upgradeMsg = net.stormdev.ucars.trade.Lang.get("general.upgrade.msg");
 		   if(upgrade.getType() == Material.IRON_BLOCK){
 				//Health upgrade
-				double health = ucars.config.getDouble("general.cars.health.default");
+				double health = car.getHealth();
 				double maxHealth = ucars.config.getDouble("general.cars.health.max");
-				HealthStat stat = new HealthStat(health, plugin);
-				if(stats.containsKey("trade.health")){
-					stat = (HealthStat) stats.get("trade.health");
-					health = stat.getHealth();
-				}
 				double bonus = (9*upgrade.getAmount());
 				health = health + bonus; //Add 9 to health stat
 				if(health > maxHealth){
@@ -520,34 +496,29 @@ public class UTradeListener implements Listener {
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
 				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
-				stat.setHealth(health);
-				stats.put("trade.health", stat);
+				car.setHealth(health);
 			}
 			else if(upgrade.getType() == Material.IRON_INGOT){
 				//Health upgrade
-				double health = ucars.config.getDouble("general.cars.health.default");
+				double health = car.getHealth();
 				double maxHealth = ucars.config.getDouble("general.cars.health.max");
-				HealthStat stat = new HealthStat(health, plugin);
-				if(stats.containsKey("trade.health")){
-					stat = (HealthStat) stats.get("trade.health");
-					health = stat.getHealth();
+				double bonus = (1*upgrade.getAmount());
+				health = health + bonus; //Add 9 to health stat
+				if(health > maxHealth){
+					health = maxHealth;
 				}
-				double bonus = 1*upgrade.getAmount();
-				health = health + bonus; //Add 1 to health stat
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), bonus+"");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "health");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), health+" (Max: "+maxHealth+")");
 				player.sendMessage(upgradeMsg);
-				if(health > maxHealth){
-					health = maxHealth;
-				}
 				upgrade.setAmount(0);
-				stat.setHealth(health);
-				stats.put("trade.health", stat);
+				car.setHealth(health);
 			}
 			else if(upgrade.getType() == Material.LEVER){
-				stats.remove("trade.handling"); //Fix handling if broken
+				if(car.isHandlingDamaged()){
+					car.setHandlingDamaged(false);
+				}
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "Fixed");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "all damage to the car");
@@ -557,12 +528,7 @@ public class UTradeListener implements Listener {
 			}
 			else if(upgrade.getType() == Material.REDSTONE){
 				//Increment speed
-				double speed = 1;
-				SpeedStat speedStat = new SpeedStat(speed, plugin);
-				if(stats.containsKey("trade.speed")){
-					speedStat = (SpeedStat) stats.get("trade.speed");
-					speed = speedStat.getSpeedMultiplier();
-				}
+				double speed = car.getSpeed();
 				speed = speed + (0.05*upgrade.getAmount());
 				speed = speed * 100; //0.05 -> 5
 				speed = Math.round(speed);
@@ -570,8 +536,6 @@ public class UTradeListener implements Listener {
 				if(speed > 4){
 					speed = 4;
 				}
-				speedStat.setSpeedMultiplier(speed);
-				stats.put("trade.speed", speedStat);
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), (0.05*upgrade.getAmount())+"x");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "speed");
@@ -586,7 +550,7 @@ public class UTradeListener implements Listener {
 					//Invalid item
 					return;
 				}
-				stats.put("trade.display", new Stat(type, main.plugin));
+				//TODO Some kind of new way for displays to work
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "1");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "Modifier");
@@ -596,9 +560,7 @@ public class UTradeListener implements Listener {
 			}
 			i.clear(1);
 			if(update){
-				car.setStats(stats);
-				i.setItem(0, car.getItem());
-				plugin.carSaver.setCar(carId, car);
+				i.setItem(0, car.toItemStack());
 				player.updateInventory();
 			}
 			return;
@@ -629,6 +591,7 @@ public class UTradeListener implements Listener {
 			}
 			top.remove();
 			loc.getWorld().dropItemNaturally(loc, new ItemStack(Material.MINECART));
+			main.plugin.carSaver.carNoLongerInUse(v.getUniqueId());
 		}
 		return;
 	}
@@ -851,8 +814,12 @@ public class UTradeListener implements Listener {
 		Runnable onDeath = new Runnable() {
 			// @Override
 			public void run() {
+				ucarDeathEvent evt = new ucarDeathEvent(car);
 				plugin.getServer().getPluginManager()
-						.callEvent(new ucarDeathEvent(car));
+						.callEvent(evt);
+				if(!evt.isCancelled()){
+					main.plugin.carSaver.carNoLongerInUse(car.getUniqueId());
+				}
 			}
 		};
 		CarHealthData health = new CarHealthData(
@@ -932,25 +899,12 @@ public class UTradeListener implements Listener {
 							+ Lang.get("lang.messages.noPlaceHere"));
 			return;
 		}
-		List<String> lore = inHand.getItemMeta().getLore();
-		Car c = null;
-		if(lore.size() > 0){
-		UUID carId;
-		try {
-			carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-		} catch (Exception e) {
-			// Invalid
-			return;
-		}
-		c = plugin.carSaver.getCar(carId);
+		
+		DrivenCar c = ItemCarValidation.getCar(inHand);
 		if(c == null){
 			return;
 		}
-		}
-		else{
-			return;
-		}
-		HashMap<String, Stat> stats = c.getStats();
+		
 		Location loc = block.getLocation().add(0, 1.5, 0);
 		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
 		Block in = loc.getBlock();
@@ -974,14 +928,7 @@ public class UTradeListener implements Listener {
 			event.setUseItemInHand(Result.DENY);
 			return;
 		}
-		double health = ucars.config.getDouble("general.cars.health.default");
-		if(stats.containsKey("trade.health")){
-			try {
-				health = (Double) stats.get("trade.health").getValue();
-			} catch (Exception e) {
-				//Leave health to default
-			}
-		}
+		double health = c.getHealth();
 		Runnable onDeath = new Runnable(){
 			//@Override
 			public void run(){
@@ -1001,23 +948,9 @@ public class UTradeListener implements Listener {
 			placed.setAmount(0);
 			event.getPlayer().getInventory().setItemInHand(placed);
 		event.setCancelled(true);
-		while(plugin.carSaver.isACar(id)){
-			Car cr = plugin.carSaver.getCar(id);
-			plugin.carSaver.removeCar(id);
-		    UUID newId = UUID.randomUUID();
-		    while(plugin.carSaver.isACar(newId)){
-		    	newId = UUID.randomUUID();
-		    }
-		    plugin.carSaver.setCar(newId, cr);
-		}
-		plugin.carSaver.removeCar(c.getId());
-		c.setId(id); //Bind car id to minecart id
-		c.isPlaced = true;
-		plugin.carSaver.setCar(id, c);
-		String name = "Unnamed";
-		if(stats.containsKey("trade.name")){
-			name = stats.get("trade.name").getValue().toString();
-		}
+		c.setId(id);
+		plugin.carSaver.carNowInUse(c);
+		String name = c.getName();
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
 		event.getPlayer().sendMessage(placeMsg);
@@ -1032,7 +965,7 @@ public class UTradeListener implements Listener {
 			return; //Don't destroy the car
 		}
 		UUID id = cart.getUniqueId();
-		Car car = plugin.carSaver.getCar(id);
+		DrivenCar car = plugin.carSaver.getCarInUse(id);
 		if(car == null){
 			cart.remove(); //IDK
 			return;
@@ -1045,15 +978,14 @@ public class UTradeListener implements Listener {
 		cart.setMetadata("car.destroyed", new StatValue(true, ucars.plugin));
 		event.setCancelled(true);
 		
-		car.isPlaced = false;
 		if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
 			if(main.random.nextBoolean()){
 				if(main.random.nextBoolean()){
-				    car.stats.put("trade.handling", new HandlingDamagedStat(true, plugin));
+				    car.setHandlingDamaged(true);
 				}
 			}
 		}
-		plugin.carSaver.setCar(id, car);
+		plugin.carSaver.carNoLongerInUse(car);
 		Location loc = cart.getLocation();
 		Entity top = cart;
 		while(top.getPassenger() != null
@@ -1081,7 +1013,7 @@ public class UTradeListener implements Listener {
 		}
 		cart.eject();
 		cart.remove();
-		loc.getWorld().dropItemNaturally(loc, new ItemStack(car.getItem()));
+		loc.getWorld().dropItemNaturally(loc, new ItemStack(car.toItemStack()));
 		//Remove car and get back item
 		return;
 	}
@@ -1294,9 +1226,9 @@ public class UTradeListener implements Listener {
 				//Give them the car and remove it from the list
 				UUID carId = car.getCarId();
 				plugin.salesManager.saveCars();
-				Car c = plugin.carSaver.getCar(carId);
-				c.isPlaced = false;
-				player.getInventory().addItem(c.getItem());
+				DrivenCar c = plugin.carSaver.getCarInUse(carId);
+				plugin.carSaver.carNoLongerInUse(c);
+				player.getInventory().addItem(c.toItemStack());
 				player.sendMessage(main.colors.getSuccess()+msg);
 			}
 		}
@@ -1466,22 +1398,8 @@ public class UTradeListener implements Listener {
 					return;
 				}
 				//Is a valid car to sell
-				List<String> lore = carItem.getItemMeta().getLore();
-				Car c = null;
-				if(lore.size() > 0){
-				UUID carId;
-				try {
-					carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-				} catch (Exception e) {
-					// invalid
-					return;
-				}
-				c = plugin.carSaver.getCar(carId);
+				DrivenCar c = ItemCarValidation.getCar(carItem);
 				if(c == null){
-					return;
-				}
-				}
-				else{
 					player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
 					return;
 				}
@@ -1495,17 +1413,13 @@ public class UTradeListener implements Listener {
 				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
-				DisplayType display = null;
-				if(c.getStats().containsKey("trade.display")){
-					display = (DisplayType) c.getStats().get("trade.display").getValue();
-				}
-				CarForSale saleItem = new CarForSale(c.id, player.getName(), 
-						purchase, price, display);
-				if(!plugin.salesManager.carsForSale.containsKey(c.id)){
-					plugin.salesManager.carsForSale.put(c.id, saleItem);
-					plugin.salesManager.saveCars();
-					player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
-				}
+				UUID rand = UUID.randomUUID();
+				CarForSale saleItem = new CarForSale(rand, player.getName(), 
+						purchase, price, null);
+				plugin.carSaver.carNowInUse(c);//Track it, even though it's not in use
+				plugin.salesManager.carsForSale.put(rand, saleItem);
+				plugin.salesManager.saveCars();
+				player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
 			}
 			else if(position == 4){
 				//Check if car and if it is update the sale button
@@ -1526,22 +1440,8 @@ public class UTradeListener implements Listener {
 							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
 							return;
 						}
-						List<String> lore = carItem.getItemMeta().getLore();
-						Car c = null;
-						if(lore.size() > 0){
-						UUID carId;
-						try {
-							carId = UUID.fromString(ChatColor.stripColor(lore.get(0)));
-						} catch (Exception e) {
-							//invalid
-							return;
-						}
-						c = plugin.carSaver.getCar(carId);
+						DrivenCar c = ItemCarValidation.getCar(carItem);
 						if(c == null){
-							return;
-						}
-						}
-						else{
 							player.sendMessage(main.colors.getInfo()+"Invalid item to sell!");
 							return;
 						}
@@ -1680,12 +1580,10 @@ public class UTradeListener implements Listener {
 	        ItemStack item = new ItemStack(Material.AIR);
 	        String name = "Car";
 	        List<String> lore = new ArrayList<String>();
-	        if(plugin.carSaver.isACar(carId)){
-	        	Car c = plugin.carSaver.getCar(carId);
-	        	if(c.getStats().containsKey("trade.name")){
-	        		name = c.getStats().get("trade.name").getValue().toString();
-	        	}
-	        	item = c.getItem();
+	        if(plugin.carSaver.isAUCar(carId)){
+	        	DrivenCar c = plugin.carSaver.getCarInUse(carId);
+	        	name = c.getName();
+	        	item = c.toItemStack();
 	        	ItemMeta im = item.getItemMeta();
 	        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
 	        	lore.add(main.colors.getInfo()+"Seller: "+seller);
@@ -1695,6 +1593,7 @@ public class UTradeListener implements Listener {
 	        	im.setLore(lore);
 	        	item.setItemMeta(im); 
 	        if(pos < 52){
+	        	plugin.carSaver.carNoLongerInUse(carId);
         		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
         		pos++;
         	}

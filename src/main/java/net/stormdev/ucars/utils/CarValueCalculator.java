@@ -1,52 +1,21 @@
 package net.stormdev.ucars.utils;
 
-import java.util.HashMap;
+import net.stormdev.ucars.trade.main;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import com.useful.ucars.ucars;
 
-import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.stats.Stat;
-
 public class CarValueCalculator {
-	public static double getCarValueForSale(Car car){
+	public static double getCarValueForSale(DrivenCar car){
 		double average = main.config.getDouble("general.carTrading.averageCarValue");
 		double rating = 20;
-		HashMap<String, Stat> stats = car.getStats();
-		boolean handlingDamaged = false;
-		double speed = 1;
-		String name = "Car";
+		boolean handlingDamaged = car.isHandlingDamaged();
+		double speed = car.getSpeed();
+		String name = car.getName();
 		double defaultHealth = ucars.config.getDouble("general.cars.health.default");
 		double maxHealth = ucars.config.getDouble("general.cars.health.max");
-		double health = defaultHealth;
+		double health = car.getHealth();
 		double bonus = 0;
-		if(stats.containsKey("trade.handling")){
-			try {
-				handlingDamaged = (Boolean) stats.get("trade.handling").getValue();
-			} catch (Exception e) {
-				handlingDamaged = true; //Well it did have the stat set!
-			}
-		}
-		if(stats.containsKey("trade.speed")){
-			try {
-				speed = (Double) stats.get("trade.speed").getValue();
-			} catch (Exception e) {
-				speed = 1;
-			}
-		}
-		if(stats.containsKey("trade.name")){
-			name = stats.get("trade.name").toString();
-		}
-		if(stats.containsKey("trade.health")){
-			try {
-				health = (Double) stats.get("trade.health").getValue();
-			} catch (Exception e) {
-				//Use default health
-			}
-		}
-		if(stats.containsKey("trade.display")){
-			DisplayType t = (DisplayType) stats.get("trade.display").getValue();
-			bonus += (t.getCarValueRatingBonus()*30);
-		}
 		rating += bonus;
 		if(handlingDamaged){
 			rating = rating - 50;
@@ -111,7 +80,7 @@ public class CarValueCalculator {
 		}
 		return Math.round(cost*100)/100; //Round to 2 d.p
 	}
-	public static double getCarValueForPurchase(Car car){
+	public static double getCarValueForPurchase(DrivenCar car){
 		double n = getCarValueForSale(car);
 		double cost = n + (main.config.getDouble("general.carTrading.VATPercent")*n)/100; //Add VAT% to the value it's worth
 		return Math.round(cost*100)/100; //Round to 2 d.p

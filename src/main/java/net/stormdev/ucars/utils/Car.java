@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.useful.ucars.ucars;
 
+@Deprecated
 public class Car implements Serializable {
 	private static final long serialVersionUID = -4379501444781549934L;
 	public Boolean isPlaced = false;

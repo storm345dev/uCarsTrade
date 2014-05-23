@@ -3,7 +3,7 @@ package net.stormdev.ucars.trade.AIVehicles;
 import java.util.List;
 
 import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -43,7 +43,7 @@ public class AIRouter {
 		api = uCarsAPI.getAPI();
 	}
 	
-	public void route(final Minecart car, final Car c) throws Exception{
+	public void route(final Minecart car, final DrivenCar c) throws Exception{
 		if(!enabled){
 			return;
 		}
@@ -58,7 +58,7 @@ public class AIRouter {
 		double cy = loc.getY();
 		double cz = loc.getZ();
 		
-		if(!c.stats.containsKey("trade.npc")){
+		if(!c.isNPC()){
 			//Not an npc
 			return;
 		}
@@ -76,7 +76,7 @@ public class AIRouter {
 				if(car.getPassenger() != null){
 					car.getPassenger().remove();
 				}
-				main.plugin.carSaver.removeCar(car.getUniqueId());
+				main.plugin.carSaver.carNoLongerInUse(c.getId());
 				car.remove();
 				AISpawnManager.decrementSpawned();
 			}

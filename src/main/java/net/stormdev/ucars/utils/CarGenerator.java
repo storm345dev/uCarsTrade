@@ -1,21 +1,16 @@
 package net.stormdev.ucars.utils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
-import net.stormdev.ucars.stats.HandlingDamagedStat;
-import net.stormdev.ucars.stats.HealthStat;
-import net.stormdev.ucars.stats.NameStat;
-import net.stormdev.ucars.stats.SpeedStat;
-import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import com.useful.ucars.ucars;
 
 public class CarGenerator {
 
-	public static Car gen(){
-		HashMap<String, Stat> meta = new HashMap<String, Stat>();
+	public static DrivenCar gen(){
 		double health = ucars.config.getDouble("general.cars.health.default");
 		double speed = 1;
 		String name = "Car";
@@ -33,27 +28,18 @@ public class CarGenerator {
 			speed = 2;
 		}
 		double speeD = speed/10;
-		if(rand == 10){ //1 in 10 chance
-			meta.put("trade.handling", new HandlingDamagedStat(true, main.plugin));
-		}
 		List<String> names = main.config.getStringList("general.cars.names");
 		if(names.size() > 0){
 			int max = names.size();
 			int random = main.random.nextInt(max);
 			name = names.get(random);
 		}
-		meta.put("trade.name", new NameStat(name, main.plugin));
-		meta.put("trade.health", new HealthStat(health, main.plugin));
-		meta.put("trade.speed", new SpeedStat(speeD, main.plugin));
-		Car c = new Car(false, meta);
-		return c;
+		return gen(speeD, health, name, (main.random.nextBoolean()&&main.random.nextBoolean()&&main.random.nextBoolean()));
 	}
-	public static Car gen(double speed, double health, String name){
-		HashMap<String, Stat> meta = new HashMap<String, Stat>();
-		meta.put("trade.name", new NameStat(main.colorise(name), main.plugin));
-		meta.put("trade.health", new HealthStat(health, main.plugin));
-		meta.put("trade.speed", new SpeedStat(speed, main.plugin));
-		Car c = new Car(false, meta);
-		return c;
+	public static DrivenCar gen(double speed, double health, String name){
+		return new DrivenCar(name, speed, health, false, new ArrayList<String>());
+	}
+	public static DrivenCar gen(double speed, double health, String name, boolean handlingDamaged){
+		return new DrivenCar(name, speed, health, handlingDamaged, new ArrayList<String>());
 	}
 }

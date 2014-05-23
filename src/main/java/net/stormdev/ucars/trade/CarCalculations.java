@@ -1,12 +1,10 @@
 package net.stormdev.ucars.trade;
 
-import java.util.HashMap;
 import java.util.UUID;
 
-import net.stormdev.ucars.stats.HandlingDamagedStat;
-import net.stormdev.ucars.stats.Stat;
-import net.stormdev.ucars.utils.Car;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Minecart;
 import org.bukkit.util.Vector;
 
@@ -40,47 +38,36 @@ public class CarCalculations {
 	}
 	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
 		UUID id = cart.getUniqueId();
-		Car car = main.plugin.carSaver.getCar(id);
+		DrivenCar car = main.plugin.carSaver.getCarInUse(id);
 		if(car == null){
 			return current;
 		}
-		HashMap<String, Stat> stats = car.getStats();
-		if(stats.containsKey("trade.speed")){
-			Stat stat = stats.get("trade.speed");
-			double mod = 1;
-			try {
-				mod = (Double) stat.getValue();
-			} catch (Exception e) {
-			}
-			current = current.multiply(mod);			
-		}
-		if(stats.containsKey("trade.handling")){
-			HandlingDamagedStat stat = (HandlingDamagedStat) stats.get("trade.handling");
-			if(stat.getDamagedHandling()){
-				double x = current.getX();
-				double z = current.getZ();
-				if(!main.random.nextBoolean()){
-					if(main.random.nextBoolean()){
-						//Change x
-						x = x*currentMult/3;
-					}
-					else if(main.random.nextBoolean()){
-						x = -x;
-						z = -z;
-					}
-					else{
-						//Change z
-						z = z*currentMult/3;	
-					}
-					current.setX(x);
-					current.setZ(z);
+		current = current.multiply(car.getSpeed());
+		if(car.isHandlingDamaged()){
+			double x = current.getX();
+			double z = current.getZ();
+			if(!main.random.nextBoolean()){
+				if(main.random.nextBoolean()){
+					//Change x
+					x = x*currentMult/3;
 				}
+				else if(main.random.nextBoolean()){
+					x = -x;
+					z = -z;
+				}
+				else{
+					//Change z
+					z = z*currentMult/3;	
+				}
+				current.setX(x);
+				current.setZ(z);
 			}
 		}
 		return current;
 	}
 	public Boolean isAuCar(Minecart car){
-		if(main.plugin.carSaver.isACar(car.getUniqueId())){
+		if(main.plugin.carSaver.isAUCar(car.getUniqueId())){
+			Bukkit.broadcastMessage("HELLO");
 			return true;
 		}
 		if(car.hasMetadata("kart.racing")){

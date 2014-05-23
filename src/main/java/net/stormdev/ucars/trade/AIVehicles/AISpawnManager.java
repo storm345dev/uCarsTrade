@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.stormdev.ucars.stats.Stat;
 import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.utils.Car;
-import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.ReturnTask;
 import net.stormdev.ucars.utils.Scheduler;
 import net.stormdev.ucars.utils.SyncReturnTask;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -583,16 +581,10 @@ public class AISpawnManager {
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
 				
-				Car c = CarGenerator.gen();
-				if(c.stats.containsKey("trade.handling")){
-					c.stats.remove("trade.handling");
-				}
+				DrivenCar c = new DrivenCar("NPC-Car", 1, 50, false, new ArrayList<String>()).setNPC(true);
 				//Make it a car
-				c.id = m.getUniqueId();
-				c.isPlaced = true;
-				//Set it as an NPC car and set direction
-				c.stats.put("trade.npc", new Stat(true, plugin));
-				plugin.carSaver.setCar(m.getUniqueId(), c);
+				c.setId(m.getUniqueId());
+				plugin.carSaver.carNowInUse(c);
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(currentDirection, null), plugin));
 				spawned++;
 				return;

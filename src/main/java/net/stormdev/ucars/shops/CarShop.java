@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
 
 import net.stormdev.ucars.trade.Lang;
 import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.IconMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.IconMenu.OptionClickEventHandler;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -89,11 +89,9 @@ public class CarShop {
 		player.sendMessage(main.colors.getSuccess()+msg);
 		
 		//Give them the car
-		Car c = CarGenerator.gen();
-		ItemStack i = c.getItem();
+		DrivenCar c = CarGenerator.gen();
+		ItemStack i = c.toItemStack();
 		player.getInventory().addItem(i);
-		
-		plugin.carSaver.setCar(c.id, c);
 		
 		return;
 	}

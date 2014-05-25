@@ -70,7 +70,7 @@ public class ItemCarValidation {
 		}
 		
 		i++;
-		if(i > lore.size()){
+		if(i >= lore.size()){
 			isHandlingDamaged = false;
 		}
 		else {

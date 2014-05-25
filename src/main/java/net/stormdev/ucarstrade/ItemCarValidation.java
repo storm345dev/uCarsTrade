@@ -91,7 +91,7 @@ public class ItemCarValidation {
 				}
 			}
 		} catch (Exception e) {
-			return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
+			return null;
 		}
 		return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
 	}

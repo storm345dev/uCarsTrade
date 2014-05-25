@@ -351,7 +351,7 @@ public class main extends JavaPlugin {
 				main.logger.info(colors.getError()+"Failed to create new car data file!");
 			}
 		}
-		this.carSaver = new CarSaver(new File(getDataFolder()+File.separator+".carData"), carSaveFile);
+		this.carSaver = new CarSaver(carSaveFile);
 		this.carSaver.load();
 		this.carCals = new CarCalculations();
 		if(getServer().getPluginManager().getPlugin("uCarsRace") != null){

@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucars.utils.ItemRename;
-import net.stormdev.ucarstrade.ItemCarValidation;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -26,18 +24,6 @@ public class DrivenCar implements Serializable {
 	private boolean isHandlingDamaged;
 	private List<String> modifiers = new ArrayList<String>();
 	private boolean isNPC = false;
-
-	public static DrivenCar convert(Car c){
-		try {
-			ItemStack i = c.getItem();
-			List<String> lore = i.getItemMeta().getLore();
-			lore.remove(0);
-			return ItemCarValidation.getCarFromLore(i.getItemMeta().getDisplayName(), lore);
-		} catch (Exception e) {
-			// Invalid
-			return null;
-		}
-	}
 	
 	public DrivenCar(String name, double speed, double health, boolean isHandlingDamaged, List<String> modifiers){
 		this.setName(name);
@@ -47,17 +33,24 @@ public class DrivenCar implements Serializable {
 		this.setModifiers(modifiers);
 	}
 	
+	private static String getHandleString(boolean isDamaged){
+		if(isDamaged){
+			return "damaged";
+		}
+		return "undamaged";
+	}
+	
 	public ItemStack toItemStack(){
 		ItemStack stack = new ItemStack(Material.MINECART);
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
 		
-		lore.add("[Speed:] "+main.colors.getInfo()+speed+"x");
+		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed+"x");
 		double max = ucars.config.getDouble("general.cars.health.max");
-		lore.add("[Health:] "+main.colors.getInfo()+health+"/"+max);
-		lore.add("[Handling:] "+main.colors.getInfo()+isHandlingDamaged);
+		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);
+		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+getHandleString(isHandlingDamaged));
 		for(String x:modifiers){
-			lore.add("-Modifier: "+x);
+			lore.add(main.colors.getTitle()+"-Modifier: "+main.colors.getInfo()+x);
 		}
 		meta.setLore(lore);
 		stack.setItemMeta(meta);

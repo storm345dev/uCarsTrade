@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import net.stormdev.ucars.trade.Colors;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
@@ -35,14 +36,13 @@ public class ItemCarValidation {
 	}
 	
 	public static DrivenCar getCarFromLore(String name, List<String> lore){
-		Bukkit.broadcastMessage("Called");
 		if(lore.size() < 3){
 			return null;
 		}
 		int i = 0;
-		if(!ChatColor.stripColor((lore.get(i))).toLowerCase().contains("[speed:]")){
+		if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){
 			i = 1;
-			if(!ChatColor.stripColor((lore.get(i))).toLowerCase().contains("[speed:]")){ //Using deprecated format
+			if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){ //Using deprecated format
 				return null;
 			}
 		}
@@ -52,7 +52,7 @@ public class ItemCarValidation {
 		boolean isHandlingDamaged = false;
 		List<String> modifiers = new ArrayList<String>();
 		
-		String line = ChatColor.stripColor(lore.get(i)).toLowerCase(); //[Speed:] 0.8x
+		String line = Colors.strip(lore.get(i)).toLowerCase(); //[Speed:] 0.8x
 		String speedRaw = line.replaceFirst(Pattern.quote("[speed:] "), "").replaceAll(Pattern.quote("x"), "");
 		try {
 			speed = Double.parseDouble(speedRaw);
@@ -61,7 +61,7 @@ public class ItemCarValidation {
 		}
 		
 		i++;
-		line = ChatColor.stripColor(lore.get(i)).toLowerCase(); //[Health:] 10.0/100.0
+		line = Colors.strip(lore.get(i)).toLowerCase(); //[Health:] 10.0/100.0
 		String[] healthRaw = line.replaceFirst(Pattern.quote("[health:] "), "").split(Pattern.quote("/"));
 		try {
 			health = Double.parseDouble(healthRaw[0]);
@@ -70,20 +70,20 @@ public class ItemCarValidation {
 		}
 		
 		i++;
-		line = ChatColor.stripColor(lore.get(i)).toLowerCase(); //[Handling:] undamaged
+		line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] undamaged
 		String handlingRaw = line.replaceFirst(Pattern.quote("[handling:] "), "").trim();
 		if(handlingRaw.equalsIgnoreCase("damaged")){
 			isHandlingDamaged = true;
 		}
 		
 		if(lore.size() > i){
+			i++;
 			for(@SuppressWarnings("unused")
 			int z=i;i<lore.size();i++){
-				line = ChatColor.stripColor(lore.get(i)).toLowerCase(); //-Modifier: <Name>
+				line = Colors.strip(lore.get(i)).toLowerCase(); //-Modifier: <Name>
 				modifiers.add(line.replaceFirst(Pattern.quote("-modifier: "), "").trim());
 			}
 		}
-		Bukkit.broadcastMessage("Speed: "+speed+" health: "+health+" handling damaged: "+isHandlingDamaged);
 		return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
 	}
 }

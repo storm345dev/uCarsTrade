@@ -67,7 +67,6 @@ public class CarCalculations {
 	}
 	public Boolean isAuCar(Minecart car){
 		if(main.plugin.carSaver.isAUCar(car.getUniqueId())){
-			Bukkit.broadcastMessage("HELLO");
 			return true;
 		}
 		if(car.hasMetadata("kart.racing")){

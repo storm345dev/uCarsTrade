@@ -17,13 +17,12 @@ public class CarSaver {
 	private ConcurrentHashMap<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
 	
 	File newSaveFile = null;
-	public CarSaver(File saveFile, File newSaveFile){
+	public CarSaver(File newSaveFile){
 		this.newSaveFile = newSaveFile;
 	}
 	
 	public boolean isAUCar(UUID carId){
-		boolean b = inUse.contains(carId);
-		return b;
+		return inUse.containsKey(carId);
 	}
 	
 	public DrivenCar getCarInUse(UUID carId){
@@ -108,7 +107,20 @@ public class CarSaver {
 		try
 		{
 	        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
-	        Object result = ois.readObject();
+	        Object result;
+			try {
+				result = ois.readObject();
+			} catch (NoClassDefFoundError e1) {
+				try {
+					File f = new File(path);
+					f.delete();
+					f.createNewFile();
+				} catch (Exception e) {
+					//CLear invalid file
+				}
+				ois.close();
+				result = new ConcurrentHashMap<UUID, DrivenCar>();
+			}
 	        ois.close();
 			try {
 				return (ConcurrentHashMap<UUID, DrivenCar>) result;
@@ -118,7 +130,6 @@ public class CarSaver {
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
 			return null;
 		}
 	}

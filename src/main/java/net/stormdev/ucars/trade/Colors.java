@@ -1,5 +1,7 @@
 package net.stormdev.ucars.trade;
 
+import org.bukkit.ChatColor;
+
 public class Colors {
 	private String success = "";
 	private String error = "";
@@ -14,6 +16,13 @@ public class Colors {
 		this.info = main.colorise(info);
 		this.title = main.colorise(title);
 		this.tp = main.colorise(tp);
+	}
+	
+	public static String strip(String in){
+		in = ChatColor.stripColor(in);
+		in = ChatColor.translateAlternateColorCodes('&', in);
+		in = ChatColor.translateAlternateColorCodes('§', in);
+		return in;
 	}
 
 	public String getSuccess() {

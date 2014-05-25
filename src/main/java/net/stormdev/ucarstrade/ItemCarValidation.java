@@ -76,13 +76,17 @@ public class ItemCarValidation {
 			isHandlingDamaged = true;
 		}
 		
-		if(lore.size() > i){
-			i++;
-			for(@SuppressWarnings("unused")
-			int z=i;i<lore.size();i++){
-				line = Colors.strip(lore.get(i)).toLowerCase(); //-Modifier: <Name>
-				modifiers.add(line.replaceFirst(Pattern.quote("-modifier: "), "").trim());
+		try {
+			if(lore.size() > i){
+				i++;
+				for(@SuppressWarnings("unused")
+				int z=i;i<lore.size();i++){
+					line = Colors.strip(lore.get(i)).toLowerCase(); //-Modifier: <Name>
+					modifiers.add(line.replaceFirst(Pattern.quote("-modifier: "), "").trim());
+				}
 			}
+		} catch (Exception e) {
+			return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
 		}
 		return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
 	}

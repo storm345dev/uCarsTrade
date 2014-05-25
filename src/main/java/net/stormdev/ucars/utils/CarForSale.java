@@ -3,16 +3,20 @@ package net.stormdev.ucars.utils;
 import java.io.Serializable;
 import java.util.UUID;
 
+import net.stormdev.ucarstrade.cars.DrivenCar;
+
 public class CarForSale implements Serializable {
-	private static final long serialVersionUID = -5344858010281860425L;
-	private UUID carId = null;
+	private static final long serialVersionUID = 2L;
+	private DrivenCar car = null;
 	private String seller = null;
 	private double price = 1.0;
 	private double profit = 1.0;
 	private DisplayType modifier = null;
-	public CarForSale(UUID carId, String sellerName, double price, double profitForSeller,
+	private UUID uuid = UUID.randomUUID();
+	public CarForSale(DrivenCar car, String sellerName, double price, double profitForSeller,
 			DisplayType modifier){
-		this.carId = carId;
+		this.uuid = UUID.randomUUID();
+		this.car = car;
 		this.seller = sellerName;
 		this.price = price;
 		this.profit = profitForSeller;
@@ -21,8 +25,11 @@ public class CarForSale implements Serializable {
 	public String getSeller(){
 		return seller;
 	}
-	public UUID getCarId(){
-		return carId;
+	public UUID getUUID(){
+		return uuid;
+	}
+	public DrivenCar getCar(){
+		return car;
 	}
     public double getPrice(){
     	return price;

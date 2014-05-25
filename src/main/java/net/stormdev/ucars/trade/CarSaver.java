@@ -30,6 +30,9 @@ public class CarSaver {
 	}
 	
 	public void carNoLongerInUse(DrivenCar car){
+		if(car == null || car.getId() == null){
+			throw new RuntimeException("DrivenCar is null!");
+		}
 		inUse.remove(car.getId());
 		asyncSave();
 	}
@@ -40,6 +43,9 @@ public class CarSaver {
 	}
 	
 	public void carNowInUse(DrivenCar car){
+		if(car == null || car.getId() == null){
+			throw new RuntimeException("DrivenCar is null!");
+		}
 		inUse.put(car.getId(), car);
 		asyncSave();
 	}

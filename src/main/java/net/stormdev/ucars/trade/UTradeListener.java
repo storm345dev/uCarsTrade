@@ -529,10 +529,10 @@ public class UTradeListener implements Listener {
 			else if(upgrade.getType() == Material.REDSTONE){
 				//Increment speed
 				double speed = car.getSpeed();
-				speed = speed + (0.05*upgrade.getAmount());
-				speed = speed * 100; //0.05 -> 5
+				speed = speed + (0.05d*upgrade.getAmount());
+				speed = speed * 1000;
 				speed = Math.round(speed);
-				speed = speed / 100; //5 -> 0.05
+				speed = speed / 1000;
 				if(speed > 4){
 					speed = 4;
 				}
@@ -542,6 +542,25 @@ public class UTradeListener implements Listener {
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+4+"x)");
 				player.sendMessage(upgradeMsg);
 				upgrade.setAmount(0);
+				car.setSpeed(speed);
+			}
+			else if(upgrade.getType() == Material.REDSTONE_BLOCK){
+				//Increment speed
+				double speed = car.getSpeed();
+				speed = speed + (0.05d*9d*upgrade.getAmount());
+				speed = speed * 1000;
+				speed = Math.round(speed);
+				speed = speed / 1000;
+				if(speed > 4){
+					speed = 4;
+				}
+				upgradeMsg = ucars.colorise(upgradeMsg);
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), (0.05*upgrade.getAmount())+"x");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "speed");
+				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%value%"), speed+"x (Max: "+4+"x)");
+				player.sendMessage(upgradeMsg);
+				upgrade.setAmount(0);
+				car.setSpeed(speed);
 			}
 			else{
 				//Apply display upgrades
@@ -1177,7 +1196,7 @@ public class UTradeListener implements Listener {
 					return;
 				}
 				//We have selected the correct car
-				if(!plugin.salesManager.carsForSale.containsKey(car.getCarId())){
+				if(!plugin.salesManager.carsForSale.containsKey(car.getUUID())){
 					//It was just bought
 					return;
 				}
@@ -1196,7 +1215,7 @@ public class UTradeListener implements Listener {
 					player.sendMessage(main.colors.getError()+msg);
 					return;
 				}
-				plugin.salesManager.carsForSale.remove(car.getCarId());
+				plugin.salesManager.carsForSale.remove(car.getUUID());
 				EconomyResponse er = main.economy.withdrawPlayer(player.getName(), price);
 				balance = er.balance;
 				if(!er.transactionSuccess()){
@@ -1223,10 +1242,8 @@ public class UTradeListener implements Listener {
 				msg = msg.replaceAll(Pattern.quote("%item%"), "1 car");
 				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(main.config.getString("general.carTrading.currencySign")+price));
 				//Give them the car and remove it from the list
-				UUID carId = car.getCarId();
+				DrivenCar c = car.getCar();
 				plugin.salesManager.saveCars();
-				DrivenCar c = plugin.carSaver.getCarInUse(carId);
-				plugin.carSaver.carNoLongerInUse(c);
 				player.getInventory().addItem(c.toItemStack());
 				player.sendMessage(main.colors.getSuccess()+msg);
 			}
@@ -1412,13 +1429,13 @@ public class UTradeListener implements Listener {
 				msg = msg.replaceAll(Pattern.quote("%price%"), Matcher.quoteReplacement(units));
 				// Add to market for sale
 				double purchase = CarValueCalculator.getCarValueForPurchase(c);
-				UUID rand = UUID.randomUUID();
-				CarForSale saleItem = new CarForSale(rand, player.getName(), 
+				CarForSale saleItem = new CarForSale(c, player.getName(), 
 						purchase, price, null);
-				plugin.carSaver.carNowInUse(c);//Track it, even though it's not in use
-				plugin.salesManager.carsForSale.put(rand, saleItem);
+				plugin.salesManager.carsForSale.put(saleItem.getUUID(), saleItem);
 				plugin.salesManager.saveCars();
 				player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
+				event.getClickEvent().setWillClose(true);
+				event.getClickEvent().setWillDestroy(true);
 			}
 			else if(position == 4){
 				//Check if car and if it is update the sale button
@@ -1509,6 +1526,8 @@ public class UTradeListener implements Listener {
 					plugin.salesManager.saveUpgrades();
 					player.sendMessage(main.colors.getInfo()+msg); //Tell player they are selling it on the market
 				}
+				event.getClickEvent().setWillClose(true);
+				event.getClickEvent().setWillDestroy(true);
 				clickEvent.getMenu().destroy(); //Close the menu
 			}
 			else if(position == 4){
@@ -1575,32 +1594,24 @@ public class UTradeListener implements Listener {
 			CarForSale car= cars.get(keys[i]);
 			double price = car.getPrice();
 	        String seller = car.getSeller();
-	        UUID carId = car.getCarId();
 	        ItemStack item = new ItemStack(Material.AIR);
 	        String name = "Car";
 	        List<String> lore = new ArrayList<String>();
-	        if(plugin.carSaver.isAUCar(carId)){
-	        	DrivenCar c = plugin.carSaver.getCarInUse(carId);
-	        	name = c.getName();
-	        	item = c.toItemStack();
-	        	ItemMeta im = item.getItemMeta();
-	        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
-	        	lore.add(main.colors.getInfo()+"Seller: "+seller);
-	        	List<String> iml = im.getLore();
-	        	iml.remove(0);
-	        	lore.addAll(2, iml);
-	        	im.setLore(lore);
-	        	item.setItemMeta(im); 
-	        if(pos < 52){
-	        	plugin.carSaver.carNoLongerInUse(carId);
-        		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
-        		pos++;
-        	}
-	        }
-	        else{
-	        	plugin.salesManager.carsForSale.remove(carId);
-	        	plugin.salesManager.saveCars();
-	        }
+	        DrivenCar c = car.getCar();
+        	name = c.getName();
+        	item = c.toItemStack();
+        	ItemMeta im = item.getItemMeta();
+        	lore.add(main.colors.getInfo()+main.config.getString("general.carTrading.currencySign")+price);
+        	lore.add(main.colors.getInfo()+"Seller: "+seller);
+        	List<String> iml = im.getLore();
+        	iml.remove(0);
+        	lore.addAll(2, iml);
+        	im.setLore(lore);
+        	item.setItemMeta(im); 
+        if(pos < 52){
+    		menu.setOption(pos, item, main.colors.getTitle()+name, lore);
+    		pos++;
+    	}
 		}
 		return menu;
 	}

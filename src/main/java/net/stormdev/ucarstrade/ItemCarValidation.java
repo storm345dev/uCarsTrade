@@ -71,7 +71,7 @@ public class ItemCarValidation {
 		
 		i++;
 		if(i >= lore.size()){
-			isHandlingDamaged = false;
+			return null;
 		}
 		else {
 			line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] undamaged

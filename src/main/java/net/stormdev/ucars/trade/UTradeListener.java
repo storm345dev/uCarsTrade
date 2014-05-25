@@ -942,13 +942,12 @@ public class UTradeListener implements Listener {
 		 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
 		 * car.setVelocity(new Vector(0,0,0));
 		 */
-		UUID id = car.getUniqueId();
 		car.setMetadata("trade.car", new StatValue(true, plugin));
 			ItemStack placed = event.getPlayer().getItemInHand();
 			placed.setAmount(0);
 			event.getPlayer().getInventory().setItemInHand(placed);
 		event.setCancelled(true);
-		c.setId(id);
+		c.setId(car.getUniqueId());
 		plugin.carSaver.carNowInUse(c);
 		String name = c.getName();
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");

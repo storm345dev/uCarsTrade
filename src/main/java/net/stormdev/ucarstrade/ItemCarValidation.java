@@ -2,11 +2,8 @@ package net.stormdev.ucarstrade;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
-import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.utils.Car;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
@@ -47,16 +44,6 @@ public class ItemCarValidation {
 			i = 1;
 			if(!ChatColor.stripColor((lore.get(i))).toLowerCase().contains("[speed:]")){ //Using deprecated format
 				return null;
-			}
-			else {
-				try {
-					Car c = main.plugin.carSaver.getOldCar(UUID.fromString(ChatColor.stripColor(lore.get(0))));
-					main.plugin.carSaver.removeOldCar(UUID.fromString(ChatColor.stripColor(lore.get(0))));
-					return DrivenCar.convert(c);
-				} catch (Exception e) {
-					//Oh dear, not a car oh well
-					return null;
-				}
 			}
 		}
 		

@@ -70,10 +70,15 @@ public class ItemCarValidation {
 		}
 		
 		i++;
-		line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] undamaged
-		String handlingRaw = line.replaceFirst(Pattern.quote("[handling:] "), "").trim();
-		if(handlingRaw.equalsIgnoreCase("damaged")){
-			isHandlingDamaged = true;
+		if(i > lore.size()){
+			isHandlingDamaged = false;
+		}
+		else {
+			line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] undamaged
+			String handlingRaw = line.replaceFirst(Pattern.quote("[handling:] "), "").trim();
+			if(handlingRaw.equalsIgnoreCase("damaged")){
+				isHandlingDamaged = true;
+			}
 		}
 		
 		try {

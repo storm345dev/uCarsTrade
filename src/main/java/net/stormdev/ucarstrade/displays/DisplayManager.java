@@ -1,7 +1,5 @@
-package net.stormdev.ucars.trade;
+package net.stormdev.ucarstrade.displays;
 
-import net.stormdev.ucars.stats.Stat;
-import net.stormdev.ucars.utils.DisplayType;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.entity.Minecart;
@@ -13,7 +11,10 @@ public class DisplayManager {
 		//TODO Put correct display items in car
 		if(car.getModifiers().size() > 0){
 			for(int i=0;i<car.getModifiers().size();i++){
-				//TODO Make it work
+				DisplayType t = Displays.getFromName(car.getModifiers().get(i));
+				if(t != null){
+					t.fill(vehicle, owner);
+				}
 			}
 			
 			/*

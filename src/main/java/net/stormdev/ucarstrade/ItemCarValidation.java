@@ -86,8 +86,8 @@ public class ItemCarValidation {
 				i++;
 				for(@SuppressWarnings("unused")
 				int z=i;i<lore.size();i++){
-					line = Colors.strip(lore.get(i)).toLowerCase(); //-Modifier: <Name>
-					modifiers.add(line.replaceFirst(Pattern.quote("-modifier: "), "").trim());
+					line = Colors.strip(lore.get(i)); //-Modifier: <Name>
+					modifiers.add(line.replaceFirst(Pattern.quote("-Modifier: "), "").trim());
 				}
 			}
 		} catch (Exception e) {

@@ -1,4 +1,4 @@
-package net.stormdev.ucars.utils;
+package net.stormdev.ucarstrade.displays;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.utils.CarFiller;
 
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -268,6 +269,19 @@ public class Displays implements Serializable {
 							Arrays.asList(
 									main.colors.getInfo()+"Makes your car hover", 
 									main.colors.getInfo()+"-Make with 64 feathers")));
+	
+	public static DisplayType getFromName(String n){
+		if(displays.size() < 1){
+			listDisplays();
+		}
+		for(DisplayType t:displays.values()){
+			if(t.getName().equalsIgnoreCase(n)){
+				return t;
+			}
+		}
+		return null;
+	}
+	
 	public static DisplayType canAdd(ItemStack items){
 		if(displays.size() < 1){
 			listDisplays();
@@ -284,6 +298,7 @@ public class Displays implements Serializable {
 	}
 	public static void listDisplays(){
 		//For each display type add the item stack
+		displays.clear();
 		Field[] fields = Displays.class.getDeclaredFields();
 		for(Field f:fields){
 			f.setAccessible(true);

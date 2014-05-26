@@ -17,8 +17,6 @@ import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.CarValueCalculator;
-import net.stormdev.ucars.utils.DisplayType;
-import net.stormdev.ucars.utils.Displays;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.InputMenu;
 import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
@@ -28,6 +26,9 @@ import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
 import net.stormdev.ucarstrade.ItemCarValidation;
 import net.stormdev.ucarstrade.cars.DrivenCar;
+import net.stormdev.ucarstrade.displays.DisplayManager;
+import net.stormdev.ucarstrade.displays.DisplayType;
+import net.stormdev.ucarstrade.displays.Displays;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -569,7 +570,13 @@ public class UTradeListener implements Listener {
 					//Invalid item
 					return;
 				}
-				//TODO Some kind of new way for displays to work
+				if(car.getModifiers().size() > 0){ //Already got a modifier
+					return;
+				}
+				//Some kind of new way for displays to work
+				List<String> modifys = car.getModifiers();
+				modifys.add(type.getName());
+				car.setModifiers(modifys);
 				upgradeMsg = ucars.colorise(upgradeMsg);
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%amount%"), "1");
 				upgradeMsg = upgradeMsg.replaceAll(Pattern.quote("%stat%"), "Modifier");

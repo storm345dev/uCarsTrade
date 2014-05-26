@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import net.stormdev.ucarstrade.cars.DrivenCar;
+import net.stormdev.ucarstrade.displays.DisplayType;
 
 public class CarForSale implements Serializable {
 	private static final long serialVersionUID = 2L;

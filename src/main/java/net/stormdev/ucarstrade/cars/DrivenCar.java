@@ -8,6 +8,7 @@ import java.util.UUID;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.ItemRename;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,7 +45,7 @@ public class DrivenCar implements Serializable {
 		ItemStack stack = new ItemStack(Material.MINECART);
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
-		
+		lore.add(ChatColor.GRAY+"car");
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed+"x");
 		double max = ucars.config.getDouble("general.cars.health.max");
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);

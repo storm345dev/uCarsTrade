@@ -2,6 +2,7 @@ package net.stormdev.ucarstrade;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import net.stormdev.ucars.trade.Colors;
@@ -41,6 +42,20 @@ public class ItemCarValidation {
 		}
 		int i = 0;
 		if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){
+			String firstLine = Colors.strip((lore.get(i))).toLowerCase();
+			if(firstLine.equalsIgnoreCase("plane")){
+				return null;
+			}
+			else if(!firstLine.equalsIgnoreCase("car")){ //It doesn't say car...
+				try {
+					UUID.fromString(firstLine); //Test if it's a UUID string
+				} catch (Exception e) {
+					// Not an old car either
+					return null;
+				}
+				//It's a UUID...
+				
+			}
 			i = 1;
 			if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){ //Using deprecated format
 				return null;
@@ -75,6 +90,9 @@ public class ItemCarValidation {
 		}
 		else {
 			line = Colors.strip(lore.get(i)).toLowerCase(); //[Handling:] undamaged
+			if(!line.contains("handling")){
+				return null;
+			}
 			String handlingRaw = line.replaceFirst(Pattern.quote("[handling:] "), "").trim();
 			if(handlingRaw.equalsIgnoreCase("damaged")){
 				isHandlingDamaged = true;

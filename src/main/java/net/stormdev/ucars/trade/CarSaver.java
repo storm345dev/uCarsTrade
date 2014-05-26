@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class CarSaver {
 	private ConcurrentHashMap<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
+	private ConcurrentHashMap<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();
 	
 	File newSaveFile = null;
 	public CarSaver(File newSaveFile){
@@ -22,11 +23,29 @@ public class CarSaver {
 	}
 	
 	public boolean isAUCar(UUID carId){
+		if(cacheSize()){
+			if(cache.containsKey(carId)){
+				return true;
+			}
+		}
 		return inUse.containsKey(carId);
 	}
 	
 	public DrivenCar getCarInUse(UUID carId){
+		if(cacheSize()){
+			DrivenCar dc = cache.get(carId);
+			if(dc != null){
+				return dc;
+			}
+		}
 		return inUse.get(carId);
+	}
+	
+	private boolean cacheSize(){
+		while(cache.size() > main.plugin.carCache){
+			cache.remove(cache.keySet().toArray(new String[]{})[0]);
+		}
+		return inUse.size() > cache.size();
 	}
 	
 	public void carNoLongerInUse(DrivenCar car){
@@ -34,12 +53,16 @@ public class CarSaver {
 			throw new RuntimeException("DrivenCar is null!");
 		}
 		inUse.remove(car.getId());
+		cache.remove(car.getId());
 		asyncSave();
+		cacheSize();
 	}
 	
 	public void carNoLongerInUse(UUID id){
 		inUse.remove(id);
+		cache.remove(id);
 		asyncSave();
+		cacheSize();
 	}
 	
 	public void carNowInUse(DrivenCar car){
@@ -47,7 +70,9 @@ public class CarSaver {
 			throw new RuntimeException("DrivenCar is null!");
 		}
 		inUse.put(car.getId(), car);
+		cache.put(car.getId(), car);
 		asyncSave();
+		cacheSize();
 	}
 	
 	public void asyncSave(){
@@ -78,6 +103,7 @@ public class CarSaver {
 		if(this.inUse == null){
 			this.inUse = new ConcurrentHashMap<UUID, DrivenCar>();
 		}
+		cacheSize();
 	}
 	public void save(){
 		asyncSave();

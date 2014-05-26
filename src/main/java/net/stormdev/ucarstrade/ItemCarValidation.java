@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 import net.stormdev.ucars.trade.Colors;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

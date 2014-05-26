@@ -22,6 +22,7 @@ public class Colors {
 		in = ChatColor.stripColor(in);
 		in = ChatColor.translateAlternateColorCodes('&', in);
 		in = ChatColor.translateAlternateColorCodes('§', in);
+		in = ChatColor.translateAlternateColorCodes('?', in);
 		return in;
 	}
 

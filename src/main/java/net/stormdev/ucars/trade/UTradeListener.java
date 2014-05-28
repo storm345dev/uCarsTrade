@@ -79,6 +79,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import com.useful.uCarsAPI.uCarRespawnEvent;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.ClosestFace;
@@ -140,6 +141,19 @@ public class UTradeListener implements Listener {
 				return;
 			}}, 3l);
 		return;
+	}
+	
+	@EventHandler
+	void respawn(uCarRespawnEvent event){
+		UUID old = event.getOldEntityId();
+		UUID newId = event.getNewEntityId();
+		DrivenCar d = plugin.carSaver.getCarInUse(old);
+		if(d == null){
+			return;
+		}
+		d.setId(newId);
+		plugin.carSaver.carNoLongerInUse(old);
+		plugin.carSaver.carNowInUse(d);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST) //Get called first

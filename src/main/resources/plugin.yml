@@ -1,6 +1,6 @@
 name: uCarsTrade
 main: net.stormdev.ucars.trade.main
-version: 5.1
+version: 6
 softdepend: [Vault]
 depend: [uCars]
 commands:

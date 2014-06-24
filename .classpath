@@ -7,7 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry including="*|**/*.java" kind="src" path="src/main/resources"/>
-	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/plugins/Vault.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/bukkit.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/plugintestserver/mcserver.jar">
 		<attributes>

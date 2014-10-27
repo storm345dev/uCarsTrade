@@ -35,9 +35,9 @@ public class AISpawnManager {
 	private Material roadEdge;
 	private Material junction;
 	private BukkitTask task = null;
-	private static long spawnRate = 6l;
+	private static long spawnRate = 20l;
 	private List<String> aiNames;
-	private static int cap = 69;
+	private static int cap = 30;
 	private static int liveCap = 5;
 	private static int spawned = 0;
 	
@@ -565,13 +565,18 @@ public class AISpawnManager {
 						return; //Already a car in close proximity
 					}
 				}
-				List<Entity> nearby = m.getNearbyEntities(10, 3, 10);
+				List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(20, 3, 20));
+				for(Entity e:new ArrayList<Entity>(nearby)){
+					if(e.getType() != EntityType.MINECART){
+						nearby.remove(e);
+					}
+				}
 				if(nearby.size() > 2){
 					//Too many in area
 					m.remove();
 					return;
 				}
-				//Is valid
+				//It's valid
 				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
 				v.setAdult();
 				v.setBreed(false);

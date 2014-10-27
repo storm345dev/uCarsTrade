@@ -72,6 +72,20 @@ public class AISpawnManager {
 		this.enabled = on;
 	}
 	
+	private List<String> carNames = new ArrayList<String>();
+	
+	private String randomCarName(){
+		List<String> names = carNames;
+		if(names.size() > 0){
+			int max = names.size();
+			int random = main.random.nextInt(max);
+			return names.get(random);
+		}
+		else {
+			return "Car";
+		}
+	}
+	
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
 		this.enabled = enabled;
@@ -81,6 +95,7 @@ public class AISpawnManager {
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
 		cap = main.config.getInt("general.ai.limit");
+		carNames = main.config.getStringList("general.cars.names");
 		liveCap = 5;
 		// A task to dynamically change liveCap to match the server's current AI holdings
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
@@ -586,7 +601,7 @@ public class AISpawnManager {
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
 				
-				DrivenCar c = new DrivenCar("NPC-Car", 0.75, 10, false, new ArrayList<String>()).setNPC(true);
+				DrivenCar c = new DrivenCar(randomCarName(), 0.75, 10, false, new ArrayList<String>()).setNPC(true);
 				//Make it a car
 				c.setId(m.getUniqueId());
 				plugin.carSaver.carNowInUse(c);

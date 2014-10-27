@@ -586,7 +586,7 @@ public class AISpawnManager {
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
 				
-				DrivenCar c = new DrivenCar("NPC-Car", 1, 50, false, new ArrayList<String>()).setNPC(true);
+				DrivenCar c = new DrivenCar("NPC-Car", 0.75, 10, false, new ArrayList<String>()).setNPC(true);
 				//Make it a car
 				c.setId(m.getUniqueId());
 				plugin.carSaver.carNowInUse(c);

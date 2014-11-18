@@ -43,7 +43,7 @@ public class CarSaver {
 	
 	private boolean cacheSize(){
 		while(cache.size() > main.plugin.carCache){
-			cache.remove(cache.keySet().toArray(new String[]{})[0]);
+			cache.remove(cache.keySet().toArray(new UUID[]{})[0]);
 		}
 		return inUse.size() > cache.size();
 	}

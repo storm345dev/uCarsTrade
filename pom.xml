@@ -111,5 +111,5 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <version>6</version>
+    <version>7</version>
 </project>

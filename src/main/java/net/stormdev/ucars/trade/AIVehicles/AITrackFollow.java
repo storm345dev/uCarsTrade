@@ -10,9 +10,9 @@ import org.bukkit.entity.Entity;
 import com.useful.ucarsCommon.StatValue;
 
 public class AITrackFollow {
-	public static TrackingData nextBlock(Block current, BlockFace dir, Material trackBlock, Material junctionBlock, Entity vehicle){
+	public static TrackingData nextBlock(Block current, BlockFace dir, Material junctionBlock, Entity vehicle){
 		Block cr = current.getRelative(dir);
-		TrackBlock ch = checkIfTracker(current, cr, trackBlock, junctionBlock);
+		TrackBlock ch = checkIfTracker(current, cr, junctionBlock);
 		boolean turn = false;
 		if(ch != null){
 			Block check = ch.block;
@@ -35,8 +35,8 @@ public class AITrackFollow {
 		while(leftCheck != behind && rightCheck != behind){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
-			TrackBlock clb = checkIfTracker(current, lb, trackBlock, junctionBlock);
-			TrackBlock crb = checkIfTracker(current, rb, trackBlock, junctionBlock);
+			TrackBlock clb = checkIfTracker(current, lb, junctionBlock);
+			TrackBlock crb = checkIfTracker(current, rb, junctionBlock);
 			//Check right first
 			if(crb != null) {
 				if(vehicle != null){
@@ -73,8 +73,8 @@ public class AITrackFollow {
 		
 		return new TrackingData(current, dir, false); //Where we came from isnt road, stay where we are
 	}
-	public static TrackBlock checkIfTracker(Block current, Block check, Material trackBlock, Material junction){
-		if(check.getType() == trackBlock){
+	public static TrackBlock checkIfTracker(Block current, Block check, Material junction){
+		if(AIRouter.isTrackBlock(check.getType())){
 			current = check;
 			return new TrackBlock(current, false);
 		}
@@ -82,7 +82,7 @@ public class AITrackFollow {
 			current = check;
 			return new TrackBlock(current, true);
 		}
-		else if(check.getRelative(BlockFace.UP).getType() == trackBlock){
+		else if(AIRouter.isTrackBlock(check.getRelative(BlockFace.UP).getType())){
 			current = check.getRelative(BlockFace.UP);
 			return new TrackBlock(current, false);
 		}
@@ -90,7 +90,7 @@ public class AITrackFollow {
 			current = check.getRelative(BlockFace.UP);
 			return new TrackBlock(current, true);
 		}
-		else if(check.getRelative(BlockFace.DOWN).getType() == trackBlock){
+		else if(AIRouter.isTrackBlock(check.getRelative(BlockFace.DOWN).getType())){
 			current = check.getRelative(BlockFace.DOWN);
 			return new TrackBlock(current, false);
 		}
@@ -100,6 +100,20 @@ public class AITrackFollow {
 		}
 		return null;
 	}
+	
+	public static BlockFace[] dirs(){ //used for iterating over dirs for pattern matching
+		return new BlockFace[]{
+				BlockFace.NORTH,
+				/*BlockFace.NORTH_EAST,*/
+				BlockFace.EAST,
+				/*BlockFace.SOUTH_EAST,*/
+				BlockFace.SOUTH,
+				/*BlockFace.SOUTH_WEST,*/
+				BlockFace.WEST,
+				/*BlockFace.NORTH_WEST*/
+		};
+	}
+	
 	public static BlockFace nextRightFace(BlockFace face){
 		switch(face){
 		case NORTH: return BlockFace.NORTH_EAST;

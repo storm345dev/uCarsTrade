@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -31,8 +32,7 @@ public class AISpawnManager {
 	private main plugin;
 	private boolean enabled;
 	private boolean fullEnable;
-	private Material trackBlock;
-	private Material roadEdge;
+	private static Material roadEdge;
 	private Material junction;
 	private BukkitTask task = null;
 	private static long spawnRate = 20l;
@@ -90,7 +90,6 @@ public class AISpawnManager {
 		this.plugin = plugin;
 		this.enabled = enabled;
 		this.fullEnable = enabled;
-		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
@@ -105,7 +104,7 @@ public class AISpawnManager {
 				// Use resource score to get live cap
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
-				if(score > 84 && DynamicLagReducer.getTPS() > 19.5){
+				if(score > 84 && DynamicLagReducer.getTPS() > 19.4){
 					newCap++;
 				}
 				else if(score < 70 || DynamicLagReducer.getTPS() < 17.5){
@@ -136,10 +135,9 @@ public class AISpawnManager {
 		
 		new DynamicLagReducer().start();
 		
-		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
 		junction = Material.getMaterial(junRaw);
-		if(trackBlock == null || roadEdge == null || junction == null){
+		if(roadEdge == null || junction == null){
 			main.logger.info("Didn't enable AIs as configuration is invalid!");
 			enabled = false;
 		}
@@ -220,8 +218,8 @@ public class AISpawnManager {
 			
 			int minY = y-10;
 			
-			tracked = b.getType() == trackBlock ? b : null;
-			tracked = br.getType() == trackBlock ? br : null;
+			tracked = AIRouter.isTrackBlock(b.getType()) ? b : null;
+			tracked = AIRouter.isTrackBlock(br.getType()) ? br : null;
 			
 			while(tracked == null
 					&& !stopSearch
@@ -232,7 +230,7 @@ public class AISpawnManager {
 					@Override
 					public void run() {
 						Location check = new Location(w, x, yy, z);
-						if(check.getBlock().getType() == trackBlock){
+						if(AIRouter.isTrackBlock(check.getBlock().getType())){
 							spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
 						}
 						return;
@@ -286,8 +284,8 @@ public class AISpawnManager {
 				
 				int minY = y-10;
 				
-				tracked = b.getType() == trackBlock ? b : null;
-				tracked = br.getType() == trackBlock ? br : null;
+				tracked = AIRouter.isTrackBlock(b.getType()) ? b : null;
+				tracked = AIRouter.isTrackBlock(br.getType()) ? br : null;
 				
 				while(tracked == null
 						&& !stopSearch
@@ -298,7 +296,7 @@ public class AISpawnManager {
 						@Override
 						public void run() {
 							Location check = new Location(w, x, yy, z);
-							if(check.getBlock().getType() == trackBlock){
+							if(AIRouter.isTrackBlock(check.getBlock().getType())){
 								spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
 							}
 							return;
@@ -358,15 +356,15 @@ public class AISpawnManager {
 			
 			int minY = y-10;
 			
-			tracked = b.getType() == trackBlock ? b : null;
-			tracked = br.getType() == trackBlock ? br : null;
+			tracked = AIRouter.isTrackBlock(b.getType()) ? b : null;
+			tracked = AIRouter.isTrackBlock(br.getType()) ? br : null;
 			
 			while(tracked == null
 					&& !stopSearch
 					&& y>minY){
 				
 				Location check = new Location(w, x, y, z);
-				if(check.getBlock().getType() == trackBlock){
+				if(AIRouter.isTrackBlock(check.getBlock().getType())){
 					spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
 				}
 				
@@ -408,7 +406,12 @@ public class AISpawnManager {
 				
 				return new SpawnData[]{new SpawnData(b, br, w, x, y, z)};
 			}}).executeOnce();
-		SpawnData data = spawnData.getResults()[0];
+		SpawnData data;
+		try {
+			data = spawnData.getResults()[0];
+		} catch (Exception e) {
+			return;
+		}
 		
 		//Location playerLoc = data.getPlayerLoc();
 		Block b = data.getB();
@@ -420,8 +423,8 @@ public class AISpawnManager {
 		
 		int minY = y-10;
 		
-		tracked = b.getType() == trackBlock ? b : null;
-		tracked = br.getType() == trackBlock ? br : null;
+		tracked = AIRouter.isTrackBlock(b.getType()) ? b : null;
+		tracked = AIRouter.isTrackBlock(br.getType()) ? br : null;
 		
 		while(tracked == null
 				&& !stopSearch
@@ -432,7 +435,7 @@ public class AISpawnManager {
 
 				@Override
 				public void run() {
-					if(check.getBlock().getType() == trackBlock){
+					if(AIRouter.isTrackBlock(check.getBlock().getType())){
 						spawnFromTrackBlock(check, ClosestFace.getClosestFace(player.getLocation().getYaw()));
 					}
 					return;
@@ -449,7 +452,7 @@ public class AISpawnManager {
 		int distance = randomDistanceAmount();
 		while(distance > 0){
 			//Need to follow the road
-			TrackingData data = AITrackFollow.nextBlock(current, currentDir, trackBlock, junction, null);
+			TrackingData data = AITrackFollow.nextBlock(current, currentDir, junction, null);
 			
 			current = data.nextBlock;
 			currentDir = data.dir;
@@ -457,7 +460,7 @@ public class AISpawnManager {
 		}
 		//Current is the track block
 		Block toSpawn = current.getRelative(BlockFace.UP);
-		while(toSpawn.getType() == trackBlock && toSpawn.getY() <= 256){ //Height limit
+		while(AIRouter.isTrackBlock(toSpawn.getType()) && toSpawn.getY() <= 256){ //Height limit
 			toSpawn = toSpawn.getRelative(BlockFace.UP);
 		}
 		//toSpawn is the road surface
@@ -478,9 +481,43 @@ public class AISpawnManager {
 		spawnNPC(spawnLoc, carDirection);
 	}
 	
-	public BlockFace carriagewayDirection(Block roadSpawnBlock){
-		BlockFace dir = BlockFace.NORTH; //By default, north bound
+	public static BlockFace carriagewayDirection(Block roadSpawnBlock){
+		String currentType = AIRouter.getTrackBlockType(roadSpawnBlock.getType());
+		if(currentType != null){
+			int currentPos = AIRouter.getTrackBlockIndexByType(currentType);
+			int nextPos = currentPos+1;
+			if(nextPos >= AIRouter.pattern.length){
+				nextPos = 0;
+			}
+			if(currentPos >= 0){
+				Block underunder = roadSpawnBlock.getRelative(BlockFace.DOWN);
+				if(underunder.getState() instanceof Sign){
+					Sign s = (Sign) underunder.getState();
+					String top = s.getLine(0);
+					if(top != null && top.length() > 0){
+						try {
+							return BlockFace.valueOf(top);
+						} catch (Exception e) {
+							//Not a road related sign
+						}
+					}
+				}
+				for(BlockFace pDir: AITrackFollow.dirs()){
+					Block next = roadSpawnBlock.getRelative(pDir);
+					String type = AIRouter.getTrackBlockType(next.getType());
+					if(type == null || type.equals(currentType)){
+						continue;
+					}
+					int pos = AIRouter.getTrackBlockIndexByType(type);
+					if(pos == nextPos && pos != currentPos){
+						return pDir;
+					}
+				}
+			}
+		}
 		
+		//If no pattern, do this
+		BlockFace dir = BlockFace.NORTH; //By default, north bound
 		//Find road edges
 		RoadEdge north = findRoadEdge(roadSpawnBlock, BlockFace.NORTH);
 		RoadEdge east = findRoadEdge(roadSpawnBlock, BlockFace.EAST);
@@ -548,7 +585,7 @@ public class AISpawnManager {
 		return dir;
 	}
 	
-	public RoadEdge findRoadEdge(Block roadSpawnBlock, BlockFace dir){
+	public static RoadEdge findRoadEdge(Block roadSpawnBlock, BlockFace dir){
 		Block edge = null;
 		int distance = 1;
 		int z = 1;

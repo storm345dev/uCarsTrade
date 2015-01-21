@@ -233,8 +233,20 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.enable")) {
 				config.set("general.ai.enable", false);
 			}
-        	if (!config.contains("general.ai.trackerBlock")) {
-				config.set("general.ai.trackerBlock", "DIAMOND_ORE");
+        	if (!config.contains("general.ai.trackerBlock.a")) {
+				config.set("general.ai.trackerBlock.a", "DIAMOND_ORE");
+			}
+        	if (!config.contains("general.ai.trackerBlock.b")) {
+				config.set("general.ai.trackerBlock.b", "EMERALD_ORE");
+			}
+        	if (!config.contains("general.ai.trackerBlock.c")) {
+				config.set("general.ai.trackerBlock.c", "REDSTONE_ORE");
+			}
+        	if (!config.contains("general.ai.trackerBlock.d")) {
+				config.set("general.ai.trackerBlock.d", "GOLD_ORE");
+			}
+        	if (!config.contains("general.ai.trackerBlock.pattern")) {
+				config.set("general.ai.trackerBlock.pattern", "a,b,c,d");
 			}
         	if (!config.contains("general.ai.roadEdgeBlock")) {
 				config.set("general.ai.roadEdgeBlock", "IRON_ORE");

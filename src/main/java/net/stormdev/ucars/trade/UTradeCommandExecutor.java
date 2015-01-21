@@ -1,8 +1,16 @@
 package net.stormdev.ucars.trade;
 
+import java.util.HashSet;
+
+import net.stormdev.ucars.trade.AIVehicles.AIRouter;
+import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -73,6 +81,25 @@ public class UTradeCommandExecutor implements CommandExecutor {
 			        sender.sendMessage(main.colors.getSuccess()+Lang.get("general.cmd.give"));
 					return true;
 				}
+			}
+			else if(command.equalsIgnoreCase("debug")){
+				if(player == null){
+					return true;
+				}
+				Block target = player.getTargetBlock(null, 10);
+				if(target == null){
+					sender.sendMessage(ChatColor.RED+"You aren't looking a block");
+					return true;
+				}
+				Material mat = target.getType();
+				if(!AIRouter.isTrackBlock(mat)){
+					sender.sendMessage(ChatColor.RED+"You aren't looking at an AI tracker block, you are looking at "+mat.name());
+					return true;
+				}
+				
+				BlockFace dir = AISpawnManager.carriagewayDirection(target);
+				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir);
+				return true;
 			}
 			return true;
 		}

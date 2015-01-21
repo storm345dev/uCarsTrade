@@ -1,6 +1,9 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucarstrade.cars.DrivenCar;
@@ -9,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -23,20 +27,57 @@ import com.useful.ucarsCommon.StatValue;
 public class AIRouter {
 	
 	private boolean enabled;
-	private Material trackBlock;
+	private static Map<String, Material> trackBlocks = new HashMap<String, Material>();
+	private String trackPattern = "a,b,c";
+	public static String[] pattern = new String[]{};
 	private Material roadEdge;
 	private Material junction;
 	private uCarsAPI api;
 	
+	public static boolean isTrackBlock(Material mat){
+		for(Material mate:trackBlocks.values()){
+			if(mat.name().contains(mate.name())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static String getTrackBlockType(Material mat){
+		for(String name:trackBlocks.keySet()){
+			if(mat.name().contains(trackBlocks.get(name).name())){
+				return name;
+			}
+		}
+		return null;
+	}
+	
+	public static int getTrackBlockIndexByType(String type){
+		for(int i=0;i<pattern.length;i++){
+			if(pattern[i].equals(type)){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	public AIRouter(boolean enabled){
 		this.enabled = enabled;
-		String trackRaw = main.config.getString("general.ai.trackerBlock");
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");
-		trackBlock = Material.getMaterial(trackRaw);
 		roadEdge = Material.getMaterial(edgeRaw);
 		junction = Material.getMaterial(junRaw);
-		if(trackBlock == null || roadEdge == null || junction == null){
+		
+		ConfigurationSection sect = main.config.getConfigurationSection("general.ai.trackerBlock");
+		for(String patternName:sect.getKeys(false)){
+			if(patternName != null && patternName.length() > 0 && !patternName.equals("pattern")){
+				trackBlocks.put(patternName, Material.getMaterial(sect.getString(patternName)));
+			}
+		}
+		trackPattern = main.config.getString("general.ai.trackerBlock.pattern");
+		pattern = trackPattern.split(Pattern.quote(","));
+		
+		if(roadEdge == null || junction == null){
 			main.logger.info("Didn't enable AIs routing as configuration is invalid!");
 			enabled = false;
 		}
@@ -82,7 +123,7 @@ public class AIRouter {
 			}
 		}
 		
-		nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
+		/*nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;
 		for(Entity e:nearby){
 			if(e.getType() == EntityType.MINECART && e.hasMetadata("trade.npc")){ //Avoid driving into another car
@@ -117,22 +158,22 @@ public class AIRouter {
 					}
 				}
 			}
-		}
+		}*/
 		
-		if(stop || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+		if(/*stop || */car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}
 		
 		Material ut = under.getType();
 		
-		if(ut != trackBlock && ut != junction){
+		if(!isTrackBlock(ut) && ut != junction){
 			Block u= under.getRelative(BlockFace.DOWN);
 			ut = u.getType();
-			if(ut != trackBlock && ut != junction){
+			if(!isTrackBlock(ut) && ut != junction){
 				u = under.getRelative(BlockFace.UP);
 				ut = u.getType();
-				if(ut != trackBlock && ut != junction){
+				if(!isTrackBlock(ut) && ut != junction){
 					relocateRoad(car, under, loc, ut==junction);
 					return;
 				}
@@ -153,7 +194,7 @@ public class AIRouter {
 		else{
 			if(car.hasMetadata("car.needRouteCheck")){
 				car.removeMetadata("car.needRouteCheck", main.plugin);
-				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+				direction =  AISpawnManager.carriagewayDirection(under);
 				//Update direction stored on car...
 				car.removeMetadata("trade.npc", main.plugin);
 				car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
@@ -177,13 +218,13 @@ public class AIRouter {
 		}
 		else{
 			if(direction == null){
-				direction = main.plugin.aiSpawns.carriagewayDirection(under);
+				direction = AISpawnManager.carriagewayDirection(under);
 				keepVel = false;
 				data.setMotion(null);
 			}
 			//Calculate direction from road
 			if(!atJ){
-				BlockFace face = main.plugin.aiSpawns.carriagewayDirection(under);
+				BlockFace face = AISpawnManager.carriagewayDirection(under);
 				if(!direction.equals(face)){
 					direction = face;
 					keepVel = false;
@@ -202,8 +243,16 @@ public class AIRouter {
 			return;
 		}
 		
+		//Recalculate dir pretty goddam often
+		if(AIRouter.isTrackBlock(under.getType())){
+			BlockFace bf = AISpawnManager.carriagewayDirection(under);
+			if(bf != null){
+				direction = bf;
+			}
+		}
+		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, trackBlock, junction, car);
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, junction, car);
 		if(nextTrack.junction){
 			keepVel = false;
 		}
@@ -217,7 +266,7 @@ public class AIRouter {
 		}
 		Block next = nextTrack.nextBlock;
 		Block road = next.getRelative(BlockFace.UP);
-		while(road.getType() == trackBlock){
+		while(isTrackBlock(road.getType())){
 			road = road.getRelative(BlockFace.UP);
 		}
 		Block toDrive = road.getRelative(BlockFace.UP);
@@ -261,11 +310,17 @@ public class AIRouter {
 					z = (z / px) * speed;
 				}
 			}
+			if(px > 0.1 && pz > 0.1) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
+				//System.out.println("DECREMENTING VECTOR");
+				x *= 0.1;
+				z *= 0.1;
+			}
 			if(y>0){
 				y = 3;
 				x*= 10;
 				x*= 10;
 			}
+			
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
@@ -298,16 +353,16 @@ public class AIRouter {
 		Block W = under.getRelative(BlockFace.WEST);
 		Block toGo = null;
 		
-		if(N.getType() == trackBlock || N.getType() == junction){
+		if(isTrackBlock(N.getType()) || N.getType() == junction){
 			toGo = N;
 		}
-		else if(E.getType() == trackBlock || E.getType() == junction){
+		else if(isTrackBlock(E.getType()) || E.getType() == junction){
 			toGo = E;
 		}
-		else if(S.getType() == trackBlock || S.getType() == junction){
+		else if(isTrackBlock(S.getType()) || S.getType() == junction){
 			toGo = S;
 		}
-		else if(W.getType() == trackBlock || W.getType() == junction){
+		else if(isTrackBlock(W.getType()) || W.getType() == junction){
 			toGo = W;
 		}
 		

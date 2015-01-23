@@ -136,6 +136,34 @@ public class AISpawnManager {
 				
 				return;
 			}}, 100l, 100l); //Every 5s
+		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				int aiCars = 0;
+				for(World world:new ArrayList<World>(Bukkit.getWorlds())){
+					for(Entity e:new ArrayList<Entity>(world.getEntities())){
+						if(!(e instanceof Minecart)){
+							continue;
+						}
+						Minecart cart = (Minecart) e;
+						if(!cart.hasMetadata("trade.npc")){
+							continue;
+						}
+						final DrivenCar c = main.plugin.carSaver.getCarInUse(cart.getUniqueId());
+						if(c == null){
+							continue;
+						}
+						
+						if(!c.isNPC()){
+							continue;
+						}
+						aiCars++;
+					}
+				}
+				spawnedCount = aiCars;
+				return;
+			}}, 10*60*20l, 10*60*20l); //Every 10 mins
 		
 		new DynamicLagReducer().start();
 		

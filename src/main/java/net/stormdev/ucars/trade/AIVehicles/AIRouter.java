@@ -14,7 +14,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
@@ -119,7 +118,7 @@ public class AIRouter {
 				}
 				main.plugin.carSaver.carNoLongerInUse(c.getId());
 				car.remove();
-				AISpawnManager.decrementSpawned();
+				AISpawnManager.decrementSpawnedCount();
 			}
 		}
 		
@@ -386,16 +385,16 @@ public class AIRouter {
 		double ty = toGo.getY();
 		double tz = toGo.getZ();
 		
-		double x = tx - cx + 0.5;
+		double x = tx - (cx + 0.5)*0.5;
 		double y = ty - cy;
-		double z = tz - cz + 0.5;
+		double z = tz - (cz + 0.5)*0.5;
 
 		vel = new Vector(x,y,z); //Go to block
 		
 		car.setVelocity(vel);
 		BlockFace direction = ClosestFace.getClosestFace(car.getLocation().getYaw());
 		if(!atJunction){
-			direction = main.plugin.aiSpawns.carriagewayDirection(under);
+			direction = AISpawnManager.carriagewayDirection(under);
 		}
 		else{
 			if(!car.hasMetadata("car.needRouteCheck")){

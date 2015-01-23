@@ -101,7 +101,7 @@ public class AITrackFollow {
 		return null;
 	}
 	
-	public static BlockFace[] dirs(){ //used for iterating over dirs for pattern matching
+	public static BlockFace[] compassDirs(){ //used for iterating over dirs for pattern matching
 		return new BlockFace[]{
 				BlockFace.NORTH,
 				/*BlockFace.NORTH_EAST,*/
@@ -111,6 +111,19 @@ public class AITrackFollow {
 				/*BlockFace.SOUTH_WEST,*/
 				BlockFace.WEST,
 				/*BlockFace.NORTH_WEST*/
+		};
+	}
+	
+	public static BlockFace[] diagonalDirs(){ //used for iterating over dirs for pattern matching
+		return new BlockFace[]{
+				/*BlockFace.NORTH,*/
+				BlockFace.NORTH_EAST,
+				/*BlockFace.EAST,*/
+				BlockFace.SOUTH_EAST,
+				/*BlockFace.SOUTH,*/
+				BlockFace.SOUTH_WEST,
+				/*BlockFace.WEST,*/
+				BlockFace.NORTH_WEST
 		};
 	}
 	

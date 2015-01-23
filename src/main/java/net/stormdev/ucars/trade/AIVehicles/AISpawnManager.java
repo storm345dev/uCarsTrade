@@ -39,17 +39,21 @@ public class AISpawnManager {
 	private List<String> aiNames;
 	private static int cap = 30;
 	private static int liveCap = 5;
-	private static int spawned = 0;
+	private static int spawnedCount = 0;
 	
-	public static void decrementSpawned(){
-		spawned--;
-		if(spawned < 0){
-			spawned = 0;
+	public static void decrementSpawnedCount(){
+		spawnedCount--;
+		if(spawnedCount < 0){
+			spawnedCount = 0;
 		}
 	}
 	
-	public static void incrementSpawned(){
-		spawned++;
+	public static void incrementSpawnedCount(){
+		spawnedCount++;
+	}
+	
+	public static int getCurrentSpawnedCount(){
+		return spawnedCount;
 	}
 	
 	public static int getLiveCap(){
@@ -145,7 +149,7 @@ public class AISpawnManager {
 			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
 
 				public void run() {
-					if(spawned >= liveCap || spawned >= cap){
+					if(spawnedCount >= liveCap || spawnedCount >= cap){
 						return;
 					}
 					boolean longSpawns = main.random.nextBoolean();
@@ -478,7 +482,7 @@ public class AISpawnManager {
 			//Not a valid road structure
 			return;
 		}
-		spawnNPC(spawnLoc, carDirection);
+		spawnNPCCar(spawnLoc, carDirection);
 	}
 	
 	public static BlockFace carriagewayDirection(Block roadSpawnBlock){
@@ -502,7 +506,18 @@ public class AISpawnManager {
 						}
 					}
 				}
-				for(BlockFace pDir: AITrackFollow.dirs()){
+				for(BlockFace pDir: AITrackFollow.compassDirs()){
+					Block next = roadSpawnBlock.getRelative(pDir);
+					String type = AIRouter.getTrackBlockType(next.getType());
+					if(type == null || type.equals(currentType)){
+						continue;
+					}
+					int pos = AIRouter.getTrackBlockIndexByType(type);
+					if(pos == nextPos && pos != currentPos){
+						return pDir;
+					}
+				}
+				for(BlockFace pDir: AITrackFollow.diagonalDirs()){
 					Block next = roadSpawnBlock.getRelative(pDir);
 					String type = AIRouter.getTrackBlockType(next.getType());
 					if(type == null || type.equals(currentType)){
@@ -603,7 +618,7 @@ public class AISpawnManager {
 		return null;
 	}
 	
-	public void spawnNPC(Location spawn, final BlockFace currentDirection){
+	public void spawnNPCCar(Location spawn, final BlockFace currentDirection){
 		spawn = spawn.add(0.5, 0, 0.5);
 		final Location spawnLoc = spawn;
 		plugin.getServer().getScheduler().runTask(plugin, new BukkitRunnable(){
@@ -643,7 +658,7 @@ public class AISpawnManager {
 				c.setId(m.getUniqueId());
 				plugin.carSaver.carNowInUse(c);
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(currentDirection, null), plugin));
-				spawned++;
+				incrementSpawnedCount();
 				return;
 			}});
 		return;

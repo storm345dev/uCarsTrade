@@ -101,6 +101,13 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir);
 				return true;
 			}
+			else if(command.equalsIgnoreCase("ai")){
+				int cap = AISpawnManager.getLiveCap();
+				int spawn = AISpawnManager.getCurrentSpawnedCount();
+				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);
+				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
+				return true;
+			}
 			return true;
 		}
 		return false;

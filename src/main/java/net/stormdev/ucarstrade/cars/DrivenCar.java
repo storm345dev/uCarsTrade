@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.utils.ItemRename;
 
 import org.bukkit.ChatColor;
@@ -112,6 +113,9 @@ public class DrivenCar implements Serializable {
 	}
 
 	public DrivenCar setNPC(boolean isNPC) {
+		if(this.isNPC && !isNPC){ //Being made NOT an NPC
+			AISpawnManager.decrementSpawnedCount();
+		}
 		this.isNPC = isNPC;
 		return this;
 	}

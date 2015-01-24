@@ -25,7 +25,7 @@ import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
 	
-	private boolean enabled;
+	private static boolean enabled;
 	private static Map<String, Material> trackBlocks = new HashMap<String, Material>();
 	private String trackPattern = "a,b,c";
 	public static String[] pattern = new String[]{};
@@ -71,6 +71,7 @@ public class AIRouter {
 		for(String patternName:sect.getKeys(false)){
 			if(patternName != null && patternName.length() > 0 && !patternName.equals("pattern")){
 				trackBlocks.put(patternName, Material.getMaterial(sect.getString(patternName)));
+				main.plugin.getLogger().info("Found AI tracker block: "+sect.getString(patternName));
 			}
 		}
 		trackPattern = main.config.getString("general.ai.trackerBlock.pattern");
@@ -81,6 +82,10 @@ public class AIRouter {
 			enabled = false;
 		}
 		api = uCarsAPI.getAPI();
+	}
+	
+	public static boolean isAIEnabled(){
+		return enabled && AISpawnManager.enabled;
 	}
 	
 	public void route(final Minecart car, final DrivenCar c) throws Exception{
@@ -216,11 +221,6 @@ public class AIRouter {
 			//direction = (BlockFace) ms.get(0).value();
 		}
 		else{
-			if(direction == null){
-				direction = AISpawnManager.carriagewayDirection(under);
-				keepVel = false;
-				data.setMotion(null);
-			}
 			//Calculate direction from road
 			if(!atJ){
 				BlockFace face = AISpawnManager.carriagewayDirection(under);
@@ -247,6 +247,7 @@ public class AIRouter {
 			BlockFace bf = AISpawnManager.carriagewayDirection(under);
 			if(bf != null){
 				direction = bf;
+				keepVel = false;
 			}
 		}
 		

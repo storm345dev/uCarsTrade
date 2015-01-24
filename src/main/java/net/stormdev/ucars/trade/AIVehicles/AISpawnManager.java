@@ -30,7 +30,7 @@ import com.useful.ucarsCommon.StatValue;
 
 public class AISpawnManager {
 	private main plugin;
-	private boolean enabled;
+	public static boolean enabled;
 	private boolean fullEnable;
 	private static Material roadEdge;
 	private Material junction;
@@ -174,6 +174,7 @@ public class AISpawnManager {
 			enabled = false;
 		}
 		if(enabled){
+			main.plugin.getLogger().info("AI Cars enabled successfully!");
 			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
 
 				public void run() {

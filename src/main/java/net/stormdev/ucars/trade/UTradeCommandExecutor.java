@@ -102,6 +102,10 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				return true;
 			}
 			else if(command.equalsIgnoreCase("ai")){
+				if(!AIRouter.isAIEnabled()){
+					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
+					return true;
+				}
 				int cap = AISpawnManager.getLiveCap();
 				int spawn = AISpawnManager.getCurrentSpawnedCount();
 				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);

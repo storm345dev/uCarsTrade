@@ -101,6 +101,26 @@ public class AITrackFollow {
 		return null;
 	}
 	
+	public static boolean isCompassDir(BlockFace dir){
+		if(dir == null){
+			return false;
+		}
+		return dir.equals(BlockFace.NORTH) 
+				|| dir.equals(BlockFace.EAST)
+				|| dir.equals(BlockFace.SOUTH)
+				|| dir.equals(BlockFace.WEST);
+	}
+	
+	public static boolean isDiagonalDir(BlockFace dir){
+		if(dir == null){
+			return false;
+		}
+		return dir.equals(BlockFace.NORTH_EAST) 
+				|| dir.equals(BlockFace.SOUTH_EAST)
+				|| dir.equals(BlockFace.SOUTH_WEST)
+				|| dir.equals(BlockFace.NORTH_WEST);
+	}
+	
 	public static BlockFace[] compassDirs(){ //used for iterating over dirs for pattern matching
 		return new BlockFace[]{
 				BlockFace.NORTH,

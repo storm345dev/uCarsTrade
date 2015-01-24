@@ -305,10 +305,14 @@ public class AIRouter {
 				x *= 2;
 				z *= 2;
 			}
-			if(px > 0.1 && pz > 0.1) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
+			if(px > 0.1 && pz > 0.1 && AITrackFollow.isCompassDir(direction)) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
 				//System.out.println("DECREMENTING VECTOR");
 				x *= 0.1;
 				z *= 0.1;
+			}
+			else if(AITrackFollow.isDiagonalDir(direction)){
+				x *= 0.4;
+				z *= 0.4;
 			}
 			if(y>0){
 				y = 3;
@@ -347,10 +351,10 @@ public class AIRouter {
 		double cz = currentLoc.getZ();
 		Block toGo = null;
 		BlockFace dir = null;
+		BlockFace goDir = null;
 		
 		if(prev == null){
 			BlockFace currentDir = vd.getDir();
-			BlockFace goDir = null;
 			for(BlockFace d:AITrackFollow.compassDirs()){
 				Block b = under.getRelative(d);
 				if(isTrackBlock(b.getType()) || b.getType() == junction){
@@ -435,13 +439,19 @@ public class AIRouter {
 		car.setVelocity(vel);
 		BlockFace direction = ClosestFace.getClosestFace(car.getLocation().getYaw());
 		if(!atJunction){
-			direction = AISpawnManager.carriagewayDirection(under);
+			if(goDir == null){
+				direction = AISpawnManager.carriagewayDirection(under);
+			}
+			if(direction == null){
+				direction = dir;
+			}
 		}
 		else{
 			if(!car.hasMetadata("car.needRouteCheck")){
 				car.setMetadata("car.needRouteCheck", new StatValue(null, main.plugin));
 			}
-		}
+		}		
+		
 		//Update direction stored on car...
 		car.removeMetadata("trade.npc", main.plugin);
 		car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));

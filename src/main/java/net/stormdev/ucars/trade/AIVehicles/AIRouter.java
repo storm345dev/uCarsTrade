@@ -288,17 +288,19 @@ public class AIRouter {
 			double pz = Math.abs(z);
 			boolean ux = px > pz ? false:true;
 
+			double mult = speed * 0.5d;
+			
 			if(y<0.15 && isCompassDir(direction) && !atJ){
 				if (ux) {
 					// x is smaller
 					// long mult = (long) (pz/speed);
-					x = (x / pz) * speed;
-					z = (z / pz) * speed;
+					x = (x / pz) * mult;
+					z = (z / pz) * mult;
 				} else {
 					// z is smaller
 					// long mult = (long) (px/speed);
-					x = (x / px) * speed;
-					z = (z / px) * speed;
+					x = (x / px) * mult;
+					z = (z / px) * mult;
 				}
 			}
 			else if(atJ){

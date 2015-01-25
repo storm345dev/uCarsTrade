@@ -277,20 +277,24 @@ public class AIRouter {
 		else{
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
-			double ty = toDrive.getY()+0.5;
+			double ty = toDrive.getY()+0.1;
 			double tz = toDrive.getZ()+0.5;
 			
 			double x = tx - cx /*+ 0.5*/;
 			double y = ty - cy;
 			double z = tz - cz /*+ 0.5*/;
 			
+			if((y-0.1) > 0.1){ //Going up
+				y+=0.2; //Help climb smoother
+			}
+			
 			double px = Math.abs(x);
 			double pz = Math.abs(z);
 			boolean ux = px > pz ? false:true;
 
-			double mult = speed * 0.5d;
+			double mult = speed * 0.5;
 			
-			if(y<0.15 && isCompassDir(direction) && !atJ){
+			if(y<2 && isCompassDir(direction) && !atJ){
 				if (ux) {
 					// x is smaller
 					// long mult = (long) (pz/speed);
@@ -316,12 +320,9 @@ public class AIRouter {
 				x *= 0.4;
 				z *= 0.4;
 			}
-			/*if(y>0){ //Going upwards
-				Bukkit.broadcastMessage("UP");
+			if(y>0.2){ //Going upwards
 				y += 3;
-				x *= 20;
-				z *= 20;
-			}*/
+			}
 			
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);

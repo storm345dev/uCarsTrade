@@ -276,13 +276,13 @@ public class AIRouter {
 		}
 		else{
 			//Calculate vector to get there...
-			double tx = toDrive.getX();
-			double ty = toDrive.getY();
-			double tz = toDrive.getZ();
+			double tx = toDrive.getX()+0.5;
+			double ty = toDrive.getY()+0.5;
+			double tz = toDrive.getZ()+0.5;
 			
-			double x = tx - cx + 0.5;
+			double x = tx - cx /*+ 0.5*/;
 			double y = ty - cy;
-			double z = tz - cz + 0.5;
+			double z = tz - cz /*+ 0.5*/;
 			
 			double px = Math.abs(x);
 			double pz = Math.abs(z);
@@ -314,11 +314,12 @@ public class AIRouter {
 				x *= 0.4;
 				z *= 0.4;
 			}
-			if(y>0){
-				y = 3;
-				x*= 10;
-				x*= 10;
-			}
+			/*if(y>0){ //Going upwards
+				Bukkit.broadcastMessage("UP");
+				y += 3;
+				x *= 20;
+				z *= 20;
+			}*/
 			
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);

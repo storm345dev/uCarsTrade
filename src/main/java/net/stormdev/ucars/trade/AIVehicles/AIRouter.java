@@ -292,9 +292,13 @@ public class AIRouter {
 			double pz = Math.abs(z);
 			boolean ux = px > pz ? false:true;
 
-			double mult = speed * 0.5;
+			double mult = speed * 0.3;
 			
-			if(y<2 && isCompassDir(direction) && !atJ){
+			if(atJ){
+				x *= 2;
+				z *= 2;
+			}
+			else if(y<2 && isCompassDir(direction) && !atJ){
 				if (ux) {
 					// x is smaller
 					// long mult = (long) (pz/speed);
@@ -306,10 +310,6 @@ public class AIRouter {
 					x = (x / px) * mult;
 					z = (z / px) * mult;
 				}
-			}
-			else if(atJ){
-				x *= 2;
-				z *= 2;
 			}
 			if(px > 0.1 && pz > 0.1 && AITrackFollow.isCompassDir(direction)) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
 				//System.out.println("DECREMENTING VECTOR");

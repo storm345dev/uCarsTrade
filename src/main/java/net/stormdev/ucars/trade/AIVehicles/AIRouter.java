@@ -298,7 +298,7 @@ public class AIRouter {
 				x *= 2;
 				z *= 2;
 			}
-			else if(y<2 && isCompassDir(direction) && !atJ){
+			else if(y<2 && !atJ){
 				if (ux) {
 					// x is smaller
 					// long mult = (long) (pz/speed);
@@ -316,10 +316,10 @@ public class AIRouter {
 				x *= 0.1;
 				z *= 0.1;
 			}*/
-			if(AITrackFollow.isDiagonalDir(direction)){
+			/*if(AITrackFollow.isDiagonalDir(direction)){
 				x *= 0.3;
 				z *= 0.3;
-			}
+			}*/
 			if(y>0.2){ //Going upwards
 				y += 3;
 			}

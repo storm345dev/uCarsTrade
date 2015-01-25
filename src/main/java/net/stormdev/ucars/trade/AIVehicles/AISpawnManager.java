@@ -531,6 +531,9 @@ public class AISpawnManager {
 						try {
 							return BlockFace.valueOf(top);
 						} catch (Exception e) {
+							if(top.equalsIgnoreCase("NONE") || top.equalsIgnoreCase("NULL")){
+								return null;
+							}
 							//Not a road related sign
 						}
 					}

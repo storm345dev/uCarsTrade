@@ -292,7 +292,7 @@ public class AIRouter {
 			double pz = Math.abs(z);
 			boolean ux = px > pz ? false:true;
 
-			double mult = speed * 0.2;
+			double mult = speed * 0.15;
 			
 			if(atJ){
 				x *= 2;

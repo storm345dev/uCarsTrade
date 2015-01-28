@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucarstrade.cars.CarPresets;
+import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import com.useful.ucars.ucars;
@@ -11,6 +13,12 @@ import com.useful.ucars.ucars;
 public class CarGenerator {
 
 	public static DrivenCar gen(){
+		if(CarPresets.isCarPresetsUsed()){
+			CarPreset cp = CarPresets.getPresets().get(main.random.nextInt(CarPresets.getPresets().size()));
+			DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications());
+			return dc;
+		}
+		
 		double health = ucars.config.getDouble("general.cars.health.default");
 		double speed = 1;
 		String name = "Car";

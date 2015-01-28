@@ -1602,7 +1602,7 @@ public class UTradeListener implements Listener {
             	event.setWillClose(true);
             	event.setWillDestroy(true);
             }
-        }, plugin);
+        }, plugin, true);
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
 		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
 		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
@@ -1649,7 +1649,7 @@ public class UTradeListener implements Listener {
             	event.setWillClose(true);
             	event.setWillDestroy(true);
             }
-        }, plugin);
+        }, plugin, true);
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
 		menu.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
 		menu.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");

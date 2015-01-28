@@ -1,5 +1,6 @@
 package net.stormdev.ucars.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -24,6 +26,8 @@ public class IconMenu implements Listener {
    
     private String[] optionNames;
     private ItemStack[] optionIcons;
+    private boolean destroyOnClose = false;
+    private List<String> viewerNames = new ArrayList<String>();
    
     public IconMenu(String name, int size, OptionClickEventHandler handler, Plugin plugin) {
         this.name = name;
@@ -33,6 +37,11 @@ public class IconMenu implements Listener {
         this.optionNames = new String[size];
         this.optionIcons = new ItemStack[size];
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+    
+    public IconMenu(String name, int size, OptionClickEventHandler handler, Plugin plugin, boolean destroyOnClose) {
+    	this(name, size, handler, plugin);
+    	this.destroyOnClose = destroyOnClose;
     }
    
     public IconMenu setOption(int position, ItemStack icon, String name, String... info) {
@@ -54,6 +63,7 @@ public class IconMenu implements Listener {
             }
         }
         player.openInventory(inventory);
+        viewerNames.add(player.getName());
     }
    
     public void destroy() {
@@ -63,6 +73,17 @@ public class IconMenu implements Listener {
         optionNames = null;
         optionIcons = null;
     }
+    
+    @EventHandler
+    void close(InventoryCloseEvent event){
+    	Player player = (Player) event.getPlayer();
+    	if(viewerNames.contains(player.getName())){
+    		viewerNames.remove(player.getName());
+    	}
+    	if(destroyOnClose && viewerNames.size() < 1){
+    		destroy();    		
+    	}
+    }
    
     @EventHandler(priority=EventPriority.MONITOR)
     void onInventoryClick(InventoryClickEvent event) {
@@ -71,7 +92,7 @@ public class IconMenu implements Listener {
             int slot = event.getRawSlot();
             if (slot >= 0 && slot < size && optionNames[slot] != null) {
                 Plugin plugin = this.plugin;
-                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot]);
+                OptionClickEvent e = new OptionClickEvent((Player)event.getWhoClicked(), slot, optionNames[slot], event.getInventory());
                 handler.onOptionClick(e);
                 if (e.willClose()) {
                     final Player p = (Player)event.getWhoClicked();
@@ -98,13 +119,19 @@ public class IconMenu implements Listener {
         private String name;
         private boolean close;
         private boolean destroy;
+        private Inventory inv;
        
-        public OptionClickEvent(Player player, int position, String name) {
+        public OptionClickEvent(Player player, int position, String name, Inventory inv) {
             this.player = player;
             this.position = position;
             this.name = name;
             this.close = true;
             this.destroy = false;
+            this.inv = inv;
+        }
+        
+        public Inventory getInventory(){
+        	return this.inv;
         }
        
         public Player getPlayer() {

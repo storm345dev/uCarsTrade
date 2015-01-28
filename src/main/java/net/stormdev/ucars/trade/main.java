@@ -25,6 +25,7 @@ import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucarstrade.cars.CarPresets;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -280,13 +281,8 @@ public class main extends JavaPlugin {
 				config.set("colorScheme.tp", "&5");
 			}
         } catch(Exception e){
+        	e.printStackTrace();
         }
-		saveConfig();
-		try {
-			lang.save(langFile);
-		} catch (IOException e1) {
-			getLogger().info("Error parsing lang file!");
-		}
 		
 		carCache = config.getInt("general.car.cache");
 		
@@ -296,7 +292,18 @@ public class main extends JavaPlugin {
 				config.getString("colorScheme.info"),
 				config.getString("colorScheme.title"),
 				config.getString("colorScheme.title"));
+		
+		CarPresets.init(config);
+		
 		logger.info("Config loaded!");
+		
+		saveConfig();
+		try {
+			lang.save(langFile);
+		} catch (IOException e1) {
+			getLogger().info("Error parsing lang file!");
+		}
+		
 		alertsFile = new File(getDataFolder().getAbsolutePath()
 				+ File.separator + "alerts.stringMap");
 		alertsFile.getParentFile().mkdirs();
@@ -491,7 +498,8 @@ public class main extends JavaPlugin {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void putBlockInCar(Minecart car, int id, int data){
-		Boolean useFallingBlock = false;
+		car.setDisplayBlock(new ItemStack(id, 1, (byte) data).getData());
+		/*Boolean useFallingBlock = false;
 		// net.minecraft.server.v1_7_R1.EntityMinecartAbstract;
 		// org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 		String NMSversion = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage()
@@ -523,6 +531,6 @@ public class main extends JavaPlugin {
 			main.logger.info("[ALERT] uCarsTrade was unable to place a wool block in a car,"
 					+ " please check for an update.");
 		}
-		return;
+		return;*/
 	}
 }

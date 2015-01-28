@@ -1,18 +1,25 @@
 package net.stormdev.ucars.shops;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.stormdev.ucars.trade.Lang;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.CarValueCalculator;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.IconMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.IconMenu.OptionClickEventHandler;
+import net.stormdev.ucarstrade.cars.CarPresets;
+import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +28,8 @@ public class CarShop {
 	private double value;
 	private IconMenu menu = null;
 	private main plugin;
+	private Map<Integer, IconMenu> menus = new HashMap<Integer, IconMenu>();
+	
 	public CarShop(main plugin){
 		this.plugin = plugin;
 		value = main.config.getDouble("general.carTrading.averageCarValue")*1.25;
@@ -46,20 +55,88 @@ public class CarShop {
 		
 		int slot = event.getPosition();
 		
-		if(slot == 4){
-			//Buy a car
-			event.setWillClose(true);
-			buyCar(event.getPlayer());
+		if(!CarPresets.isCarPresetsUsed()){
+			if(slot == 4){
+				//Buy a car
+				event.setWillClose(true);
+				buyCar(event.getPlayer(), CarGenerator.gen());
+			}
+		}
+		else {
+			String title = ChatColor.stripColor(event.getInventory().getTitle());
+			title = title.replaceFirst("Car Shop Page ", "");
+			int page;
+			try {
+				page = Integer.parseInt(title);
+			} catch (NumberFormatException e) {
+				return;
+			}
+			
+			int pos = event.getPosition();
+			if(pos == 52){ //Prev page
+				int prevPage = page-1;
+				if(!pageExists(prevPage)){
+					event.getPlayer().sendMessage(ChatColor.RED+"That page doesn't exist!");
+					return;
+				}
+				final IconMenu nextPage = getPage(prevPage);
+				final Player pl = event.getPlayer();
+				event.setWillClose(true);
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						nextPage.open(pl);
+						return;
+					}}, 2l);
+				return;
+			}
+			else if(pos == 53){ //Next page
+				int nextPage = page+1;
+				if(!pageExists(nextPage)){
+					event.getPlayer().sendMessage(ChatColor.RED+"That page doesn't exist!");
+					return;
+				}
+				final IconMenu ppage = getPage(nextPage);
+				final Player pl = event.getPlayer();
+				event.setWillClose(true);
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						ppage.open(pl);
+						return;
+					}}, 2l);
+				return;
+			}
+			else {
+				//Clicked a car
+				List<CarPreset> cars = CarPresets.getPresets();
+				int startPos = (page-1)*52; //52 items per page
+				int arrayPos = startPos + pos;
+				if(arrayPos >= cars.size()){
+					return; //Clicked on a blank slot
+				}
+				CarPreset cp = cars.get(arrayPos);
+				event.setWillClose(true);
+				DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications());
+				buyCar(event.getPlayer(), dc);
+				return;
+			}
 		}
 		return;
 	}
 	
 	public void open(Player player){
+		if(this.menu == null){
+			player.sendMessage(ChatColor.RED+"No cars for sale!");
+			return;
+		}
 		getShopWindow().open(player);
 		return;
 	}
 	
-	public void buyCar(Player player){
+	public void buyCar(Player player, DrivenCar dc){
 		if(main.economy == null){
 			main.plugin.setupEconomy();
 			if(main.economy == null){
@@ -68,7 +145,7 @@ public class CarShop {
 			}
 		}
 		double bal = main.economy.getBalance(player.getName());
-		double cost = value;
+		double cost = CarPresets.isCarPresetsUsed() ? CarValueCalculator.getCarValueForPurchase(dc):value;
 		if(cost < 1){
 			return;
 		}
@@ -89,25 +166,76 @@ public class CarShop {
 		player.sendMessage(main.colors.getSuccess()+msg);
 		
 		//Give them the car
-		DrivenCar c = CarGenerator.gen();
-		ItemStack i = c.toItemStack();
+		ItemStack i = dc.toItemStack();
 		player.getInventory().addItem(i);
 		
 		return;
 	}
 	
+	private boolean pageExists(int page){
+		return menus.containsKey(page);
+	}
+	
+	public IconMenu getPage(int page){
+		return menus.get(page);
+	}
+	
 	public void setupMenu(main plugin){
 		String currency = main.config.getString("general.carTrading.currencySign");
 		
-		this.menu = new IconMenu("Car Shop", 9, new OptionClickEventHandler(){
+		if(!CarPresets.isCarPresetsUsed()){
+			this.menu = new IconMenu("Car Shop", 9, new OptionClickEventHandler(){
 
-			public void onOptionClick(OptionClickEvent event) {
-				onClick(event);
-				return;
-			}}, plugin);
-		List<String> info = new ArrayList<String>();
-		info.add(main.colors.getTitle()+"[Price:] "+main.colors.getInfo()+currency+value);
-		this.menu.setOption(4, new ItemStack(Material.MINECART), main.colors.getTitle()+"Buy Random Car", info);
+				public void onOptionClick(OptionClickEvent event) {
+					onClick(event);
+					return;
+				}}, plugin);
+			List<String> info = new ArrayList<String>();
+			info.add(main.colors.getTitle()+"[Price:] "+main.colors.getInfo()+currency+value);
+			this.menu.setOption(4, new ItemStack(Material.MINECART), main.colors.getTitle()+"Buy Random Car", info);
+		}
+		else {
+			//Paged icon menu, eurgh
+			List<CarPreset> cars = CarPresets.getPresets();
+			int pagesNeeded = (int) Math.ceil(((double)cars.size()) / 52.0d); //52 per page
+			main.logger.info("Pages of cars: "+pagesNeeded+", cars: "+cars.size());
+			for(int i=0;i<pagesNeeded;i++){
+				int startPos = i*52;
+				IconMenu page = new IconMenu("Car Shop Page "+(i+1), 54, new OptionClickEventHandler(){
+
+					public void onOptionClick(OptionClickEvent event) {
+						onClick(event);
+						return;
+					}}, plugin);
+				
+				for(int pos=0;pos<52;pos++){
+					if((startPos+pos) >= cars.size()){
+						continue; //Skip
+					}
+					int arrayPos = (startPos+pos);
+					CarPreset cp = cars.get(arrayPos);
+					List<String> lore = new ArrayList<String>();
+					lore.add(ChatColor.YELLOW+"Speed: "+cp.getSpeed()+"x");
+					lore.add(ChatColor.YELLOW+"Health: "+cp.getHealth());
+					if(cp.getModifications().size() > 0){
+						lore.add(ChatColor.YELLOW+"Modifications:");
+						for(String n:cp.getModifications()){
+							lore.add(ChatColor.YELLOW+" -"+n);
+						}
+					}
+					lore.add(ChatColor.WHITE+"Price: "+currency+CarValueCalculator.getCarValueForPurchase(new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications())));
+					
+					page.setOption(pos, new ItemStack(Material.MINECART), ChatColor.BLUE+cp.getName(), 
+							lore);
+				}
+				page.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");
+				page.setOption(53, new ItemStack(Material.PAPER), main.colors.getTitle()+"Next Page", main.colors.getInfo()+"Go to next page");
+				if(i == 0){
+					this.menu = page;
+				}
+				menus.put(i+1, page);
+			}
+		}
 	}
 	
 }

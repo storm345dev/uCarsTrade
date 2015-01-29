@@ -44,24 +44,7 @@ public class CarCalculations {
 		}
 		current = current.multiply(car.getSpeed());
 		if(car.isHandlingDamaged()){
-			double x = current.getX();
-			double z = current.getZ();
-			if(!main.random.nextBoolean()){
-				if(main.random.nextBoolean()){
-					//Change x
-					x = x*currentMult/3;
-				}
-				else if(main.random.nextBoolean()){
-					x = -x;
-					z = -z;
-				}
-				else{
-					//Change z
-					z = z*currentMult/3;	
-				}
-				current.setX(x);
-				current.setZ(z);
-			}
+			current.multiply(0.5);
 		}
 		return current;
 	}

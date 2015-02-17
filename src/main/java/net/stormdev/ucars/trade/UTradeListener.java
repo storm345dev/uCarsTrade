@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.stormdev.ucars.stats.StatType;
-import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
@@ -42,6 +41,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -109,7 +109,7 @@ public class UTradeListener implements Listener {
 			if(player.getVehicle() != null){
 				final Location loc = player.getVehicle().getLocation();
 				player.getVehicle().eject();
-				plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+				plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
 					public void run() {
 						player.teleport(loc.add(0, 0.5, 0));
@@ -127,7 +127,7 @@ public class UTradeListener implements Listener {
 		if(player.getVehicle() != null){
 			player.getVehicle().eject();
 		}
-		plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+		plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
 			public void run() {
 				c.setNPC(false);
@@ -140,6 +140,49 @@ public class UTradeListener implements Listener {
 				return;
 			}}, 3l);
 		return;
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST)
+	void aiCarDie(VehicleDestroyEvent event){
+		if(!event.getVehicle().hasMetadata("trade.npc") || event.isCancelled()){
+			return;
+		}
+		
+		//The ai car has died
+		Vehicle veh = event.getVehicle();
+		Location loc = veh.getLocation();
+		Entity passenger = veh.getPassenger();
+		while(passenger != null){
+			final Entity pass = passenger;
+			passenger = passenger.getPassenger();
+			Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					pass.remove();
+					Bukkit.broadcastMessage("REMOVED "+pass.getType());
+					return;
+				}}, 2l);
+		}
+		List<Entity> near = veh.getNearbyEntities(5, 5, 5);
+		
+		veh.remove();
+		event.setCancelled(true);
+		
+		for(Entity e:near){
+			if(e.getType().equals(EntityType.VILLAGER) 
+					|| e.getType().equals(EntityType.DROPPED_ITEM)){
+				e.remove();
+			}
+			else if(e instanceof Minecart){
+				//Nothing
+			}
+			else if(e instanceof Damageable){
+				((Damageable)e).damage(5);
+			}
+		}
+		
+		loc.getWorld().playEffect(loc, Effect.EXPLOSION_HUGE, 20);
 	}
 	
 	@EventHandler

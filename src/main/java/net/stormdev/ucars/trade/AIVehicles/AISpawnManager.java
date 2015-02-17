@@ -175,14 +175,16 @@ public class AISpawnManager {
 		}
 		if(enabled){
 			main.plugin.getLogger().info("AI Cars enabled successfully!");
-			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new BukkitRunnable(){
+			task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 				public void run() {
 					if(spawnedCount >= liveCap || spawnedCount >= cap){
 						return;
 					}
-					boolean longSpawns = main.random.nextBoolean();
-					boolean doubleSpawns = longSpawns && main.random.nextBoolean();
+					/*boolean longSpawns = main.random.nextBoolean();
+					boolean doubleSpawns = longSpawns && main.random.nextBoolean();*/
+					boolean longSpawns = main.random.nextInt(10) < 8; //8/10 chance
+					boolean doubleSpawns = longSpawns && main.random.nextInt(10) < 8; //8/10 * 8/10 chance
 					
 					for(Player player:new ArrayList<Player>(Arrays.asList(Bukkit.getOnlinePlayers()))){
 						try {
@@ -216,7 +218,7 @@ public class AISpawnManager {
 		if(!enabled){
 			return;
 		}
-		if(main.random.nextBoolean()){
+		if(main.random.nextInt(10) < 2){ //2/10 chance
 			return; //Next iteration
 		}
 		if(player == null || !player.isOnline()){
@@ -349,7 +351,7 @@ public class AISpawnManager {
 		}
 		Player[] online = plugin.getServer().getOnlinePlayers().clone();
 		for(final Player player:online){
-			if(main.random.nextBoolean()){
+			if(main.random.nextInt(10) < 2){ //2/10 chance
 				continue; //Next iteration
 			}
 			if(player == null || !player.isOnline()){
@@ -411,7 +413,7 @@ public class AISpawnManager {
 		if(!enabled){
 			return;
 		}
-		if(main.random.nextBoolean()){
+		if(main.random.nextInt(10) < 2){ //2/10 chance
 			return; //Next iteration
 		}
 		if(player == null || !player.isOnline()){

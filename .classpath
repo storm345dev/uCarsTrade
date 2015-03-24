@@ -17,13 +17,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
-		<attributes>
-			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/mcserver.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/ucars.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/spigot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/uCars.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

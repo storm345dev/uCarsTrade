@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.ReturnTask;
 import net.stormdev.ucars.utils.Scheduler;
 import net.stormdev.ucars.utils.SyncReturnTask;
@@ -73,32 +74,23 @@ public class AISpawnManager {
 	}
 	
 	public synchronized void setNPCsCurrentlyEnabled(boolean on){
-		this.enabled = on;
+		AISpawnManager.enabled = on;
 	}
 	
-	private List<String> carNames = new ArrayList<String>();
-	
 	private String randomCarName(){
-		List<String> names = carNames;
-		if(names.size() > 0){
-			int max = names.size();
-			int random = main.random.nextInt(max);
-			return names.get(random);
-		}
-		else {
-			return "Car";
-		}
+		DrivenCar car = CarGenerator.gen();
+		return car.getName();
 	}
 	
 	public AISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
-		this.enabled = enabled;
+		AISpawnManager.enabled = enabled;
 		this.fullEnable = enabled;
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		aiNames = main.config.getStringList("general.ai.names");
 		cap = main.config.getInt("general.ai.limit");
-		carNames = main.config.getStringList("general.cars.names");
+		
 		liveCap = 5;
 		// A task to dynamically change liveCap to match the server's current AI holdings
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
@@ -655,7 +647,7 @@ public class AISpawnManager {
 	public void spawnNPCCar(Location spawn, final BlockFace currentDirection){
 		spawn = spawn.add(0.5, 0, 0.5);
 		final Location spawnLoc = spawn;
-		plugin.getServer().getScheduler().runTask(plugin, new BukkitRunnable(){
+		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){
 
 			public void run() {
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
@@ -687,7 +679,7 @@ public class AISpawnManager {
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
 				
-				DrivenCar c = new DrivenCar(randomCarName(), 0.75, 10, false, new ArrayList<String>()).setNPC(true);
+				DrivenCar c = CarGenerator.gen().setNPC(true);
 				//Make it a car
 				c.setId(m.getUniqueId());
 				plugin.carSaver.carNowInUse(c);

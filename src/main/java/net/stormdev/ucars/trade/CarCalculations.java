@@ -44,7 +44,13 @@ public class CarCalculations {
 		}
 		current = current.multiply(car.getSpeed());
 		if(car.isHandlingDamaged()){
-			current.multiply(0.5);
+			double x = current.getX();
+			double z = current.getZ();
+			double degrees = main.random.nextInt(180)-90;
+			double[] output = rotateVector2d(x, z, Math.toRadians(degrees));
+			current.setX(output[0]);
+			current.setZ(output[1]);
+			current.multiply((main.random.nextInt(100)/100.0d));
 		}
 		return current;
 	}
@@ -56,5 +62,13 @@ public class CarCalculations {
 			return true;
 		}
 		return false;
+	}
+	
+	static double[] rotateVector2d(double x, double y, double radians)
+	{
+	    double[] result = new double[2];
+	    result[0] = x * Math.cos(radians) - y * Math.sin(radians);
+	    result[1] = x * Math.sin(radians) + y * Math.cos(radians);
+	    return result;
 	}
 }

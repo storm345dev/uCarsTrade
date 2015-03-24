@@ -79,6 +79,7 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import com.useful.uCarsAPI.uCarCrashEvent;
 import com.useful.uCarsAPI.uCarRespawnEvent;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
@@ -1038,6 +1039,38 @@ public class UTradeListener implements Listener {
 		DisplayManager.fillCar(car, c, event.getPlayer());
 		return;
 	}
+	 
+	@EventHandler (priority=EventPriority.HIGHEST)
+	void carCrash(uCarCrashEvent event){
+		if(event.isCancelled()){
+			return;
+		}
+		
+		Minecart cart = event.getCar();
+		if(cart.hasMetadata("trade.npc") || cart.hasMetadata("car.destroyed")){
+			return; //Don't damage the car
+		}
+		UUID id = cart.getUniqueId();
+		DrivenCar car = plugin.carSaver.getCarInUse(id);
+		if(car == null){
+			cart.remove(); //Stop invalid cars from keeping on driving
+			return;
+		}
+		
+		if(main.random.nextInt(20) < 1){ // 1/20 chance
+			car.setHandlingDamaged(true);
+			plugin.carSaver.asyncSave();
+			
+			Entity passenger = cart.getPassenger();
+			while(!passenger.getType().equals(EntityType.PLAYER) && passenger.getPassenger() != null){
+				passenger = passenger.getPassenger();
+			}
+			if(passenger instanceof Player){
+				((Player) passenger).sendMessage(ChatColor.RED+"*The car's handling broke* If you want to repair it, you will need to use an anvil and a lever!");
+			}
+		}
+	}
+	
 	@EventHandler (priority=EventPriority.HIGHEST)
 	void carRemoval(ucarDeathEvent event){
 		event.setCancelled(true);
@@ -1059,13 +1092,13 @@ public class UTradeListener implements Listener {
 		cart.setMetadata("car.destroyed", new StatValue(true, ucars.plugin));
 		event.setCancelled(true);
 		
-		if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
+		/*if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
 			if(main.random.nextBoolean()){
 				if(main.random.nextBoolean()){
 				    car.setHandlingDamaged(true);
 				}
 			}
-		}
+		}*/
 		plugin.carSaver.carNoLongerInUse(car);
 		Location loc = cart.getLocation();
 		Entity top = cart;

@@ -438,6 +438,7 @@ public class main extends JavaPlugin {
 			}
 			this.aiSpawns.end();
 			this.carShop.destroy();
+			Bukkit.getScheduler().cancelTasks(this);
 			logger.info("uCarsTrade has been disabled!");
 		} catch (Exception e) {
 			//Disabled without being enabled

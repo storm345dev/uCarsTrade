@@ -178,7 +178,7 @@ public class AISpawnManager {
 					boolean longSpawns = main.random.nextInt(10) < 8; //8/10 chance
 					boolean doubleSpawns = longSpawns && main.random.nextInt(10) < 8; //8/10 * 8/10 chance
 					
-					for(Player player:new ArrayList<Player>(Arrays.asList(Bukkit.getOnlinePlayers()))){
+					for(Player player:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
 						try {
 							doSpawns(player);
 						} catch (Exception e) {
@@ -274,7 +274,7 @@ public class AISpawnManager {
 		if(!enabled){
 			return;
 		}
-		Player[] online = plugin.getServer().getOnlinePlayers().clone();
+		Player[] online = new ArrayList<Player>(plugin.getServer().getOnlinePlayers()).toArray(new Player[]{});
 		for(final Player player:online){
 			if(main.random.nextBoolean()){
 				continue; //Next iteration
@@ -341,7 +341,7 @@ public class AISpawnManager {
 		if(!enabled){
 			return;
 		}
-		Player[] online = plugin.getServer().getOnlinePlayers().clone();
+		Player[] online = new ArrayList<Player>(plugin.getServer().getOnlinePlayers()).toArray(new Player[]{});
 		for(final Player player:online){
 			if(main.random.nextInt(10) < 2){ //2/10 chance
 				continue; //Next iteration

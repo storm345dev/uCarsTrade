@@ -1,6 +1,6 @@
 package net.stormdev.ucars.trade;
 
-import java.util.HashSet;
+import java.util.Set;
 
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
@@ -86,7 +86,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				if(player == null){
 					return true;
 				}
-				Block target = player.getTargetBlock(null, 10);
+				Block target = player.getTargetBlock(((Set<Material>)null), 10);
 				if(target == null){
 					sender.sendMessage(ChatColor.RED+"You aren't looking a block");
 					return true;

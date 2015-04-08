@@ -4,6 +4,7 @@ import java.util.Set;
 
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
@@ -108,6 +109,10 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				}
 				int cap = AISpawnManager.getLiveCap();
 				int spawn = AISpawnManager.getCurrentSpawnedCount();
+				sender.sendMessage(ChatColor.YELLOW+"Available memory: "+DynamicLagReducer.getAvailableMemory()+"MB/"+DynamicLagReducer.getMaxMemory()+"MB");
+				sender.sendMessage(ChatColor.YELLOW+"Server Resource Score: "+DynamicLagReducer.getResourceScore()+"%");
+				sender.sendMessage(ChatColor.YELLOW+"Server TPS: "+DynamicLagReducer.getTPS()+"(/20.0)");
+				sender.sendMessage(ChatColor.GREEN+"Currently spawning NPC cars: "+main.plugin.aiSpawns.NPCsCurrentlyEnabled());
 				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
 				return true;

@@ -1,7 +1,6 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.stormdev.ucars.trade.main;
@@ -23,7 +22,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.useful.ucars.ClosestFace;
@@ -100,7 +98,7 @@ public class AISpawnManager {
 				// Use resource score to get live cap
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
-				if(score > 84 && DynamicLagReducer.getTPS() > 19.4){
+				if(score > 75 && DynamicLagReducer.getTPS() > 19.4){
 					newCap++;
 				}
 				else if(score < 70 || DynamicLagReducer.getTPS() < 17.5){

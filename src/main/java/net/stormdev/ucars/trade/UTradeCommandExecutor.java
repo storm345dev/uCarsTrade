@@ -109,9 +109,12 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				}
 				int cap = AISpawnManager.getLiveCap();
 				int spawn = AISpawnManager.getCurrentSpawnedCount();
-				sender.sendMessage(ChatColor.YELLOW+"Available memory: "+DynamicLagReducer.getAvailableMemory()+"MB/"+DynamicLagReducer.getMaxMemory()+"MB");
+				double availMem = Math.round(DynamicLagReducer.getAvailableMemory()*100.0d)/100.0d;
+				double maxMem = Math.round(DynamicLagReducer.getMaxMemory()*100.0d)/100.0d;
+				double percent = Math.round(((availMem/maxMem)*100)*100.0d)/100.0d;
+				sender.sendMessage(ChatColor.YELLOW+"Available memory: "+availMem+"MB / "+maxMem+"MB ("+percent+"%)");
 				sender.sendMessage(ChatColor.YELLOW+"Server Resource Score: "+DynamicLagReducer.getResourceScore()+"%");
-				sender.sendMessage(ChatColor.YELLOW+"Server TPS: "+DynamicLagReducer.getTPS()+"(/20.0)");
+				sender.sendMessage(ChatColor.YELLOW+"Server TPS: "+Math.round(DynamicLagReducer.getTPS()*100.0d)/100.0d+"(/20.0)");
 				sender.sendMessage(ChatColor.GREEN+"Currently spawning NPC cars: "+main.plugin.aiSpawns.NPCsCurrentlyEnabled());
 				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);

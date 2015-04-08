@@ -19,7 +19,7 @@ public class DynamicLagReducer implements Runnable {
 	}
 
 	public static double getTPS() {
-		return getTPS(100);
+		return getTPS(300);
 	}
 
 	public static double getAvailableMemory(){
@@ -58,7 +58,7 @@ public class DynamicLagReducer implements Runnable {
 		if(main.random.nextInt(100) < 10){
 			overloadPrevention();
 		}
-		double tps = getTPS(100);
+		double tps = getTPS(300);
 		double mem = getAvailableMemory();
 		if(tps>19.5 && mem>400){
 			return 100;
@@ -87,7 +87,7 @@ public class DynamicLagReducer implements Runnable {
 			}
 			return 10;
 		}
-		double tps = getTPS(100);
+		double tps = getTPS(300);
 		double mem = getAvailableMemory();
 		if(tps>19 && mem>requestedMemory+20){
 			return 100;

@@ -41,7 +41,7 @@ public class NetworkScan {
 	}
 	
 	public static enum Stage {
-		REVALIDATE_EXISTING_NODES(0),
+		/*REVALIDATE_EXISTING_NODES(0),*/
 		SCAN_ROAD_NETWORK_BLOCKS(1),
 		PLACE_NODES(2),
 		/*CHECK_NODES(3),*/
@@ -69,7 +69,7 @@ public class NetworkScan {
 	
 	private Logger logger = null;
 	private Location origin = null;
-	private Stage stage = Stage.REVALIDATE_EXISTING_NODES;
+	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
 	private AINodesSpawnManager spawnManager = null;
 	private volatile List<Vector> roadNetworkBlocks = new ArrayList<Vector>();
 	private volatile List<Node> nodes = new ArrayList<Node>();
@@ -188,11 +188,11 @@ public class NetworkScan {
 			nextStage();
 		}
 			break;
-		case REVALIDATE_EXISTING_NODES: {
+		/*case REVALIDATE_EXISTING_NODES: {
 			rescanNodes();
 			nextStage();
-		}
-			break;
+		}*/
+			/*break;*/
 		case SAVE_AND_ACTIVATE: {
 			saveNodes();
 			nextStage();

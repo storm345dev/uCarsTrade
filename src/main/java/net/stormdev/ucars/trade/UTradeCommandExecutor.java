@@ -27,7 +27,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 		this.plugin = plugin;
 	}
 
-	public boolean onCommand(CommandSender sender, Command cmd, String alias,
+	public boolean onCommand(final CommandSender sender, Command cmd, String alias,
 			String[] args) {
 		Player player = null;
 		if(sender instanceof Player){
@@ -134,6 +134,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				}
 				if(args.length < 2){
 					sender.sendMessage(ChatColor.RED+"Options:");
+					sender.sendMessage("/car ainodes count - Count and show how many nodes there are");
 					sender.sendMessage("/car ainodes revalidate - Forces revalidation of ALL nodes (will likely cause lag)");
 					sender.sendMessage("/car ainodes clear - Clears ALL nodes (PERMANENT; don't do this unless you want to have to re-calculate them all again)");
 					sender.sendMessage("/car ainodes scan - Starts where the player is and then follows the whole connected road network, placing nodes for villager cars to spawn at (Will definitely cause lag)");
@@ -148,6 +149,21 @@ public class UTradeCommandExecutor implements CommandExecutor {
 							@Override
 							public void run() {
 								((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().revalidateNodes();
+								return;
+							}});
+						
+					}
+					return true;
+				}
+				else if(action.equalsIgnoreCase("count")){
+					sender.sendMessage(ChatColor.GRAY+"Counting unique nodes...");
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+							@Override
+							public void run() {
+								int nodes = ((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().getNodeCount();
+								sender.sendMessage(ChatColor.GREEN+"There are "+nodes+" unique nodes!");
 								return;
 							}});
 						

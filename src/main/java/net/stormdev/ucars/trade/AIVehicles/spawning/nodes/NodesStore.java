@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.stormdev.ucars.trade.main;
@@ -34,6 +33,27 @@ public class NodesStore {
 	public NodesStore(File saveFile){
 		this.saveFile = saveFile;
 		load();
+	}
+	
+	public int getNodeCount(){
+		//Have to actually count nodes...
+		List<Node> counted = new ArrayList<Node>();
+		for(ChunkCoord chunkCoord:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+			List<Node> nodes = nodesByActiveChunks.get(chunkCoord);
+			for(Node n:nodes){
+				boolean alreadyCounted = false;
+				for(Node countedNode:counted){
+					if(n.equals(countedNode)){
+						alreadyCounted = true;
+						break;
+					}
+				}
+				if(!alreadyCounted){
+					counted.add(n);
+				}
+			}
+		}
+		return counted.size();
 	}
 	
 	public void revalidateNodes(){

@@ -370,7 +370,7 @@ public class NetworkScan {
 		}
 		try {
 			Thread.yield();
-			Thread.sleep(75); //Give the main thread a rest occasionally so the server hopefully doesn't crash
+			Thread.sleep(50); //Give the main thread a rest occasionally so the server hopefully doesn't crash
 			
 			roadNetwork.add(block);
 			//Now check for nearby tracker blocks

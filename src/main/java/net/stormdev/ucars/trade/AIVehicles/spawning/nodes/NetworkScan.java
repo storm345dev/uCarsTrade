@@ -404,7 +404,7 @@ public class NetworkScan {
 			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size()+" Current network size: "+roughSize);
 		}
 		int count = 0;
-		while((countScanBranches() < 0) && (System.currentTimeMillis() - lastStartTime) > 120000 && count < 5){ //Give it 5 extra seconds after scanning the network for safety
+		while(((countScanBranches() <= 0) || (System.currentTimeMillis() - lastStartTime) > 120000) && count < 5){ //Give it 5 extra seconds after scanning the network for safety
 			count++;
 			try {
 				Thread.sleep(5000);

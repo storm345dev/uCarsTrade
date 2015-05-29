@@ -10,6 +10,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
+import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
 
 import org.bukkit.Bukkit;
@@ -17,10 +18,11 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public class NetworkScan {
-	private static final int SCAN_BRANCH_LIMIT = 2000;
+	private static int SCAN_BRANCH_LIMIT = 2500;
 	public static class Logger {
 		private UUID startPlayerUUID;
 		
@@ -70,6 +72,8 @@ public class NetworkScan {
 	private AINodesSpawnManager spawnManager = null;
 	private volatile List<Block> roadNetwork = new ArrayList<Block>();
 	private volatile List<Node> nodes = new ArrayList<Node>();
+	private volatile long REST_TIME = 50; //Rest time between calculations
+	private volatile BukkitTask restTimeChecker = null;
 	
 	public NetworkScan(Player player){ //Constructed and called async
 		if(Bukkit.isPrimaryThread()){
@@ -115,6 +119,35 @@ public class NetworkScan {
 		}
 		spawnManager = (AINodesSpawnManager) main.plugin.aiSpawns;
 		
+		restTimeChecker = Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				double tps = DynamicLagReducer.getTPS();
+				if(tps > 18){
+					if(REST_TIME > 5){
+						REST_TIME -= 10;
+					}
+					if(REST_TIME < 5){
+						REST_TIME = 5;
+					}
+				}
+				else if(tps > 14){
+					if(REST_TIME > 5){
+						REST_TIME -= 5;
+					}
+					if(REST_TIME < 5){
+						REST_TIME = 5;
+					}
+				}
+				else {
+					REST_TIME += 20;
+					if(REST_TIME > 200){
+						REST_TIME = 200;
+					}
+				}
+				return;
+			}}, 20l, 20l);
 		startStage();
 	}
 	
@@ -223,6 +256,12 @@ public class NetworkScan {
 				//uh oh
 				e.printStackTrace();
 			}
+			Thread.yield();
+			try {
+				Thread.sleep(REST_TIME);
+			} catch (InterruptedException e) {
+				//kk
+			} //Give it time to recover
 		}
 		
 		logger.log("Validated placed nodes successfully! "+removed+" nodes were removed! There are "+nodes.size()+" valid nodes on this network!");
@@ -287,7 +326,7 @@ public class NetworkScan {
 			nodes.add(new Node(block.getLocation()));
 			Thread.yield();
 			try {
-				Thread.sleep(100); //Give the main thread a break from being spammed to calculate stuff
+				Thread.sleep(REST_TIME); //Give the main thread a break from being spammed to calculate stuff
 			} catch (InterruptedException e) {
 				//Uh oh
 				e.printStackTrace();
@@ -318,7 +357,7 @@ public class NetworkScan {
 			} catch (InterruptedException e) {
 				//oh well
 			}
-			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size());
+			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size()+" Current network size: "+roughSize);
 		}
 		
 		logger.log("Road network indexed!");
@@ -326,14 +365,24 @@ public class NetworkScan {
 	
 	private int countScanBranches(){
 		if(queuedBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
-			while(scansRunning < SCAN_BRANCH_LIMIT && queuedBranches.size() > 0){
-				Block b = queuedBranches.get(0);
+			int toStart = SCAN_BRANCH_LIMIT - scansRunning;
+			if(toStart > queuedBranches.size()){
+				toStart = queuedBranches.size();
+			}
+			for(int i=0;i<toStart && scansRunning<SCAN_BRANCH_LIMIT;i++){
+				final Block b = queuedBranches.get(0);
 				queuedBranches.remove(0);
 				incrementScansRunning();
-				blockScan(b);
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						blockScan(b);
+						return;
+					}});
 				Thread.yield();
 				try {
-					Thread.sleep(100); //Prevent starting LOTS of branches at one time
+					Thread.sleep(REST_TIME); //Prevent starting LOTS of branches at one time
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -349,6 +398,7 @@ public class NetworkScan {
 	
 	private volatile long lastStartTime = 0;
 	private volatile int scansRunning = 1;
+	private volatile int roughSize = 0; //rough because of thread synchronizing
 	
 	private synchronized void incrementScansRunning(){
 		scansRunning++;
@@ -370,8 +420,8 @@ public class NetworkScan {
 		}
 		try {
 			Thread.yield();
-			Thread.sleep(50); //Give the main thread a rest occasionally so the server hopefully doesn't crash
-			
+			Thread.sleep(REST_TIME); //Give the main thread a rest occasionally so the server hopefully doesn't crash
+			roughSize++;
 			roadNetwork.add(block);
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){

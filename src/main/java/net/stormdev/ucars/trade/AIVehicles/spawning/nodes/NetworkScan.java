@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public class NetworkScan { //TODO Should probably also check against other active nodes in chunks overlapping so that re-running the scan won't double the nodes (Will allow for partial scans if/when implemented)
+	//TODO Every 200K road blocks scanned, save to file; calculate the nodes and then move on - Still leaves exponentially more processing to scan larger networks tho... (if you want to make sure not to double back on self)
 	private static int SCAN_BRANCH_LIMIT = 1000;
 	public static class Logger {
 		private UUID startPlayerUUID;
@@ -70,7 +71,7 @@ public class NetworkScan { //TODO Should probably also check against other activ
 	private Location origin = null;
 	private Stage stage = Stage.REVALIDATE_EXISTING_NODES;
 	private AINodesSpawnManager spawnManager = null;
-	private volatile List<Block> roadNetwork = new ArrayList<Block>();
+	private volatile List<Vector> roadNetworkBlocks = new ArrayList<Vector>();
 	private volatile List<Node> nodes = new ArrayList<Node>();
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
@@ -165,8 +166,9 @@ public class NetworkScan { //TODO Should probably also check against other activ
 		spawnManager.getNodesStore().asyncSave();
 		origin = null;
 		spawnManager = null;
-		roadNetwork.clear();
-		roadNetwork = null;
+		roadNetworkBlocks.clear();
+		roadNetworkBlocks = null;
+		restTimeChecker.cancel();
 		nodes.clear();
 		nodes = null;
 		logger.log("Network scanning terminated!");
@@ -276,22 +278,22 @@ public class NetworkScan { //TODO Should probably also check against other activ
 			@Override
 			public void run() {
 				while(stage.equals(Stage.PLACE_NODES)){
+					logger.log("Gone through "+roughNodes+" out of "+roughSize+" road blocks...");
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						//oh well
 					}
-					logger.log("Gone through "+roughNodes+" out of "+roughSize+" road blocks...");
 				}
 				return;
 			}});
 		
-		for(final Block block:new ArrayList<Block>(roadNetwork)){
+		for(Vector blockLoc:new ArrayList<Vector>(roadNetworkBlocks)){
+			final Block block = new Location(origin.getWorld(), blockLoc.getX(), blockLoc.getY(), blockLoc.getZ()).getBlock();
 			roughNodes++;
 			if(block == null){
 				continue;
 			}
-			Vector blockLoc = new Vector(block.getX(), block.getY(), block.getZ());
 			boolean overlappingNode = false;
 			Future<BlockFace> getDir = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<BlockFace>(){
 
@@ -360,10 +362,10 @@ public class NetworkScan { //TODO Should probably also check against other activ
 	}
 	
 	public void scanRoadNetwork(){
-		if(roadNetwork == null){
-			roadNetwork = new ArrayList<Block>();
+		if(roadNetworkBlocks == null){
+			roadNetworkBlocks = new ArrayList<Vector>();
 		}
-		roadNetwork.clear(); //In case it isn't already
+		roadNetworkBlocks.clear(); //In case it isn't already
 		logger.log("Starting indexing of the road network... (This could take a long time)");
 		
 		blockScan(origin.getBlock());
@@ -430,6 +432,10 @@ public class NetworkScan { //TODO Should probably also check against other activ
 		if(block == null){
 			return;
 		}
+		if(roadNetworkBlocks.contains(block.getLocation().toVector())){ //TODO Do those vectors count as equal... I hope so
+			decrementScansRunning();
+			return;
+		}
 		if(scansRunning > NetworkScan.SCAN_BRANCH_LIMIT){
 			queuedBranches.add(block);
 			decrementScansRunning();
@@ -439,7 +445,7 @@ public class NetworkScan { //TODO Should probably also check against other activ
 			Thread.yield();
 			Thread.sleep(REST_TIME); //Give the main thread a rest occasionally so the server hopefully doesn't crash
 			roughSize++;
-			roadNetwork.add(block);
+			roadNetworkBlocks.add(block.getLocation().toVector());
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){
 
@@ -451,7 +457,7 @@ public class NetworkScan { //TODO Should probably also check against other activ
 							for(int modZ=-1;modZ<=1;modZ++){
 								try {
 									final Block newBlock = new Location(block.getWorld(), block.getX()+modX, block.getY()+modY, block.getZ()+modZ).getBlock();
-									if(AIRouter.isTrackBlock(newBlock.getType()) && !roadNetwork.contains(newBlock)){
+									if(AIRouter.isTrackBlock(newBlock.getType())){
 										final boolean originalScan = !startedMore;
 										startedMore = true;
 										Bukkit.getScheduler().runTaskLaterAsynchronously(main.plugin, new Runnable(){

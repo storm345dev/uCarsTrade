@@ -24,6 +24,7 @@ import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
+	public static int PLAYER_RADIUS = 20;
 	
 	private static boolean enabled;
 	private static Map<String, Material> trackBlocks = new HashMap<String, Material>();
@@ -107,7 +108,7 @@ public class AIRouter {
 			//Not an npc
 			return;
 		}
-		List<Entity> nearby = car.getNearbyEntities(20, 10, 20); //20x20 radius
+		List<Entity> nearby = car.getNearbyEntities(PLAYER_RADIUS, 10, PLAYER_RADIUS); //20x20 radius
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			//Check if players nearby
 			boolean nearbyPlayers = false;

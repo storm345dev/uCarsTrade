@@ -192,7 +192,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						return; //Already a car in close proximity
 					}
 				}
-				List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(20, 3, 20));
+				List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 3, AIRouter.PLAYER_RADIUS));
 				for(Entity e:new ArrayList<Entity>(nearby)){
 					if(e.getType() != EntityType.MINECART){
 						nearby.remove(e);

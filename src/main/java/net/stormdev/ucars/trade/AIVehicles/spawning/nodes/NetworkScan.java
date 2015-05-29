@@ -267,10 +267,27 @@ public class NetworkScan {
 		logger.log("Validated placed nodes successfully! "+removed+" nodes were removed! There are "+nodes.size()+" valid nodes on this network!");
 	}
 	
+	private volatile int roughNodes = 0;
 	public void nodePlacing(){
 		logger.log("Starting placing of nodes throughout the network, this could also take a long time...");
 		
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				while(stage.equals(Stage.PLACE_NODES)){
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						//oh well
+					}
+					logger.log("Gone through "+roughNodes+" out of "+roughSize+" road blocks...");
+				}
+				return;
+			}});
+		
 		for(final Block block:new ArrayList<Block>(roadNetwork)){
+			roughNodes++;
 			if(block == null){
 				continue;
 			}

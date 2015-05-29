@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 public class NetworkScan { //TODO Should probably also check against other active nodes in chunks overlapping so that re-running the scan won't double the nodes (Will allow for partial scans if/when implemented)
-	private static int SCAN_BRANCH_LIMIT = 2500;
+	private static int SCAN_BRANCH_LIMIT = 1000;
 	public static class Logger {
 		private UUID startPlayerUUID;
 		
@@ -128,16 +128,16 @@ public class NetworkScan { //TODO Should probably also check against other activ
 					if(REST_TIME > 10){
 						REST_TIME -= 10;
 					}
-					if(REST_TIME < 10){
-						REST_TIME = 10;
+					if(REST_TIME < 15){
+						REST_TIME = 15;
 					}
 				}
 				else if(tps > 14){
 					if(REST_TIME > 10){
 						REST_TIME -= 5;
 					}
-					if(REST_TIME < 10){
-						REST_TIME = 10;
+					if(REST_TIME < 15){
+						REST_TIME = 15;
 					}
 				}
 				else {

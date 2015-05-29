@@ -125,19 +125,19 @@ public class NetworkScan { //TODO Should probably also check against other activ
 			public void run() {
 				double tps = DynamicLagReducer.getTPS();
 				if(tps > 18){
-					if(REST_TIME > 5){
+					if(REST_TIME > 10){
 						REST_TIME -= 10;
 					}
-					if(REST_TIME < 5){
-						REST_TIME = 5;
+					if(REST_TIME < 10){
+						REST_TIME = 10;
 					}
 				}
 				else if(tps > 14){
-					if(REST_TIME > 5){
+					if(REST_TIME > 10){
 						REST_TIME -= 5;
 					}
-					if(REST_TIME < 5){
-						REST_TIME = 5;
+					if(REST_TIME < 10){
+						REST_TIME = 10;
 					}
 				}
 				else {

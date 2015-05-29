@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-public class NetworkScan {
+public class NetworkScan { //TODO Should probably also check against other active nodes in chunks overlapping so that re-running the scan won't double the nodes (Will allow for partial scans if/when implemented)
 	private static int SCAN_BRANCH_LIMIT = 2500;
 	public static class Logger {
 		private UUID startPlayerUUID;

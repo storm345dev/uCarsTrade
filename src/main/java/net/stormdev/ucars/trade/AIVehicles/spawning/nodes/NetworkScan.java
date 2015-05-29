@@ -449,6 +449,7 @@ public class NetworkScan {
 	private void blockScan(final Block block){
 		lastStartTime = System.currentTimeMillis();
 		if(block == null){
+			decrementScansRunning();
 			return;
 		}
 		if(roadNetworkBlocks.contains(block.getLocation().toVector())){

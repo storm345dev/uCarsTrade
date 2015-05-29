@@ -2,8 +2,9 @@ package net.stormdev.ucars.trade;
 
 import java.util.Set;
 
+import net.stormdev.ucars.trade.AIVehicles.AIProbingSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
-import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucarstrade.cars.DrivenCar;
@@ -98,7 +99,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				
-				BlockFace dir = AISpawnManager.carriagewayDirection(target);
+				BlockFace dir = AITrackFollow.carriagewayDirection(target);
 				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir);
 				return true;
 			}
@@ -107,15 +108,15 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
 					return true;
 				}
-				int cap = AISpawnManager.getLiveCap();
-				int spawn = AISpawnManager.getCurrentSpawnedCount();
+				int cap = main.plugin.aiSpawns.getCurrentAICap();
+				int spawn = main.plugin.aiSpawns.getSpawnedAICount();
 				double availMem = Math.round(DynamicLagReducer.getAvailableMemory()*100.0d)/100.0d;
 				double maxMem = Math.round(DynamicLagReducer.getMaxMemory()*100.0d)/100.0d;
 				double percent = Math.round(((availMem/maxMem)*100)*100.0d)/100.0d;
 				sender.sendMessage(ChatColor.YELLOW+"Available memory: "+availMem+"MB / "+maxMem+"MB ("+percent+"%)");
 				sender.sendMessage(ChatColor.YELLOW+"Server Resource Score: "+DynamicLagReducer.getResourceScore()+"%");
 				sender.sendMessage(ChatColor.YELLOW+"Server TPS: "+Math.round(DynamicLagReducer.getTPS()*100.0d)/100.0d+"(/20.0)");
-				sender.sendMessage(ChatColor.GREEN+"Currently spawning NPC cars: "+main.plugin.aiSpawns.NPCsCurrentlyEnabled());
+				sender.sendMessage(ChatColor.GREEN+"Currently spawning NPC cars: "+main.plugin.aiSpawns.isNPCCarsSpawningNow());
 				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
 				return true;

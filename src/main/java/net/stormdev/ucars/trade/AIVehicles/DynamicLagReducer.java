@@ -41,14 +41,14 @@ public class DynamicLagReducer implements Runnable {
 			freeMemory = (long) (Runtime.getRuntime().freeMemory() * 0.00097560975 * 0.00097560975); //In MB
 			if(freeMemory < 150){ //If, after gc, the memory is still running out
 				//Enable and disable AI
-				main.plugin.aiSpawns.setNPCsCurrentlyEnabled(false);
+				main.plugin.aiSpawns.setNPCsCurrentlySpawning(false);
 				return true;
 			}
 		}
 		else{
 			//re-enable AI if disabled
-			if(!main.plugin.aiSpawns.NPCsCurrentlyEnabled()){
-				main.plugin.aiSpawns.setNPCsCurrentlyEnabled(true);
+			if(!main.plugin.aiSpawns.isNPCCarsSpawningNow()){
+				main.plugin.aiSpawns.setNPCsCurrentlySpawning(true);
 			}
 		}
 		return false;

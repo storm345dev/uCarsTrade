@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +18,9 @@ import java.util.logging.Level;
 import net.milkbowl.vault.economy.Economy;
 import net.stormdev.ucars.shops.CarShop;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
-import net.stormdev.ucars.trade.AIVehicles.AISpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.spawning.AISpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.spawning.AIWorldProbingSpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
@@ -71,6 +72,7 @@ public class main extends JavaPlugin {
 	public CarShop carShop = null;
 	public BukkitTask lagReducer = null;
 	public int carCache = 20;
+	public SpawnMethod aiSpawnMethod = SpawnMethod.WORLD_PROBE;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -262,6 +264,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.limit")) {
 				config.set("general.ai.limit", 69);
 			}
+        	if (!config.contains("general.ai.spawnMethod")) {
+				config.set("general.ai.spawnMethod", SpawnMethod.WORLD_PROBE.name());
+			}
         	if (!config.contains("general.ai.canSteal")) {
 				config.set("general.ai.canSteal", true);
 			}
@@ -417,7 +422,22 @@ public class main extends JavaPlugin {
 			this.alerts = new HashMap<String, String>();
 		}
 		
-		this.aiSpawns = new AISpawnManager(this, config.getBoolean("general.ai.enable"));
+		if(config.getBoolean("general.ai.enable")){
+			String spawnMethodRaw = config.getString("general.ai.spawnMethod");
+			try {
+				SpawnMethod method = SpawnMethod.valueOf(spawnMethodRaw);
+				if(method == null){throw new Exception();}
+				this.aiSpawnMethod = method;
+			} catch (Exception e) {
+				getLogger().info("INVALID AI spawn method set, it must be either 'WORLD_PROBE' or 'NODES'");
+			}
+		}
+		if(this.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
+			this.aiSpawns = new AIWorldProbingSpawnManager(this, config.getBoolean("general.ai.enable"));
+		}
+		else if(this.aiSpawnMethod.equals(SpawnMethod.NODES)){
+			//TODO Init spawn manager
+		}
 		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
 		
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
@@ -436,7 +456,7 @@ public class main extends JavaPlugin {
 			if(ucars != null){
 			ucars.unHookPlugin(this);
 			}
-			this.aiSpawns.end();
+			this.aiSpawns.shutdown();
 			this.carShop.destroy();
 			Bukkit.getScheduler().cancelTasks(this);
 			logger.info("uCarsTrade has been disabled!");

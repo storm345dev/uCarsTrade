@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -86,7 +85,7 @@ public class AIRouter {
 	}
 	
 	public static boolean isAIEnabled(){
-		return enabled && AISpawnManager.enabled;
+		return enabled && main.plugin.aiSpawns.isNPCCarsSpawningNow();
 	}
 	
 	public void route(final Minecart car, final DrivenCar c) throws Exception{
@@ -124,7 +123,7 @@ public class AIRouter {
 				}
 				main.plugin.carSaver.carNoLongerInUse(c.getId());
 				car.remove();
-				AISpawnManager.decrementSpawnedCount();
+				main.plugin.aiSpawns.decrementSpawnedAICount();
 			}
 		}
 		
@@ -208,7 +207,7 @@ public class AIRouter {
 		if(!car.hasMetadata("trade.npc")){
 			//Calculate direction from road
 			if(!atJ){
-				BlockFace face = AISpawnManager.carriagewayDirection(under);
+				BlockFace face = AITrackFollow.carriagewayDirection(under);
 				if(!direction.equals(face)){
 					direction = face;
 					keepVel = false;
@@ -234,7 +233,7 @@ public class AIRouter {
 		
 		//Recalculate dir pretty goddam often
 		if(AIRouter.isTrackBlock(under.getType())){
-			BlockFace bf = AISpawnManager.carriagewayDirection(under);
+			BlockFace bf = AITrackFollow.carriagewayDirection(under);
 			if(bf != null){
 				direction = bf;
 				keepVel = false;
@@ -363,7 +362,7 @@ public class AIRouter {
 				Block b = under.getRelative(d);
 				if(isTrackBlock(b.getType()) || b.getType() == junction){
 					if(toGo != null){
-						BlockFace bd = AISpawnManager.carriagewayDirection(b);
+						BlockFace bd = AITrackFollow.carriagewayDirection(b);
 						if(bd != null && bd.equals(currentDir) && !(goDir != null && goDir.equals(currentDir))){
 							toGo = b;
 							dir = d;
@@ -385,7 +384,7 @@ public class AIRouter {
 				Block b = under.getRelative(d);
 				if(isTrackBlock(b.getType()) || b.getType() == junction){
 					if(toGo != null){
-						BlockFace bd = AISpawnManager.carriagewayDirection(b);
+						BlockFace bd = AITrackFollow.carriagewayDirection(b);
 						if(bd != null && bd.equals(currentDir) && !(goDir != null && goDir.equals(currentDir))){
 							toGo = b;
 							dir = d;
@@ -444,7 +443,7 @@ public class AIRouter {
 		BlockFace direction = ClosestFace.getClosestFace(car.getLocation().getYaw());
 		if(!atJunction){
 			if(goDir == null){
-				direction = AISpawnManager.carriagewayDirection(under);
+				direction = AITrackFollow.carriagewayDirection(under);
 			}
 			if(direction == null){
 				direction = dir;

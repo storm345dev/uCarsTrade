@@ -23,7 +23,6 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
 		this.nodes = new NodesStore(nodesSaveFile);
-		AIRouter.PLAYER_RADIUS = 40;
 		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
 			main.config.set("general.ai.minSpawnDistanceFromPlayers", 10);
 		}
@@ -32,6 +31,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 			main.config.set("general.ai.maxSpawnDistanceFromPlayers", 40);
 		}
 		minDistance = main.config.getInt("general.ai.maxSpawnDistanceFromPlayers");
+		AIRouter.PLAYER_RADIUS = maxDistance;
 		plugin.saveConfig();
 	}
 	

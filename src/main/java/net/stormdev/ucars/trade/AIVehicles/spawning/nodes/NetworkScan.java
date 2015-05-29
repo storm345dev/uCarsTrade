@@ -389,6 +389,12 @@ public class NetworkScan {
 		
 		blockScan(origin.getBlock());
 		
+		roadScanOutput();
+		
+		logger.log("Road network indexed!");
+	}
+	
+	private void roadScanOutput(){
 		while((countScanBranches() > 0) && (System.currentTimeMillis() - lastStartTime) < 120000){ //120 second timeout if no more blocks are scanned within it (May cause task to stop premature if server lags extremely)
 			try {
 				Thread.sleep(1000);
@@ -397,8 +403,20 @@ public class NetworkScan {
 			}
 			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size()+" Current network size: "+roughSize);
 		}
-		
-		logger.log("Road network indexed!");
+		int count = 0;
+		while((countScanBranches() > 0) && (System.currentTimeMillis() - lastStartTime) < 120000 && count < 5){ //Give it 5 extra seconds after scanning the network for safety
+			count++;
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if(count < 5){ //It wasn't actually finished
+			roadScanOutput();
+			return;
+		}
+		roughSize = roadNetworkBlocks.size(); //Make sure it's correct or it looks dodgy
 	}
 	
 	private int countScanBranches(){

@@ -21,8 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-public class NetworkScan { //TODO Should probably also check against other active nodes in chunks overlapping so that re-running the scan won't double the nodes (Will allow for partial scans if/when implemented)
-	//TODO Every 200K road blocks scanned, save to file; calculate the nodes and then move on - Still leaves exponentially more processing to scan larger networks tho... (if you want to make sure not to double back on self)
+public class NetworkScan { 
 	private static int SCAN_BRANCH_LIMIT = 1000;
 	public static class Logger {
 		private UUID startPlayerUUID;
@@ -316,6 +315,8 @@ public class NetworkScan { //TODO Should probably also check against other activ
 				continue;
 			}
 			
+			List<Node> toScan = new ArrayList<Node>(nodes);
+			toScan.addAll(spawnManager.getNodesStore().getActiveNodes(block.getLocation()));
 			for(final Node node:nodes){
 				if(node.getLocation() == null){
 					continue;

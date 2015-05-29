@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class NetworkScan {
-	private static final int SCAN_BRANCH_LIMIT = 5000;
+	private static final int SCAN_BRANCH_LIMIT = 2000;
 	public static class Logger {
 		private UUID startPlayerUUID;
 		

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.stormdev.ucars.trade.main;
@@ -21,6 +22,7 @@ import net.stormdev.ucars.trade.main;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 import com.google.common.io.Files;
@@ -166,15 +168,41 @@ public class NodesStore {
 		return chunkNodes;
 	}
 	
-	public synchronized void setNodeIntoCorrectActiveChunks(Node node){ //Also works to update the node
-		Chunk nodeChunk = node.getChunk();
+	public synchronized void setNodeIntoCorrectActiveChunks(final Node node){ //Also works to update the node
+		Chunk nodeChunk = null;
+		World nodeWorld = null;
+		if(Bukkit.isPrimaryThread()){
+			nodeChunk = node.getChunk();
+			nodeWorld = nodeChunk.getWorld();
+		}
+		else {
+			try {
+				Future<Chunk> getChunk = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Chunk>(){
+
+					@Override
+					public Chunk call() {
+						return node.getChunk();
+					}});
+				nodeChunk = getChunk.get();
+				final Chunk nc = nodeChunk;
+				Future<World> getWorld = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<World>(){
+
+					@Override
+					public World call() {
+						return nc.getWorld();
+					}});
+				nodeWorld = getWorld.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		int chunkX = nodeChunk.getX();
 		int chunkZ = nodeChunk.getZ();
 		
 		//Generate the 5x5 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
 		for(int x = chunkX -2;x<=chunkX+2;x++){
 			for(int z = chunkZ -2;z<=chunkZ+2;z++){
-				ChunkCoord coord = new ChunkCoord(nodeChunk.getWorld(), x, z);
+				ChunkCoord coord = new ChunkCoord(nodeWorld, x, z);
 				
 				List<Node> chunkNodes = new ArrayList<Node>();
 				for(ChunkCoord key:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){

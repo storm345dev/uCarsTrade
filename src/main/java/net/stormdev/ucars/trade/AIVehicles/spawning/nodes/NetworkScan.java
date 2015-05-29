@@ -43,8 +43,8 @@ public class NetworkScan {
 		REVALIDATE_EXISTING_NODES(0),
 		SCAN_ROAD_NETWORK_BLOCKS(1),
 		PLACE_NODES(2),
-		CHECK_NODES(3),
-		SAVE_AND_ACTIVATE(4);
+		/*CHECK_NODES(3),*/
+		SAVE_AND_ACTIVATE(3);
 		
 		private int pos;
 		private Stage(int pos){
@@ -176,11 +176,11 @@ public class NetworkScan {
 	
 	private void startStage(){
 		switch(stage){
-		case CHECK_NODES: {
+		/*case CHECK_NODES: {
 			checkNodes();
 			nextStage();
-		}
-			break;
+		}*/
+			/*break;*/
 		case PLACE_NODES: {
 			nodePlacing();
 			nextStage();

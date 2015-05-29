@@ -2,13 +2,15 @@ package net.stormdev.ucars.trade;
 
 import java.util.Set;
 
-import net.stormdev.ucars.trade.AIVehicles.AIProbingSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
+import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
+import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.NetworkScan;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -119,6 +121,74 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				sender.sendMessage(ChatColor.GREEN+"Currently spawning NPC cars: "+main.plugin.aiSpawns.isNPCCarsSpawningNow());
 				sender.sendMessage(ChatColor.GREEN+"Currently spawned: "+spawn);
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
+				return true;
+			}
+			else if(command.equalsIgnoreCase("ainodes")){
+				if(!AIRouter.isAIEnabled()){
+					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
+					return true;
+				}
+				if(sender instanceof Player && !(sender.isOp())){
+					sender.sendMessage(ChatColor.RED+"Sorry this feature is for ops only - And with v. good reason!");
+					return true;
+				}
+				if(args.length < 2){
+					sender.sendMessage(ChatColor.RED+"Options:");
+					sender.sendMessage("/car ainodes revalidate - Forces revalidation of ALL nodes (will likely cause lag)");
+					sender.sendMessage("/car ainodes clear - Clears ALL nodes (PERMANENT; don't do this unless you want to have to re-calculate them all again)");
+					sender.sendMessage("/car ainodes scan - Starts where the player is and then follows the whole connected road network, placing nodes for villager cars to spawn at (Will definitely cause lag)");
+					return true;
+				}
+				String action = args[1];
+				if(action.equalsIgnoreCase("revalidate")){
+					sender.sendMessage(ChatColor.GREEN+"Starting revalidation of all nodes! This could take some time, look at the console for notification of when completed!");
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+							@Override
+							public void run() {
+								((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().revalidateNodes();
+								return;
+							}});
+						
+					}
+					return true;
+				}
+				else if(action.equalsIgnoreCase("clear")){
+					sender.sendMessage(ChatColor.RED+"CLEARING ALL saved nodes! (GOD I hope you know what this command does... or I feel so sorry for you whenever somebody who does realises what you have done - Just in case the existing nodes will be saved to 'oldNodes.nodelist')");
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+							@Override
+							public void run() {
+								((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().resetNodes();
+								return;
+							}});
+					}
+					return true;
+				}
+				else if(action.equalsIgnoreCase("scan")){
+					if(!(sender instanceof Player)){
+						sender.sendMessage(ChatColor.RED+"Only players can use this command");
+						return true;
+					}
+					sender.sendMessage(ChatColor.YELLOW+"Commencing network scan...");
+					final Player pl = player;
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+							@Override
+							public void run() {
+								new NetworkScan(pl);
+								return;
+							}});
+					}
+					return true;
+				}
+				else {
+					sender.sendMessage("Do '/car ainodes' for a list of options!");
+				}
+				
 				return true;
 			}
 			return true;

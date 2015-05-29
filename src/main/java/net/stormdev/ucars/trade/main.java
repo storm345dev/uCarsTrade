@@ -21,6 +21,7 @@ import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.spawning.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.AIWorldProbingSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
+import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.utils.IconMenu;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
@@ -436,7 +437,7 @@ public class main extends JavaPlugin {
 			this.aiSpawns = new AIWorldProbingSpawnManager(this, config.getBoolean("general.ai.enable"));
 		}
 		else if(this.aiSpawnMethod.equals(SpawnMethod.NODES)){
-			//TODO Init spawn manager
+			initNodeAISpawnManager();
 		}
 		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
 		
@@ -553,5 +554,11 @@ public class main extends JavaPlugin {
 					+ " please check for an update.");
 		}
 		return;*/
+	}
+	
+	public void initNodeAISpawnManager(){
+		this.aiSpawns = new AINodesSpawnManager(this, 
+				config.getBoolean("general.ai.enable"),
+				new File(getDataFolder() + File.separator + "aiSpawnNodes.nodelist"));
 	}
 }

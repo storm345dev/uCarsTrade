@@ -289,6 +289,9 @@ public class NetworkScan { //TODO Should probably also check against other activ
 			}});
 		
 		for(Vector blockLoc:new ArrayList<Vector>(roadNetworkBlocks)){
+			if(blockLoc == null){ //Not sure why happens, but it does
+				continue;
+			}
 			final Block block = new Location(origin.getWorld(), blockLoc.getX(), blockLoc.getY(), blockLoc.getZ()).getBlock();
 			roughNodes++;
 			if(block == null){

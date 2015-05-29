@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.md_5.bungee.api.ChatColor;
@@ -287,16 +288,30 @@ public class NetworkScan {
 				return;
 			}});
 		
-		for(Vector blockLoc:new ArrayList<Vector>(roadNetworkBlocks)){
+		for(final Vector blockLoc:new ArrayList<Vector>(roadNetworkBlocks)){
 			if(blockLoc == null){ //Not sure why happens, but it does
 				continue;
 			}
-			final Block block = new Location(origin.getWorld(), blockLoc.getX(), blockLoc.getY(), blockLoc.getZ()).getBlock();
 			roughNodes++;
+			boolean overlappingNode = false;
+			Future<Block> getBlock = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Block>(){
+
+				@Override
+				public Block call() throws Exception {
+					Block block = new Location(origin.getWorld(), blockLoc.getX(), blockLoc.getY(), blockLoc.getZ()).getBlock(); //HAS to be done sync ;(
+					return block;
+				}});
+			
+			final Block block;
+			try {
+				block = getBlock.get();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+				continue;
+			}
 			if(block == null){
 				continue;
 			}
-			boolean overlappingNode = false;
 			Future<BlockFace> getDir = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<BlockFace>(){
 
 				@Override
@@ -436,7 +451,7 @@ public class NetworkScan {
 		if(block == null){
 			return;
 		}
-		if(roadNetworkBlocks.contains(block.getLocation().toVector())){ //TODO Do those vectors count as equal... I hope so
+		if(roadNetworkBlocks.contains(block.getLocation().toVector())){
 			decrementScansRunning();
 			return;
 		}

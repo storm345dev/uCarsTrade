@@ -57,7 +57,10 @@ public class NodesStore {
 			}
 		}
 		try {
-			Files.copy(saveFile, backup);
+			if(saveFile.exists()){
+				Files.copy(saveFile, backup);
+				saveFile.delete();
+			}
 		} catch (IOException e) {
 			//oh well... they don't get a backup...
 			e.printStackTrace();
@@ -170,10 +173,15 @@ public class NodesStore {
 		
 		//Generate the 5x5 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
 		for(int x = chunkX -2;x<=chunkX+2;x++){
-			for(int z = chunkZ -2;z<=chunkZ+2;x++){
+			for(int z = chunkZ -2;z<=chunkZ+2;z++){
 				ChunkCoord coord = new ChunkCoord(nodeChunk.getWorld(), x, z);
 				
-				List<Node> chunkNodes = getActiveNodes(coord);
+				List<Node> chunkNodes = new ArrayList<Node>();
+				for(ChunkCoord key:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+					if(key.isEqualTo(coord)){
+						chunkNodes = nodesByActiveChunks.get(key);
+					}
+				}
 				
 				boolean alreadySet = false;
 				for(Node n:new ArrayList<Node>(chunkNodes)){
@@ -195,7 +203,6 @@ public class NodesStore {
 				nodesByActiveChunks.put(coord, chunkNodes);
 			}
 		}
-		asyncSave();
 	}
 	
 	public synchronized void saveNow(){ //synchronized so nodesByActiveChunks not modified whilst saving

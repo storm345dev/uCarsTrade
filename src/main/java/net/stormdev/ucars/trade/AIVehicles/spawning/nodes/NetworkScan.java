@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.md_5.bungee.api.ChatColor;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
+import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class NetworkScan {
+	private static final int SCAN_BRANCH_LIMIT = 5000;
 	public static class Logger {
 		private UUID startPlayerUUID;
 		
@@ -67,8 +68,8 @@ public class NetworkScan {
 	private Location origin = null;
 	private Stage stage = Stage.REVALIDATE_EXISTING_NODES;
 	private AINodesSpawnManager spawnManager = null;
-	private List<Block> roadNetwork = new ArrayList<Block>();
-	private List<Node> nodes = new ArrayList<Node>();
+	private volatile List<Block> roadNetwork = new ArrayList<Block>();
+	private volatile List<Node> nodes = new ArrayList<Node>();
 	
 	public NetworkScan(Player player){ //Constructed and called async
 		if(Bukkit.isPrimaryThread()){
@@ -128,6 +129,7 @@ public class NetworkScan {
 	}
 	
 	public void finish(){
+		spawnManager.getNodesStore().asyncSave();
 		origin = null;
 		spawnManager = null;
 		roadNetwork.clear();
@@ -178,6 +180,9 @@ public class NetworkScan {
 			spawnManager.getNodesStore().setNodeIntoCorrectActiveChunks(node);
 		}
 		
+		main.config.set("general.ai.spawnMethod", SpawnMethod.NODES.name());
+		main.plugin.saveConfig();
+		
 		logger.log("Successfully saved the nodes! Villager cars should now start spawning!");
 	}
 	
@@ -195,6 +200,9 @@ public class NetworkScan {
 					}
 					
 					for(Node otherNode:new ArrayList<Node>(nodes)){
+						if(otherNode.equals(node)){
+							continue; //SAME node
+						}
 						double distanceSquared = otherNode.getLocation().distanceSquared(node.getLocation());
 						if(distanceSquared <= 48){ //Nodes too close together!
 							BlockFace n1Dir = node.getCarriagewayDirection();
@@ -223,8 +231,11 @@ public class NetworkScan {
 	public void nodePlacing(){
 		logger.log("Starting placing of nodes throughout the network, this could also take a long time...");
 		
-		for(final Block block:roadNetwork){
-			Vector blockLoc = block.getLocation().toVector();
+		for(final Block block:new ArrayList<Block>(roadNetwork)){
+			if(block == null){
+				continue;
+			}
+			Vector blockLoc = new Vector(block.getX(), block.getY(), block.getZ());
 			boolean overlappingNode = false;
 			Future<BlockFace> getDir = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<BlockFace>(){
 
@@ -245,7 +256,10 @@ public class NetworkScan {
 			}
 			
 			for(final Node node:nodes){
-				Vector nodeLoc = node.getLocation().toVector();
+				if(node.getLocation() == null){
+					continue;
+				}
+				Vector nodeLoc = new Vector(node.getLocation().getX(), node.getLocation().getY(), node.getLocation().getZ());
 				Vector diff = nodeLoc.subtract(blockLoc);
 				if(diff.lengthSquared() < 49){ //There is another node within 7 blocks of this locations, check if we should skip it
 					Future<BlockFace> existingNodeDir = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<BlockFace>(){
@@ -290,29 +304,73 @@ public class NetworkScan {
 	}
 	
 	public void scanRoadNetwork(){
+		if(roadNetwork == null){
+			roadNetwork = new ArrayList<Block>();
+		}
 		roadNetwork.clear(); //In case it isn't already
 		logger.log("Starting indexing of the road network... (This could take a long time)");
 		
 		blockScan(origin.getBlock());
 		
-		while(activeScanBranches > 0){
+		while((countScanBranches() > 0) && (System.currentTimeMillis() - lastStartTime) < 120000){ //120 second timeout if no more blocks are scanned within it (May cause task to stop premature if server lags extremely)
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				//oh well
 			}
-			logger.log("Currently active scan branches: "+activeScanBranches);
+			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size());
 		}
 		
 		logger.log("Road network indexed!");
 	}
 	
-	int activeScanBranches = 0;
+	private int countScanBranches(){
+		if(queuedBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
+			while(scansRunning < SCAN_BRANCH_LIMIT && queuedBranches.size() > 0){
+				Block b = queuedBranches.get(0);
+				queuedBranches.remove(0);
+				incrementScansRunning();
+				blockScan(b);
+				Thread.yield();
+				try {
+					Thread.sleep(100); //Prevent starting LOTS of branches at one time
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if(queuedBranches.size() > 0 && scansRunning < 1){
+			return 1; //Don't stop the scan...
+		}
+		return scansRunning;
+	}
+	
+	private volatile List<Block> queuedBranches = new ArrayList<Block>();
+	
+	private volatile long lastStartTime = 0;
+	private volatile int scansRunning = 1;
+	
+	private synchronized void incrementScansRunning(){
+		scansRunning++;
+	}
+	
+	private synchronized void decrementScansRunning(){
+		scansRunning--;
+	}
+	
 	private void blockScan(final Block block){
-		activeScanBranches++;
+		lastStartTime = System.currentTimeMillis();
+		if(block == null){
+			return;
+		}
+		if(scansRunning > NetworkScan.SCAN_BRANCH_LIMIT){
+			queuedBranches.add(block);
+			decrementScansRunning();
+			return;
+		}
 		try {
 			Thread.yield();
-			Thread.sleep(100); //Give the main thread a rest occasionally so the server hopefully doesn't crash
+			Thread.sleep(50); //Give the main thread a rest occasionally so the server hopefully doesn't crash
 			
 			roadNetwork.add(block);
 			//Now check for nearby tracker blocks
@@ -327,11 +385,15 @@ public class NetworkScan {
 								try {
 									final Block newBlock = new Location(block.getWorld(), block.getX()+modX, block.getY()+modY, block.getZ()+modZ).getBlock();
 									if(AIRouter.isTrackBlock(newBlock.getType()) && !roadNetwork.contains(newBlock)){
+										final boolean originalScan = !startedMore;
 										startedMore = true;
 										Bukkit.getScheduler().runTaskLaterAsynchronously(main.plugin, new Runnable(){
 
 											@Override
 											public void run() {
+												if(!originalScan){
+													incrementScansRunning();
+												}
 												blockScan(newBlock);
 												return;
 											}}, 1l);
@@ -345,11 +407,11 @@ public class NetworkScan {
 					}
 					return startedMore;
 				}});
-			moreStarted.get(); //Block on the near blocks being scanned (So it's easier to tell if we're done or not)
+			if(!moreStarted.get()){ //Block on the near blocks being scanned (So it's easier to tell if we're done or not)
+				decrementScansRunning();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			activeScanBranches--;
 		}
 	}
 }

@@ -174,15 +174,13 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					}
 					sender.sendMessage(ChatColor.YELLOW+"Commencing network scan...");
 					final Player pl = player;
-					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
-						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+					Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
-							@Override
-							public void run() {
-								new NetworkScan(pl);
-								return;
-							}});
-					}
+						@Override
+						public void run() {
+							new NetworkScan(pl);
+							return;
+						}});
 					return true;
 				}
 				else {

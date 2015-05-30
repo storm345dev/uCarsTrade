@@ -10,6 +10,8 @@ import net.stormdev.ucars.trade.AIVehicles.spawning.AbstractAISpawnManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -18,14 +20,14 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 40l;
-	private int minDistance = 10;
+	private int minDistance = 25;
 	private int maxDistance = 40;
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
 		this.nodes = new NodesStore(nodesSaveFile);
 		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
-			main.config.set("general.ai.minSpawnDistanceFromPlayers", 10);
+			main.config.set("general.ai.minSpawnDistanceFromPlayers", 25);
 		}
 		minDistance = main.config.getInt("general.ai.minSpawnDistanceFromPlayers");
 		if(!main.config.contains("general.ai.maxSpawnDistanceFromPlayers")){
@@ -49,6 +51,10 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	
 	private boolean randomDoSpawn(){
 		return main.random.nextInt(1) < 1; //50/50 chance
+	}
+	
+	private int randomMinCarSpacing(){
+		return main.random.nextInt(15-5) + 5;
 	}
 
 	@Override
@@ -103,6 +109,22 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					chance = (int) ((nearCount*1.5) + 1);
 					if(!(main.random.nextInt(chance) <= 1)){ //Avoids LOTS of cars spawning where there's LOTS of players
+						continue;
+					}
+					
+					boolean closeCar = false;
+					int minSpacing = randomMinCarSpacing();
+					for(Entity e:new ArrayList<Entity>(randomNodeLoc.getWorld().getEntities())){ //PLEASE don't get caught by AsyncCatcher...
+						if(!e.getType().equals(EntityType.MINECART)){
+							continue;
+						}
+						Location l = e.getLocation();
+						if(l.distanceSquared(randomNodeLoc) < minSpacing){
+							closeCar = true;
+							break;
+						}
+					}
+					if(closeCar){
 						continue;
 					}
 					

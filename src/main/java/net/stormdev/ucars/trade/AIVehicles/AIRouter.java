@@ -326,9 +326,9 @@ public class AIRouter {
 			double y = ty - cy;
 			double z = tz - cz /*+ 0.5*/;
 			
-			if((y-0.1) > 0.1){ //Going up
-				y+=0.2; //Help climb smoother
-			}
+			/*if(y > 0.2){ //Going up
+				y+=0.2; //Help climb smoother TODO: Does it?
+			}*/
 			
 			double px = Math.abs(x);
 			double pz = Math.abs(z);
@@ -362,9 +362,9 @@ public class AIRouter {
 				x *= 0.3;
 				z *= 0.3;
 			}*/
-			if(y>0.2){ //Going upwards
-				y += 3;
-			}
+			/*if(y>0.2){ //Going upwards
+				y += 3; //TODO Is this needed?
+			}*/
 			
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);

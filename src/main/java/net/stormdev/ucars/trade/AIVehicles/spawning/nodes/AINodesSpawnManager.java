@@ -54,6 +54,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	@Override
 	public void initSpawnTask() {
 		final double minDistanceSquared = Math.pow(minDistance, 2);
+		final double maxDistanceSquared = Math.pow(maxDistance, 2);
 		task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 			@Override
@@ -73,7 +74,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					int chance = 40;
+					int chance = 60;
 					chance -= activeNodes.size(); //Make it more likely to spawn a car; the more nodes there are active
 					if(chance < 2){
 						chance = 2;
@@ -87,6 +88,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					
 					Location randomNodeLoc = randomNode.getLocation();
 					
+					int nearCount = 0;
 					for(Player pl:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
 						if(pl.equals(player)){
 							continue;
@@ -94,6 +96,14 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						if(pl.getLocation().distanceSquared(randomNodeLoc) < minDistanceSquared){
 							return; //Don't spawn at node if other player right near it
 						}
+						else if(pl.getLocation().distanceSquared(randomNodeLoc) < maxDistanceSquared){
+							//It's also near to them
+							nearCount++;
+						}
+					}
+					chance = nearCount + 1;
+					if(!(main.random.nextInt(chance) <= 1)){ //Avoids LOTS of cars spawning where there's LOTS of players
+						continue;
 					}
 					
 					Bukkit.getScheduler().runTask(plugin, new Runnable(){

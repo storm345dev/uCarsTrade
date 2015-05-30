@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.MetadataValue;
@@ -135,7 +136,7 @@ public class AIRouter {
 			}
 		}
 		
-		/*nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
+		nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;
 		for(Entity e:nearby){
 			if(e.getType() == EntityType.MINECART && e.hasMetadata("trade.npc")){ //Avoid driving into another car
@@ -170,9 +171,9 @@ public class AIRouter {
 					}
 				}
 			}
-		}*/
+		}
 		
-		if(/*stop || */car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+		if(stop || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}

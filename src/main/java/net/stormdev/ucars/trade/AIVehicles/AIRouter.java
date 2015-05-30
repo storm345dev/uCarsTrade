@@ -307,8 +307,13 @@ public class AIRouter {
 			//Car has hit a wall
 			return;
 		}
+		String rName = road.getType().name().toLowerCase();
+		String tName = toDrive.getType().name().toLowerCase();
 		if(toDrive.getLocation().distanceSquared(loc) >= 3.25 ||
-				toDrive.getY() > loc.getBlockY()){
+				toDrive.getY() > loc.getBlockY()
+				|| ((tName.contains("step")||tName.contains("carpet")) && !(rName.contains("step") || rName.contains("carpet")))//One of them is a step and the other isn't
+				|| (!(tName.contains("step")||tName.contains("carpet")) && (rName.contains("step") || rName.contains("carpet")))
+				){ 
 			keepVel = false;
 		}
 		if(keepVel){
@@ -320,7 +325,6 @@ public class AIRouter {
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
 			double ty = toDrive.getY()+0.1;
-			String rName = road.getType().name().toLowerCase();
 			if(rName.contains("step")){
 				ty -= 0.5;
 			}

@@ -177,9 +177,9 @@ public class AITrackFollow {
 		//Need to get right/left of it
 		BlockFace leftCheck = nextLeftFace(dir);
 		BlockFace rightCheck = nextRightFace(dir);
-		/*BlockFace behind = dir.getOppositeFace();*/
+		BlockFace behind = dir.getOppositeFace();
 		
-		while(leftCheck != rightCheck/*behind && rightCheck != behind*/){
+		while(leftCheck != behind && rightCheck != behind){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
 			TrackBlock clb = checkIfTracker(current, lb, junctionBlock);

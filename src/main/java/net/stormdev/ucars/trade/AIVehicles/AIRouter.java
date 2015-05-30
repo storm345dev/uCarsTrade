@@ -291,9 +291,6 @@ public class AIRouter {
 			keepVel = false;
 			//Update direction stored on car...
 			car.removeMetadata("trade.npc", main.plugin);
-			if(atJ){
-				Bukkit.broadcastMessage("Nullified motion vector");
-			}
 			data.setMotion(null);
 			car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		}
@@ -343,9 +340,6 @@ public class AIRouter {
 			vel = data.getMotion();
 			car.removeMetadata("relocatingRoad", main.plugin);
 			car.setVelocity(vel);
-			if(atJ){
-				Bukkit.broadcastMessage(vel+"("+direction+")");
-			}
 		}
 		else{
 			//Calculate vector to get there...

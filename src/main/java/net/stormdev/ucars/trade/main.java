@@ -28,12 +28,16 @@ import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucarstrade.cars.CarPresets;
+import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -458,6 +462,23 @@ public class main extends JavaPlugin {
 			ucars.unHookPlugin(this);
 			}
 			this.aiSpawns.shutdown();
+			for(World w:Bukkit.getWorlds()){
+				for(Entity e:new ArrayList<Entity>(w.getEntities())){
+					try {
+						if(e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
+							final DrivenCar c = plugin.carSaver.getCarInUse(e.getUniqueId());
+							if(c == null
+									|| !c.isNPC()){
+								continue; //Not a car or not an npc car
+							}
+							AIRouter.despawnNPCCarNow(((Minecart)e), c);
+						}
+					} catch (Exception e1) {
+						//Oki....
+						e1.printStackTrace();
+					}
+				}
+			}
 			this.carShop.destroy();
 			Bukkit.getScheduler().cancelTasks(this);
 			logger.info("uCarsTrade has been disabled!");

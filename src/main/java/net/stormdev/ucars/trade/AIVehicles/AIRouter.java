@@ -532,6 +532,16 @@ public class AIRouter {
 		main.plugin.aiSpawns.decrementSpawnedAICount();
 	}
 	
+	public static void despawnNPCCarNow(Minecart car, final DrivenCar c){
+		//Remove me
+		if(car.getPassenger() != null){
+			car.getPassenger().remove();
+		}
+		main.plugin.carSaver.carNoLongerInUse(c.getId());
+		car.remove();
+		main.plugin.aiSpawns.decrementSpawnedAICount();
+	}
+	
 	public boolean isCompassDir(BlockFace face){
 		switch(face){
 		case NORTH: return true;

@@ -285,18 +285,42 @@ public class AIRouter {
 		}
 		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, junction, car);
-		if(nextTrack.junction){
-			keepVel = false;
-		}
-		if(direction != nextTrack.dir){
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, junction, car, atJ);
+		if(direction != nextTrack.dir && !car.hasMetadata("car.atJunction") && !atJ){
 			direction = nextTrack.dir;
 			keepVel = false;
 			//Update direction stored on car...
 			car.removeMetadata("trade.npc", main.plugin);
+			if(atJ){
+				Bukkit.broadcastMessage("Nullified motion vector");
+			}
 			data.setMotion(null);
 			car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		}
+		if(nextTrack.forJunction){
+			keepVel = false; //make it recalculate so we can go slower
+		}
+		if(atJ&&!car.hasMetadata("car.atJunction")){
+			keepVel = false;
+			direction = nextTrack.dir;
+			data.setMotion(null);
+			car.setMetadata("car.atJunction", new StatValue(nextTrack.dir, main.plugin));
+		}
+		else if(atJ && car.hasMetadata("car.atJunction")){
+			/*try {
+				direction = (BlockFace) car.getMetadata("car.atJunction").get(0).value();
+			} catch (Exception e) {
+				//invalid meta
+				car.removeMetadata("car.atJunction", main.plugin);
+			}*/
+			nextTrack.nextBlock = under.getRelative(direction);
+			keepVel = true;
+		}
+		else if(!atJ && car.hasMetadata("car.atJunction")){
+			car.removeMetadata("car.atJunction", main.plugin);
+			keepVel = false; //Recalcualte faster speed vector
+		}
+		
 		Block next = nextTrack.nextBlock;
 		Block road = next.getRelative(BlockFace.UP);
 		while(isTrackBlock(road.getType())){
@@ -319,6 +343,9 @@ public class AIRouter {
 			vel = data.getMotion();
 			car.removeMetadata("relocatingRoad", main.plugin);
 			car.setVelocity(vel);
+			if(atJ){
+				Bukkit.broadcastMessage(vel+"("+direction+")");
+			}
 		}
 		else{
 			//Calculate vector to get there...
@@ -339,7 +366,7 @@ public class AIRouter {
 			double z = tz - cz /*+ 0.5*/;
 			
 			/*if(y > 0.2){ //Going up
-				y+=0.2; //Help climb smoother TODO: Does it?
+				y+=0.2; //Help climb smoother
 			}*/
 			
 			double px = Math.abs(x);
@@ -348,11 +375,7 @@ public class AIRouter {
 
 			double mult = speed * 0.15;
 			
-			if(atJ){
-				x *= 2;
-				z *= 2;
-			}
-			else if(y<2 && !atJ){
+			if(y<2){
 				if (ux) {
 					// x is smaller
 					// long mult = (long) (pz/speed);
@@ -365,6 +388,10 @@ public class AIRouter {
 					z = (z / px) * mult;
 				}
 			}
+			if(nextTrack.forJunction || atJ){ //Slow down for junction
+				x *= 0.5;
+				z *= 0.5;
+			}
 /*			if(px > 0.1 && pz > 0.1 && AITrackFollow.isCompassDir(direction)) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
 				//System.out.println("DECREMENTING VECTOR");
 				x *= 0.1;
@@ -375,7 +402,7 @@ public class AIRouter {
 				z *= 0.3;
 			}*/
 			/*if(y>0.2){ //Going upwards
-				y += 3; //TODO Is this needed?
+				y += 3;
 			}*/
 			
 			vel = new Vector(x,y,z); //Go to block

@@ -64,7 +64,7 @@ public class CarCalculations {
 		return false;
 	}
 	
-	static double[] rotateVector2d(double x, double y, double radians)
+	public static double[] rotateVector2d(double x, double y, double radians)
 	{
 	    double[] result = new double[2];
 	    result[0] = x * Math.cos(radians) - y * Math.sin(radians);

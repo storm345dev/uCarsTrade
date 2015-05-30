@@ -2,6 +2,7 @@ package net.stormdev.ucars.trade.AIVehicles;
 
 import net.stormdev.ucars.trade.main;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -154,19 +155,21 @@ public class AITrackFollow {
 		return dir;
 	}
 	
-	public static TrackingData nextBlock(Block current, BlockFace dir, Material junctionBlock, Entity vehicle){
+	public static TrackingData nextBlock(Block current, BlockFace dir, Material junctionBlock, Entity vehicle, boolean atJ){ //TODO WTf why doesn't this listen to dir signs, etc...
 		Block cr = current.getRelative(dir);
 		TrackBlock ch = checkIfTracker(current, cr, junctionBlock);
 		boolean turn = false;
 		if(ch != null){
 			Block check = ch.block;
 			if(check != null){
-				if(ch.junction && main.random.nextBoolean() && main.random.nextBoolean()
+				if(/*ch.junction*/atJ && main.random.nextBoolean()
 						&& (vehicle != null && !vehicle.hasMetadata("npc.turning"))){
 					turn = true;
-				}
+					/*return new TrackingData(check, dir, true); //TODO Maybe don't handle junction turns before we even get there...
+*/				}
 				else{
-					return new TrackingData(check, dir, false);
+					vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
+					return new TrackingData(check, dir, false, ch.junction, 0);
 				}
 			}
 		}
@@ -174,9 +177,9 @@ public class AITrackFollow {
 		//Need to get right/left of it
 		BlockFace leftCheck = nextLeftFace(dir);
 		BlockFace rightCheck = nextRightFace(dir);
-		BlockFace behind = dir.getOppositeFace();
+		/*BlockFace behind = dir.getOppositeFace();*/
 		
-		while(leftCheck != behind && rightCheck != behind){
+		while(leftCheck != rightCheck/*behind && rightCheck != behind*/){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
 			TrackBlock clb = checkIfTracker(current, lb, junctionBlock);
@@ -194,7 +197,7 @@ public class AITrackFollow {
 					}
 				}
 				return new TrackingData(crb.block, rightCheck, 
-						crb.junction);
+						crb.junction, ch.junction, 1);
 			}
 			else if(clb != null){
 				if(vehicle != null){
@@ -208,14 +211,14 @@ public class AITrackFollow {
 					}
 				}
 				return new TrackingData(clb.block, leftCheck, 
-						clb.junction);
+						clb.junction, ch.junction, -1);
 			}
 			//Didn't find a block to follow on
 			leftCheck = nextLeftFace(leftCheck);
 			rightCheck = nextRightFace(rightCheck);
 		}
 		
-		return new TrackingData(current, dir, false); //Where we came from isnt road, stay where we are
+		return new TrackingData(current, dir, false, ch.junction, 0); //Where we came from isnt road, stay where we are
 	}
 	public static TrackBlock checkIfTracker(Block current, Block check, Material junction){
 		if(AIRouter.isTrackBlock(check.getType())){

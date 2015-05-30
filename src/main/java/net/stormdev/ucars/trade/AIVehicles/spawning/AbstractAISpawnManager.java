@@ -242,7 +242,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				int distance = randomDistanceAmount();
 				while(distance > 0){
 					//Need to follow the road
-					TrackingData data = AITrackFollow.nextBlock(current, followDir, junction, null);
+					TrackingData data = AITrackFollow.nextBlock(current, followDir, junction, null, false);
 					
 					current = data.nextBlock;
 					followDir = data.dir;

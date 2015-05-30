@@ -320,6 +320,13 @@ public class AIRouter {
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
 			double ty = toDrive.getY()+0.1;
+			String rName = road.getType().name().toLowerCase();
+			if(rName.contains("step")){
+				ty -= 0.5;
+			}
+			if(rName.contains("carpet")){
+				ty -= 0.9;
+			}
 			double tz = toDrive.getZ()+0.5;
 			
 			double x = tx - cx /*+ 0.5*/;

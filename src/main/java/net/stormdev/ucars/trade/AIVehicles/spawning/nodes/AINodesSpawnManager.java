@@ -115,7 +115,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					boolean closeCar = false;
 					int minSpacing = randomMinCarSpacing();
 					for(Entity e:new ArrayList<Entity>(randomNodeLoc.getWorld().getEntities())){ //PLEASE don't get caught by AsyncCatcher...
-						if(!e.getType().equals(EntityType.MINECART)){
+						if(!e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
 							continue;
 						}
 						Location l = e.getLocation();

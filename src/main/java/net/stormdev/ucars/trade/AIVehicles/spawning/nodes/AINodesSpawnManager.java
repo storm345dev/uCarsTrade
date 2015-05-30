@@ -30,7 +30,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		if(!main.config.contains("general.ai.maxSpawnDistanceFromPlayers")){
 			main.config.set("general.ai.maxSpawnDistanceFromPlayers", 40);
 		}
-		minDistance = main.config.getInt("general.ai.maxSpawnDistanceFromPlayers");
+		maxDistance = main.config.getInt("general.ai.maxSpawnDistanceFromPlayers");
 		AIRouter.PLAYER_RADIUS = maxDistance;
 		plugin.saveConfig();
 	}
@@ -62,7 +62,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 				}
 				for(Player player:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
 					if(!randomDoSpawn()){ //Random if we spawn cars near this player this cycle or not
-						continue;
+						continue; //TODO Make it so higher chance if more nodes nearby so that car frequency is more even
 					}
 					final Node randomNode = getNodesStore().getRandomActiveNode(player, minDistance, maxDistance);
 					if(randomNode == null){ //No nodes near the player

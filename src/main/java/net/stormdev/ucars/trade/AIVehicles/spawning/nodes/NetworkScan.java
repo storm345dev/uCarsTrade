@@ -129,16 +129,16 @@ public class NetworkScan {
 					if(REST_TIME > 10){
 						REST_TIME -= 10;
 					}
-					if(REST_TIME < 15){
-						REST_TIME = 15;
+					if(REST_TIME < 1){
+						REST_TIME = 1;
 					}
 				}
 				else if(tps > 14){
 					if(REST_TIME > 10){
 						REST_TIME -= 5;
 					}
-					if(REST_TIME < 15){
-						REST_TIME = 15;
+					if(REST_TIME < 2){
+						REST_TIME = 2;
 					}
 				}
 				else {
@@ -221,7 +221,7 @@ public class NetworkScan {
 		logger.log("Successfully saved the nodes! Villager cars should now start spawning!");
 	}
 	
-	public void checkNodes(){
+	/*public void checkNodes(){ //Not used anymore... (Waste of processing)
 		logger.log("Starting validation of placed nodes, this could also take a long time...");
 		
 		int removed = 0;
@@ -239,11 +239,15 @@ public class NetworkScan {
 							continue; //SAME node
 						}
 						double distanceSquared = otherNode.getLocation().distanceSquared(node.getLocation());
-						if(distanceSquared <= 48){ //Nodes too close together!
+						if(distanceSquared <= 49){ //Nodes too close together!
 							BlockFace n1Dir = node.getCarriagewayDirection();
 							BlockFace n2Dir = otherNode.getCarriagewayDirection();
 							if(!n1Dir.getOppositeFace().equals(n2Dir)){ //Allow close nodes if on different sides of the road
-								return false;
+								double absModX = Math.abs(diff.getX()); //If re-implemented, diff is the vector to get from the first node to the second
+								double absModZ = Math.abs(diff.getZ());
+								if(absModX < 2 || absModZ < 2){ //Check if on same carriageway (Breaks at corners, but is accurate enough)
+									return false;
+								}
 							}
 						}
 					}
@@ -267,7 +271,7 @@ public class NetworkScan {
 		}
 		
 		logger.log("Validated placed nodes successfully! "+removed+" nodes were removed! There are "+nodes.size()+" valid nodes on this network!");
-	}
+	}*/
 	
 	private volatile int roughNodes = 0;
 	public void nodePlacing(){
@@ -348,8 +352,12 @@ public class NetworkScan {
 					try {
 						BlockFace existingNodeCarriageway = existingNodeDir.get();
 						if(!existingNodeCarriageway.getOppositeFace().equals(dir)){ //if it is opposite, then it's the opposite carriageway so we're ok to place a node
-							overlappingNode = true;
-							break;
+							double absModX = Math.abs(diff.getX());
+							double absModZ = Math.abs(diff.getZ());
+							if(absModX < 2 || absModZ < 2){ //Check if on same carriageway (Breaks at corners, but is accurate enough)
+								overlappingNode = true;
+								break;
+							}
 						}
 					} catch (Exception e) {
 						//Uh oh

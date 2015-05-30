@@ -77,10 +77,10 @@ public class Node implements Serializable {
 	}
 	
 	public boolean isEqualTo(Node other){
-		Block self = getLocation().getBlock();
-		Block otherBlock = other.getLocation().getBlock();
-		return self.getX() == otherBlock.getX() 
-				&& self.getY() == otherBlock.getY()
-				&& self.getZ() == otherBlock.getZ();
+		Location self = getLocation();
+		Location otherLoc = other.getLocation();
+		return self.getX() == otherLoc.getX() 
+				&& self.getY() == otherLoc.getY()
+				&& self.getZ() == otherLoc.getZ();
 	}
 }

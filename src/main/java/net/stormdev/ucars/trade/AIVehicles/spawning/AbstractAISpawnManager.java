@@ -181,7 +181,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 	public void spawnNPCCar(Location spawn, final BlockFace carriagewayDir) {
 		spawn = spawn.add(0.5, 0, 0.5);
 		final Location spawnLoc = spawn;
-		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){
+		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO THIS is what is creating the lag
 
 			public void run() {
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);

@@ -17,7 +17,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
-	private long spawnRate = 20l;
+	private long spawnRate = 40l;
 	private int minDistance = 10;
 	private int maxDistance = 40;
 	
@@ -59,6 +59,9 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 			@Override
 			public void run() { //TODO Scan for nodes async, but if bukkit doesn't like it then will do sync
 				if(!AINodesSpawnManager.this.isNPCCarsSpawningNow()){
+					return;
+				}
+				if(AINodesSpawnManager.this.getSpawnedAICount() >= AINodesSpawnManager.this.getCurrentAICap()){
 					return;
 				}
 				for(Player player:new ArrayList<Player>(Bukkit.getOnlinePlayers())){

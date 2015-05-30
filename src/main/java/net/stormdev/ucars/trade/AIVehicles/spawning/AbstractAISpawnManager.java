@@ -185,26 +185,28 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 			public void run() {
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
-				List<Entity> es = m.getNearbyEntities(2, 2, 2);
-				for(Entity e:es){
-					if(e.getType() == EntityType.MINECART){
+				if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
+					List<Entity> es = m.getNearbyEntities(2, 2, 2);
+					for(Entity e:es){
+						if(e.getType() == EntityType.MINECART){
+							m.remove();
+							return; //Already a car in close proximity
+						}
+					}
+					List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 3, AIRouter.PLAYER_RADIUS));
+					for(Entity e:new ArrayList<Entity>(nearby)){
+						if(e.getType() != EntityType.MINECART){
+							nearby.remove(e);
+						}
+					}
+					if(nearby.size() > 2){
+						//Too many in area
 						m.remove();
-						return; //Already a car in close proximity
+						return;
 					}
-				}
-				List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 3, AIRouter.PLAYER_RADIUS));
-				for(Entity e:new ArrayList<Entity>(nearby)){
-					if(e.getType() != EntityType.MINECART){
-						nearby.remove(e);
-					}
-				}
-				if(nearby.size() > 2){
-					//Too many in area
-					m.remove();
-					return;
 				}
 				//It's valid
-				Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+				final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
 				v.setAdult();
 				v.setBreed(false);
 				v.setAgeLock(true);
@@ -213,12 +215,20 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
 				
-				DrivenCar c = CarGenerator.gen().setNPC(true);
+				final DrivenCar c = CarGenerator.gen().setNPC(true);
 				//Make it a car
 				c.setId(m.getUniqueId());
-				plugin.carSaver.carNowInUse(c);
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
-				incrementSpawnedAICount();
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
+							plugin.carSaver.carNowInUse(c);
+							incrementSpawnedAICount();
+						}
+						return;
+					}});
 				return;
 			}});
 		return;

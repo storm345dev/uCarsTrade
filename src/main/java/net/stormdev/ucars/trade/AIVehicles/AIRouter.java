@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -122,7 +123,13 @@ public class AIRouter {
 				if(car.getPassenger() != null){
 					car.getPassenger().remove();
 				}
-				main.plugin.carSaver.carNoLongerInUse(c.getId());
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						main.plugin.carSaver.carNoLongerInUse(c.getId());
+						return;
+					}});
 				car.remove();
 				main.plugin.aiSpawns.decrementSpawnedAICount();
 			}

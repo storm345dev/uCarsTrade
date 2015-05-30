@@ -129,8 +129,8 @@ public class NetworkScan {
 					if(REST_TIME > 10){
 						REST_TIME -= 10;
 					}
-					if(REST_TIME < 1){
-						REST_TIME = 1;
+					if(REST_TIME < 0){
+						REST_TIME = 0;
 					}
 				}
 				else if(tps > 14){
@@ -370,7 +370,15 @@ public class NetworkScan {
 			}
 			//Place a node here!
 			nodes.add(new Node(block.getLocation()));
-			Thread.yield();
+			sleep(); 
+		}
+		
+		logger.log("Nodes distributed throughout the network successfully! There are now "+nodes.size()+" nodes placed!");
+	}
+	
+	private void sleep(){
+		Thread.yield();
+		if(REST_TIME > 0){
 			try {
 				Thread.sleep(REST_TIME); //Give the main thread a break from being spammed to calculate stuff
 			} catch (InterruptedException e) {
@@ -378,8 +386,6 @@ public class NetworkScan {
 				e.printStackTrace();
 			}
 		}
-		
-		logger.log("Nodes distributed throughout the network successfully! There are now "+nodes.size()+" nodes placed!");
 	}
 	
 	public void rescanNodes(){
@@ -488,8 +494,7 @@ public class NetworkScan {
 			return;
 		}
 		try {
-			Thread.yield();
-			Thread.sleep(REST_TIME); //Give the main thread a rest occasionally so the server hopefully doesn't crash
+			sleep(); //Give the main thread a rest occasionally so the server hopefully doesn't crash
 			roughSize++;
 			roadNetworkBlocks.add(block.getLocation().toVector());
 			//Now check for nearby tracker blocks

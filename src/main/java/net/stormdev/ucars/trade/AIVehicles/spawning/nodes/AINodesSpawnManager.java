@@ -2,6 +2,7 @@ package net.stormdev.ucars.trade.AIVehicles.spawning.nodes;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -47,7 +48,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	}
 	
 	private boolean randomDoSpawn(){
-		return main.random.nextInt(10) < 1;
+		return main.random.nextInt(1) < 1; //50/50 chance
 	}
 
 	@Override
@@ -64,10 +65,22 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					if(!randomDoSpawn()){ //Random if we spawn cars near this player this cycle or not
 						continue; //TODO Make it so higher chance if more nodes nearby so that car frequency is more even
 					}
-					final Node randomNode = getNodesStore().getRandomActiveNode(player, minDistance, maxDistance);
-					if(randomNode == null){ //No nodes near the player
+					List<Node> activeNodes = getNodesStore().getActiveNodes(player, minDistance, maxDistance);
+					if(activeNodes.size() < 1){ //No nodes near the player
 						continue;
 					}
+					
+					int chance = 40;
+					chance -= activeNodes.size(); //Make it more likely to spawn a car; the more nodes there are active
+					if(chance < 2){
+						chance = 2;
+					}
+					
+					if(!(main.random.nextInt(chance) < 1)){
+						continue;
+					}
+					
+					final Node randomNode = activeNodes.get(main.random.nextInt(activeNodes.size()));
 					
 					Location randomNodeLoc = randomNode.getLocation();
 					

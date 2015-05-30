@@ -16,6 +16,7 @@ import org.bukkit.block.BlockFace;
 public class Node implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private SerializableLocation trackerBlockSloc = null;
+	private transient volatile long lastSpawnTime = -1l; //Stops lots spawning at node at once
 	
 	public Node(Location location){
 		this.trackerBlockSloc = new SerializableLocation(location);
@@ -62,6 +63,9 @@ public class Node implements Serializable {
 	}
 	
 	public void spawnAICarIfLogicalToDoSo(){
+		if((System.currentTimeMillis() - lastSpawnTime) < 2000){ //2 second cooldown
+			return;
+		}
 		Block tracker = getLocation().getBlock();
 		
 		Location spawnLoc = tracker.getRelative(BlockFace.UP, 2).getLocation();
@@ -72,6 +76,7 @@ public class Node implements Serializable {
 		BlockFace carriagewayDir = AITrackFollow.carriagewayDirection(tracker);
 		
 		if(carriagewayDir != null){
+			lastSpawnTime = System.currentTimeMillis();
 			main.plugin.aiSpawns.spawnNPCCar(spawnLoc, carriagewayDir);
 		}
 	}

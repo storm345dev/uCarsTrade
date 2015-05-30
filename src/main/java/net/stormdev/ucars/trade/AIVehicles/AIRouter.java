@@ -91,6 +91,29 @@ public class AIRouter {
 		return enabled && main.plugin.aiSpawns.isNPCCarsSpawningNow();
 	}
 	
+	public static class PositionTracking {
+		private Location current;
+		private int stationaryCount = 0;
+		
+		public PositionTracking(Location current){
+			this.current = current;
+		}
+		
+		public void updateLocation(Location loc){
+			if(loc.distanceSquared(current) < 2){
+				stationaryCount++;
+			}
+			else {
+				stationaryCount = 0;
+				current = loc;
+			}
+		}
+		
+		public int getStationaryCount(){
+			return this.stationaryCount;
+		}
+	}
+	
 	public void route(final Minecart car, final DrivenCar c) throws Exception{
 		if(!enabled){
 			return;
@@ -120,23 +143,11 @@ public class AIRouter {
 				}
 			}
 			if(!nearbyPlayers){
-				//Remove me
-				if(car.getPassenger() != null){
-					car.getPassenger().remove();
-				}
-				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-
-					@Override
-					public void run() {
-						main.plugin.carSaver.carNoLongerInUse(c.getId());
-						return;
-					}});
-				car.remove();
-				main.plugin.aiSpawns.decrementSpawnedAICount();
+				despawnNPCCar(car, c);
 			}
 		}
 		
-		nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
+		/*nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;
 		for(Entity e:nearby){
 			if(e.getType() == EntityType.MINECART && e.hasMetadata("trade.npc")){ //Avoid driving into another car
@@ -171,9 +182,32 @@ public class AIRouter {
 					}
 				}
 			}
+		}*/
+		
+		final String POS_META = "car.npc.position"; //This bit checks if the car has been stationary for a while and if so despawns it
+		PositionTracking pt = null;
+		if(car.hasMetadata(POS_META)){
+			try {
+				pt = (PositionTracking) car.getMetadata(POS_META).get(0).value();
+			} catch (Exception e) {
+				//Invalid meta...
+			}
+		}
+		if(pt == null){
+			pt = new PositionTracking(car.getLocation());
+		}
+		else {
+			pt.updateLocation(car.getLocation());
+		}
+		car.removeMetadata(POS_META, main.plugin);
+		car.setMetadata(POS_META, new StatValue(pt, main.plugin));
+		if(pt.getStationaryCount() > 100){ //Being stationary a while
+			despawnNPCCar(car, c);
+			return;
 		}
 		
-		if(stop || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+		if(/*stop ||*/ car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+			car.removeMetadata(POS_META, main.plugin); //Don't count this as being stationary
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}
@@ -468,6 +502,22 @@ public class AIRouter {
 		car.removeMetadata("trade.npc", main.plugin);
 		car.setMetadata("trade.npc", new StatValue(new VelocityData(direction, null), main.plugin));
 		return;
+	}
+	
+	public static void despawnNPCCar(Minecart car, final DrivenCar c){
+		//Remove me
+		if(car.getPassenger() != null){
+			car.getPassenger().remove();
+		}
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				main.plugin.carSaver.carNoLongerInUse(c.getId());
+				return;
+			}});
+		car.remove();
+		main.plugin.aiSpawns.decrementSpawnedAICount();
 	}
 	
 	public boolean isCompassDir(BlockFace face){

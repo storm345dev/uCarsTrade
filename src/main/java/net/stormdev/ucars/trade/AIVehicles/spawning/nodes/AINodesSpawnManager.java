@@ -63,7 +63,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 				}
 				for(Player player:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
 					if(!randomDoSpawn()){ //Random if we spawn cars near this player this cycle or not
-						continue; //TODO Make it so higher chance if more nodes nearby so that car frequency is more even
+						continue;
 					}
 					List<Node> activeNodes = getNodesStore().getActiveNodes(player, minDistance, maxDistance);
 					if(activeNodes.size() < 1){ //No nodes near the player

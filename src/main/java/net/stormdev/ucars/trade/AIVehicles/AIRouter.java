@@ -311,8 +311,7 @@ public class AIRouter {
 		String tName = toDrive.getType().name().toLowerCase();
 		if(toDrive.getLocation().distanceSquared(loc) >= 3.25 ||
 				toDrive.getY() > loc.getBlockY()
-				|| ((tName.contains("step")||tName.contains("carpet")) && !(rName.contains("step") || rName.contains("carpet")))//One of them is a step and the other isn't
-				|| (!(tName.contains("step")||tName.contains("carpet")) && (rName.contains("step") || rName.contains("carpet")))
+				|| ((tName.contains("step")||tName.contains("carpet")))
 				){ 
 			keepVel = false;
 		}
@@ -325,7 +324,9 @@ public class AIRouter {
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
 			double ty = toDrive.getY()+0.1;
-			if(rName.contains("step")){
+			if(rName.contains("step") && !rName.contains("double") 
+					&& ((int)road.getData())<8 //Makes sure it's a bottom slab
+					){
 				ty -= 0.5;
 			}
 			if(rName.contains("carpet")){

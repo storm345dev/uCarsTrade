@@ -123,6 +123,31 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
 				return true;
 			}
+			else if(command.equalsIgnoreCase("aispawn")){
+				if(!AIRouter.isAIEnabled()){
+					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
+					return true;
+				}
+				if(!(sender instanceof Player)){
+					sender.sendMessage(ChatColor.RED+"Sorry this feature is for players!");
+					return true;
+				}
+				
+				Block under = player.getLocation().getBlock().getRelative(BlockFace.DOWN, 2);
+				if(!AIRouter.isTrackBlock(under.getType())){
+					sender.sendMessage(ChatColor.RED+"You need to stand above the road tracker block!!");
+					return true;
+				}
+				BlockFace dir = AITrackFollow.carriagewayDirection(under);
+				if(dir == null){
+					sender.sendMessage(ChatColor.RED+"Cannot spawn car where there is no determinable direction!");
+					return true;
+				}
+				
+				main.plugin.aiSpawns.spawnNPCCar(under.getRelative(BlockFace.UP, 2).getLocation(), dir);
+				sender.sendMessage(ChatColor.GREEN+"Car spawned!");
+				return true;
+			}
 			else if(command.equalsIgnoreCase("ainodes")){
 				if(!AIRouter.isAIEnabled()){
 					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");

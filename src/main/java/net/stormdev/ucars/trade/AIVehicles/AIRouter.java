@@ -285,7 +285,8 @@ public class AIRouter {
 		}
 		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, junction, car, atJ);
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, direction, junction, car, atJ); //TODO Not always returning, ever; even when calculation ended...
+		
 		if(direction != nextTrack.dir && !car.hasMetadata("car.atJunction") && !atJ){
 			direction = nextTrack.dir;
 			keepVel = false;

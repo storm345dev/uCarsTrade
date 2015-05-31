@@ -1,5 +1,6 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
@@ -8,12 +9,10 @@ public class TrackingData {
 	public BlockFace dir;
 	public boolean junction;
 	public boolean forJunction;
-	public int turnDir = 0;
-	public TrackingData(Block nextBlock, BlockFace dir, boolean junction, boolean forJunction, int turnDir){
+	public TrackingData(Block nextBlock, BlockFace dir, boolean junction, boolean forJunction){
 		this.nextBlock = nextBlock;
 		this.dir = dir;
 		this.junction = junction;
 		this.forJunction = forJunction;
-		this.turnDir = turnDir;
 	}
 }

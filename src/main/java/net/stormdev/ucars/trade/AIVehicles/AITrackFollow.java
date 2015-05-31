@@ -169,17 +169,18 @@ public class AITrackFollow {
 */				}
 				else{
 					vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
-					return new TrackingData(check, dir, false, ch.junction, 0);
+					return new TrackingData(check, dir, false, ch.junction);
 				}
 			}
 		}
+		boolean chJ = ch!=null?ch.junction:false;
 		
 		//Need to get right/left of it
 		BlockFace leftCheck = nextLeftFace(dir);
 		BlockFace rightCheck = nextRightFace(dir);
 		BlockFace behind = dir.getOppositeFace();
 		
-		while(leftCheck != behind && rightCheck != behind){
+		while(!leftCheck.equals(behind) && !rightCheck.equals(behind)){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
 			TrackBlock clb = checkIfTracker(current, lb, junctionBlock);
@@ -197,7 +198,7 @@ public class AITrackFollow {
 					}
 				}
 				return new TrackingData(crb.block, rightCheck, 
-						crb.junction, ch.junction, 1);
+						crb.junction, chJ);
 			}
 			else if(clb != null){
 				if(vehicle != null){
@@ -210,15 +211,16 @@ public class AITrackFollow {
 						}
 					}
 				}
-				return new TrackingData(clb.block, leftCheck, 
-						clb.junction, ch.junction, -1);
+				TrackingData res = new TrackingData(clb.block, leftCheck, 
+						clb.junction, chJ);
+				return res;
 			}
 			//Didn't find a block to follow on
 			leftCheck = nextLeftFace(leftCheck);
 			rightCheck = nextRightFace(rightCheck);
 		}
 		
-		return new TrackingData(current, dir, false, ch.junction, 0); //Where we came from isnt road, stay where we are
+		return new TrackingData(current, dir, false, chJ); //Where we came from isnt road, stay where we are
 	}
 	public static TrackBlock checkIfTracker(Block current, Block check, Material junction){
 		if(AIRouter.isTrackBlock(check.getType())){

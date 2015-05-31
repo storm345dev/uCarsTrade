@@ -9,4 +9,8 @@ public class TrackBlock {
 		this.block = block;
 		this.junction = junction;
 	}
+	
+	public boolean isJunction(){
+		return this.junction;
+	}
 }

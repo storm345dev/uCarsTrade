@@ -432,7 +432,7 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	@EventHandler (priority = EventPriority.MONITOR)
-	void carUpgradeAnvil(InventoryClickEvent event){
+	void carUpgradeAnvil(final InventoryClickEvent event){
 		if(event.getAction()==InventoryAction.CLONE_STACK){
 			ItemStack cloned = event.getCursor();
 			if(cloned.getType() == Material.MINECART){
@@ -443,6 +443,12 @@ public class UTradeListener implements Listener {
 		}
 		final Player player = (Player) event.getWhoClicked();
 		InventoryView view = event.getView();
+		
+		if(event.isShiftClick() && (view.getBottomInventory() instanceof AnvilInventory || view.getTopInventory() instanceof AnvilInventory)){
+			event.setCancelled(true); //Disables shift clicking stuff into anvils since it doesn't update properly with the upgrading
+			return;
+		}
+		
 		final Inventory i = event.getInventory();
 		if(!(i instanceof AnvilInventory)){
 			return;
@@ -450,11 +456,6 @@ public class UTradeListener implements Listener {
 		int slotNumber = event.getRawSlot();
 		if(!(slotNumber == view.convertSlot(slotNumber))){
 			//Not clicking in the anvil
-			return;
-		}
-		
-		if(event.isShiftClick()){
-			event.setCancelled(true); //Disables shift clicking stuff into anvils since it doesn't update properly with the upgrading
 			return;
 		}
 		
@@ -476,6 +477,23 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		if(carItem == null){
+			if(!pickup && i.getItem(1) != null){ //Put down item and already an upgrade in slot 2...
+				ItemStack held = event.getCursor();
+				DrivenCar car = ItemCarValidation.getCar(held);
+				if(car == null){
+					return;
+				}
+				//They just placed the car; revalidate upgrades next tick
+				Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						if(i.getItem(0) != null){
+							carUpgradeAnvil(event);
+						}
+						return;
+					}}, 1l);
+			}
 			return;
 		}
 		if(!(carItem.getType() == Material.MINECART) || 
@@ -536,9 +554,14 @@ public class UTradeListener implements Listener {
 		if(pickup && slotNumber == 1){
 			return; //Don't bother tracking and updating, etc...
 		} 
+		if(pickup && slotNumber == 0 && upgrade != null && !upgrade.getType().equals(Material.AIR)){
+			//Don't apply upgrades as item is being removed...
+			return;
+		}
 		applyUpgrades(upgrade, car, update, save, player, i);
 		return;
 	}
+	
 	@SuppressWarnings("deprecation")
 	public void applyUpgrades(ItemStack upgrade, DrivenCar car, Boolean update, Boolean save, Player player, Inventory i){
 		   String upgradeMsg = net.stormdev.ucars.trade.Lang.get("general.upgrade.msg");

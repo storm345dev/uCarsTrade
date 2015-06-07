@@ -435,10 +435,7 @@ public class UTradeListener implements Listener {
 	void carUpgradeAnvil(InventoryClickEvent event){
 		if(event.getAction()==InventoryAction.CLONE_STACK){
 			ItemStack cloned = event.getCursor();
-			if(cloned.getType() == Material.MINECART || 
-					cloned.getItemMeta() == null ||
-					cloned.getItemMeta().getLore() == null ||
-					cloned.getItemMeta().getLore().size() < 2){
+			if(cloned.getType() == Material.MINECART){
 				event.setCancelled(true);
 				return;
 			}
@@ -455,6 +452,12 @@ public class UTradeListener implements Listener {
 			//Not clicking in the anvil
 			return;
 		}
+		
+		if(event.isShiftClick()){
+			event.setCancelled(true); //Disables shift clicking stuff into anvils since it doesn't update properly with the upgrading
+			return;
+		}
+		
 		//AnvilInventory i = (AnvilInventory) inv;
 		Boolean update = true;
 		Boolean save = false;

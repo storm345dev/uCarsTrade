@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.md_5.bungee.api.ChatColor;
@@ -72,7 +71,7 @@ public class NetworkScan {
 	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
 	private AINodesSpawnManager spawnManager = null;
 	private volatile List<Vector> roadNetworkBlocks = new ArrayList<Vector>();
-	private volatile List<Node> nodes = new ArrayList<Node>();
+	/*private volatile List<Node> nodes = new ArrayList<Node>();*/
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
 	
@@ -169,8 +168,8 @@ public class NetworkScan {
 		roadNetworkBlocks.clear();
 		roadNetworkBlocks = null;
 		restTimeChecker.cancel();
-		nodes.clear();
-		nodes = null;
+		/*nodes.clear();
+		nodes = null;*/
 		logger.log("Network scanning terminated!");
 		logger = null;
 		System.gc(); //Try and get java to garbage collect all the junk now it's done with
@@ -209,11 +208,13 @@ public class NetworkScan {
 	}
 	
 	public void saveNodes(){
-		logger.log("Saving "+nodes.size()+" nodes into the correct chunks for them to be 'active' inside of (5x5 chunk grid with node at center FYI)...");
+		/*logger.log("Saving "+nodes.size()+" nodes into the correct chunks for them to be 'active' inside of (5x5 chunk grid with node at center FYI)...");
 		
 		for(Node node:nodes){
 			spawnManager.getNodesStore().setNodeIntoCorrectActiveChunks(node);
-		}
+		}*/
+		
+		spawnManager.getNodesStore().asyncSave();
 		
 		main.config.set("general.ai.spawnMethod", SpawnMethod.NODES.name());
 		main.plugin.saveConfig();
@@ -334,9 +335,8 @@ public class NetworkScan {
 				continue;
 			}
 			
-			List<Node> toScan = new ArrayList<Node>(nodes);
-			toScan.addAll(spawnManager.getNodesStore().getActiveNodes(block.getLocation()));
-			for(final Node node:nodes){
+			List<Node> toScan = new ArrayList<Node>(spawnManager.getNodesStore().getActiveNodes(block.getLocation()));
+			for(final Node node:toScan){
 				if(node.getLocation() == null){
 					continue;
 				}
@@ -369,11 +369,12 @@ public class NetworkScan {
 				continue;
 			}
 			//Place a node here!
-			nodes.add(new Node(block.getLocation()));
+			Node n = new Node(block.getLocation());
+			spawnManager.getNodesStore().setNodeIntoCorrectActiveChunks(n);
 			sleep(); 
 		}
 		
-		logger.log("Nodes distributed throughout the network successfully! There are now "+nodes.size()+" nodes placed!");
+		logger.log("Nodes distributed throughout the network successfully! There are now roughly "+roughNodes+" new nodes placed!");
 	}
 	
 	private void sleep(){

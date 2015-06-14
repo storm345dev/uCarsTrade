@@ -170,8 +170,28 @@ public class NodesStore {
 		return getActiveNodes(entity.getLocation());
 	}
 	
-	public List<Node> getActiveNodes(Location location){
-		return getActiveNodes(location.getChunk());
+	public List<Node> getActiveNodes(final Location location){
+		Chunk chunk = null;
+		if(Bukkit.isPrimaryThread()){
+			chunk = location.getChunk();
+		}
+		else {
+			Future<Chunk> getChunk = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Chunk>(){
+
+				@Override
+				public Chunk call() throws Exception {
+					return location.getChunk();
+				}});
+			try {
+				chunk = getChunk.get();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if(chunk == null){
+			return new ArrayList<Node>();
+		}
+		return getActiveNodes(chunk);
 	}
 	
 	public List<Node> getActiveNodes(Chunk chunk){

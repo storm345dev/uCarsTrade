@@ -1,5 +1,7 @@
 package net.stormdev.ucars.trade;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -7,11 +9,13 @@ import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.NetworkScan;
+import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.Node;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -163,6 +167,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					sender.sendMessage("/car ainodes revalidate - Forces revalidation of ALL nodes (will likely cause lag)");
 					sender.sendMessage("/car ainodes clear - Clears ALL nodes (PERMANENT; don't do this unless you want to have to re-calculate them all again)");
 					sender.sendMessage("/car ainodes scan - Starts where the player is and then follows the whole connected road network, placing nodes for villager cars to spawn at (Will definitely cause lag)");
+					sender.sendMessage("/car ainodes show - Sends block changes to the player to show the nodes near then - Will require relogging to make the world look correct again!");
 					return true;
 				}
 				String action = args[1];
@@ -223,6 +228,20 @@ public class UTradeCommandExecutor implements CommandExecutor {
 							return;
 						}});
 					return true;
+				}
+				else if(action.equalsIgnoreCase("show")){
+					if(!(sender instanceof Player)){
+						sender.sendMessage(ChatColor.RED+"Only players can use this command");
+						return true;
+					}
+					sender.sendMessage(ChatColor.GREEN+"Highlighting local nodes for your client with emerald blocks! To remove the (fake) highlighted blocks, relog!");
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						List<Node> nodeList = ((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().getActiveNodes(player);
+						for(Node node:new ArrayList<Node>(nodeList)){
+							Location l = node.getLocation();
+							player.sendBlockChange(l, Material.EMERALD_BLOCK, (byte) 0);
+						}
+					}
 				}
 				else {
 					sender.sendMessage("Do '/car ainodes' for a list of options!");

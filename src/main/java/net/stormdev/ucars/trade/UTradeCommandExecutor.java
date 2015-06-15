@@ -237,8 +237,10 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					sender.sendMessage(ChatColor.GREEN+"Highlighting local nodes for your client with emerald blocks! To remove the (fake) highlighted blocks, relog!");
 					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
 						List<Node> nodeList = ((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().getActiveNodes(player);
+						sender.sendMessage(ChatColor.GRAY+"Painting "+nodeList.size()+" nodes...");
 						for(Node node:new ArrayList<Node>(nodeList)){
 							Location l = node.getLocation();
+							l = l.getBlock().getRelative(BlockFace.UP).getLocation();
 							player.sendBlockChange(l, Material.EMERALD_BLOCK, (byte) 0);
 						}
 					}

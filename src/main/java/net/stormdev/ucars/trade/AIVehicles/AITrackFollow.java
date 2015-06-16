@@ -167,7 +167,9 @@ public class AITrackFollow {
 					/*return new TrackingData(check, dir, true); //TODO Maybe don't handle junction turns before we even get there...
 */				}
 				else{
-					vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
+					if(vehicle != null){
+						vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
+					}
 					return new TrackingData(check, dir, false, ch.junction);
 				}
 			}

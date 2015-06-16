@@ -237,6 +237,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 	@Override
 	public void followRoadAndSpawnCarFromTrackerBlock(Location trackerBlockLoc,
 			BlockFace followDir) {
+				if(!plugin.aiSpawns.isNPCCarsEnabled()){
+					return;
+				}
 		//Track road and spawn in an AI
 				Block current = trackerBlockLoc.getBlock();
 				int distance = randomDistanceAmount();

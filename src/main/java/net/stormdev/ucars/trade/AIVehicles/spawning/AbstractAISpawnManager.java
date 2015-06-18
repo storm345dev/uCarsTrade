@@ -23,6 +23,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Villager;
 
+import com.useful.ucars.CarHealthData;
+import com.useful.ucars.ucars;
 import com.useful.ucarsCommon.StatValue;
 
 public abstract class AbstractAISpawnManager implements AISpawnManager {
@@ -219,6 +221,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				//Make it a car
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
+				ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 					@Override

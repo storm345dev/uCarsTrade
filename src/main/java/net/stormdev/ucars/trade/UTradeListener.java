@@ -47,7 +47,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -75,7 +77,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -102,7 +103,7 @@ public class UTradeListener implements Listener {
 		safeExit = main.config.getBoolean("general.car.safeExit");
 	}
 	
-	void npcCarSteal(final Minecart vehicle, final Player player, final DrivenCar c){
+	void npcCarSteal(final Minecart vehicle, final Player player, final DrivenCar c, final boolean setPassenger){
 		if(!vehicle.hasMetadata("trade.npc") || !c.isNPC()){
 			return; //Not an npc
 		}
@@ -125,8 +126,10 @@ public class UTradeListener implements Listener {
 			vehicle.eject();
 			e.remove();
 		}
-		if(player.getVehicle() != null){
-			player.getVehicle().eject();
+		if(setPassenger){
+			if(player.getVehicle() != null){
+				player.getVehicle().eject();
+			}
 		}
 		plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
@@ -136,7 +139,9 @@ public class UTradeListener implements Listener {
 				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
 				plugin.getServer().getPluginManager().callEvent(evt);
 				plugin.carSaver.carNowInUse(c); //Update changes to car, aka it's not an npc
-				vehicle.setPassenger(player);
+				if(setPassenger){
+					vehicle.setPassenger(player);
+				}
 				player.sendMessage(main.colors.getInfo()+net.stormdev.ucars.trade.Lang.get("general.steal.taken"));
 				return;
 			}}, 3l);
@@ -145,7 +150,7 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	void aiCarDie(VehicleDestroyEvent event){
-		if(!event.getVehicle().hasMetadata("trade.npc") || event.isCancelled()){
+		if(!event.getVehicle().hasMetadata("trade.npc") || event.isCancelled() || event.getVehicle().hasMetadata("car.destroyed")){
 			return;
 		}
 		
@@ -161,7 +166,6 @@ public class UTradeListener implements Listener {
 				@Override
 				public void run() {
 					pass.remove();
-					Bukkit.broadcastMessage("REMOVED "+pass.getType());
 					return;
 				}}, 2l);
 		}
@@ -222,10 +226,10 @@ public class UTradeListener implements Listener {
 			}
 			event.setCancelled(true);
 			final Minecart m = (Minecart) cart;
-			plugin.getServer().getScheduler().runTaskLater(plugin, new BukkitRunnable(){
+			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
 				public void run() {
-					npcCarSteal(m, player, c);
+					npcCarSteal(m, player, c, true);
 					return;
 				}}, 4l);
 		}
@@ -839,9 +843,14 @@ public class UTradeListener implements Listener {
 		if(v == null){
 			return;
 		}
-		//Part of a car stack
-		event.setDamage(0);
-		event.setCancelled(true);
+		if(v.hasMetadata("trade.npc")){
+			//Allow it to be hurt
+		}
+		else {
+			//Part of a car stack
+			event.setDamage(0);
+			event.setCancelled(true);
+		}
 		return;
 	}
 	
@@ -859,6 +868,42 @@ public class UTradeListener implements Listener {
 			//Part of a car stack
 			event.setDroppedExp(0);
 			event.getDrops().clear();
+			if(e instanceof Villager && v.hasMetadata("trade.npc")){ //Handle as if car is stolen
+				final DrivenCar c = plugin.carSaver.getCarInUse(v.getUniqueId());
+				if(c == null || !(v instanceof Minecart)){
+					return;
+				}
+				final Minecart m = (Minecart) v;
+				
+				if(!(e.getLastDamageCause() instanceof EntityDamageByEntityEvent)){
+					c.setNPC(false);
+					m.removeMetadata("trade.npc", main.plugin);
+					plugin.carSaver.carNowInUse(c);
+					return;
+				}
+				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) e.getLastDamageCause();
+				Entity damager = ev.getDamager();
+				if(damager instanceof Projectile){
+					Projectile p = (Projectile) damager;
+					if(p.getShooter() instanceof Player){
+						damager = (Entity) p.getShooter();
+					}
+				}
+				if(!(damager instanceof Player)){
+					c.setNPC(false);
+					m.removeMetadata("trade.npc", main.plugin);
+					plugin.carSaver.carNowInUse(c);
+					return;
+				}
+				final Player player = (Player) damager;
+				
+				plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
+
+					public void run() {
+						npcCarSteal(m, player, c, false);
+						return;
+					}}, 4l);
+			}
 		} catch (Exception e) {
 			//Entities already removed
 		}
@@ -908,44 +953,33 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOW) //Call second
 	void carDestroy(EntityDamageByEntityEvent event){
-		if(event.getEntity() instanceof Minecart
-				|| !(event.getDamager() instanceof Player)){
+		if(event.getEntity() instanceof Minecart){
 			return; //uCars can handle it, or they're not a player
 		}
 		if(event.isCancelled() || event.getDamage() <= 0){
 			return;
 		}
-		final Player player = (Player) event.getDamager();
+		final Player player = event.getDamager() instanceof Player ? (Player) event.getDamager() : null;
 		final Minecart car = isEntityInCar(event.getEntity());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
-		Runnable onDeath = new Runnable() {
-			// @Override
-			public void run() {
-				ucarDeathEvent evt = new ucarDeathEvent(car);
-				plugin.getServer().getPluginManager()
-						.callEvent(evt);
-				if(!evt.isCancelled()){
-					main.plugin.carSaver.carNoLongerInUse(car.getUniqueId());
-				}
-			}
-		};
-		CarHealthData health = new CarHealthData(
-				ucars.config.getDouble("general.cars.health.default"), onDeath,
-				plugin);
-		if (car.hasMetadata("carhealth")) {
-			List<MetadataValue> vals = car.getMetadata("carhealth");
-			for (MetadataValue val : vals) {
-				if (val instanceof CarHealthData) {
-					health = (CarHealthData) val;
-				}
+		if(car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)){
+			return; //They punched the villager; don't take car health
+		}
+		CarHealthData health = ucars.listener.getCarHealthHandler(car);
+		if(health == null){
+			return;
+		}
+		double damage = event.getDamage();
+		if(player != null){
+			if(player.getItemInHand() == null | player.getItemInHand().getType().equals(Material.AIR)
+					|| damage < ucars.config.getDouble("general.cars.health.punchDamage")){
+				damage = ucars.config.getDouble("general.cars.health.punchDamage");
 			}
 		}
 		event.setDamage(0);
 		event.setCancelled(true);
-		double damage = ucars.config
-				.getDouble("general.cars.health.punchDamage");
 		if (damage > 0) {
 			double max = ucars.config.getDouble("general.cars.health.default");
 			double left = health.getHealth() - damage;
@@ -959,10 +993,17 @@ public class UTradeListener implements Listener {
 			if (left < 0) {
 				left = 0;
 			}
-			player.sendMessage(ChatColor.RED + "-" + damage + ChatColor.YELLOW
-					+ "[" + player.getName() + "]" + color + " (" + left + ")");
-			health.damage(damage);
-			car.setMetadata("carhealth", health);
+			if(player != null){
+				player.sendMessage(ChatColor.RED + "-" + damage + ChatColor.YELLOW
+						+ "[" + player.getName() + "]" + color + " (" + left + ")");
+			}
+			if(player != null){
+				health.damage(damage, car, player);
+			}
+			else {
+				health.damage(damage, car);
+			}
+			ucars.listener.updateCarHealthHandler(car, health);
 		}
 		return;
 	}
@@ -1038,13 +1079,9 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		double health = c.getHealth();
-		Runnable onDeath = new Runnable(){
-			//@Override
-			public void run(){
-				plugin.getServer().getPluginManager().callEvent(new ucarDeathEvent((Minecart) car));
-			}
-		};
-		car.setMetadata("carhealth", new CarHealthData(health, onDeath, plugin));
+		CarHealthData chd = ucars.listener.getCarHealthHandler(car);
+		chd.setHealth(health);
+		ucars.listener.updateCarHealthHandler(car, chd);
 		/*
 		 * Location carloc = car.getLocation();
 		 * carloc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
@@ -1073,7 +1110,7 @@ public class UTradeListener implements Listener {
 		}
 		
 		Minecart cart = event.getCar();
-		if(cart.hasMetadata("trade.npc") || cart.hasMetadata("car.destroyed")){
+		if(cart.hasMetadata("car.destroyed")){
 			return; //Don't damage the car
 		}
 		UUID id = cart.getUniqueId();
@@ -1101,7 +1138,7 @@ public class UTradeListener implements Listener {
 	void carRemoval(ucarDeathEvent event){
 		event.setCancelled(true);
 		Minecart cart = event.getCar();
-		if(cart.hasMetadata("trade.npc") || cart.hasMetadata("car.destroyed")){
+		if(cart.hasMetadata("car.destroyed")){
 			return; //Don't destroy the car
 		}
 		UUID id = cart.getUniqueId();
@@ -1117,6 +1154,15 @@ public class UTradeListener implements Listener {
 		*/
 		cart.setMetadata("car.destroyed", new StatValue(true, ucars.plugin));
 		event.setCancelled(true);
+		
+		if(cart.hasMetadata("trade.npc")){
+			//Say it's no longer in use
+			main.plugin.aiSpawns.decrementSpawnedAICount();
+			if(event.didPlayerKill()){
+				Player player = event.getPlayerWhoKilled();
+				npcCarSteal(cart, player, car, false);
+			}
+		}
 		
 		/*if(main.random.nextBoolean() && main.config.getBoolean("general.car.damage")){
 			if(main.random.nextBoolean()){

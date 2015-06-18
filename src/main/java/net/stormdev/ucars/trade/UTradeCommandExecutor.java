@@ -168,6 +168,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					sender.sendMessage("/car ainodes clear - Clears ALL nodes (PERMANENT; don't do this unless you want to have to re-calculate them all again)");
 					sender.sendMessage("/car ainodes scan - Starts where the player is and then follows the whole connected road network, placing nodes for villager cars to spawn at (Will definitely cause lag)");
 					sender.sendMessage("/car ainodes show - Sends block changes to the player to show the nodes near then - Will require relogging to make the world look correct again!");
+					sender.sendMessage("/car ainodes delnode - Deletes a node being stood on!");
 					return true;
 				}
 				String action = args[1];
@@ -243,6 +244,26 @@ public class UTradeCommandExecutor implements CommandExecutor {
 							l = l.getBlock().getRelative(BlockFace.UP).getLocation();
 							player.sendBlockChange(l, Material.EMERALD_BLOCK, (byte) 0);
 						}
+					}
+				}
+				else if(action.equalsIgnoreCase("delnode")){
+					if(!(sender instanceof Player)){
+						sender.sendMessage(ChatColor.RED+"Only players can use this command");
+						return true;
+					}
+					if(main.plugin.aiSpawns instanceof AINodesSpawnManager){
+						List<Node> nodeList = ((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().getActiveNodes(player);
+						Location loc = player.getLocation().getBlock().getLocation();
+						for(Node node:new ArrayList<Node>(nodeList)){
+							Location l = node.getLocation().getBlock().getLocation();
+							if(l.getX() == loc.getX() && l.getY() == loc.getY() && l.getZ() == loc.getZ()){
+								((AINodesSpawnManager)main.plugin.aiSpawns).getNodesStore().removeNode(node);
+								player.sendMessage(ChatColor.GREEN+"Node deleted!");
+								return true;
+							}
+						}
+						sender.sendMessage(ChatColor.RED+"Could not find a node to delete!");
+						return true;
 					}
 				}
 				else {

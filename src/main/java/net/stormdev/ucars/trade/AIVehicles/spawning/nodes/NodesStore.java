@@ -56,6 +56,16 @@ public class NodesStore {
 		return counted.size();
 	}
 	
+	public void removeNode(Node node){
+		for(ChunkCoord key: new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+			List<Node> nodes = nodesByActiveChunks.get(key);
+			if(node != null && nodes.contains(node)){
+				nodes.remove(node);
+			}
+		}
+		asyncSave();
+	}
+	
 	public void revalidateNodes(){
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 

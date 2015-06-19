@@ -472,6 +472,7 @@ public class main extends JavaPlugin {
 								continue; //Not a car or not an npc car
 							}
 							AIRouter.despawnNPCCarNow(((Minecart)e), c);
+							e.remove();
 						}
 					} catch (Exception e1) {
 						//Oki....

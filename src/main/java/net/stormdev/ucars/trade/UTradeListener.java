@@ -59,7 +59,6 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -278,8 +277,20 @@ public class UTradeListener implements Listener {
         	return;
         }
         Player player = (Player) exited;
+        if(exited.isDead() || player.getHealth() < 1){
+        	return; //Allow them to exit
+        }
         
-        if((!b.isEmpty() && !b.isLiquid()) 
+      //Handle the exit ourselves
+        loc.setYaw(player.getLocation().getYaw());
+        loc.setPitch(player.getLocation().getPitch());
+    	main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+			public void run() {
+				exited.teleport(loc.add(0, 0.5, 0));
+				return;
+			}}, 2l); //Teleport back to car loc after exit
+        /*if((!b.isEmpty() && !b.isLiquid()) 
         		|| (!b.getRelative(BlockFace.UP).isEmpty() && !b.getRelative(BlockFace.UP).isLiquid())
         		|| (!b.getRelative(BlockFace.UP, 2).isEmpty() && !b.getRelative(BlockFace.UP, 2).isLiquid())){
         	//Not allowed to exit
@@ -288,13 +299,13 @@ public class UTradeListener implements Listener {
         }
         else{
         	//Handle the exit ourselves
-        	main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new BukkitRunnable(){
+        	main.plugin.getServer().getScheduler().runTaskLater(main.plugin, new Runnable(){
 
 				public void run() {
 					exited.teleport(loc.add(0, 0.5, 0));
 					return;
 				}}, 2l); //Teleport back to car loc after exit
-        }
+        }*/
     	return;
     }
 	@EventHandler

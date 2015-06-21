@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import net.stormdev.ucars.trade.main;
-import net.stormdev.ucars.trade.AIVehicles.AIProbingSpawnManager;
 import net.stormdev.ucars.utils.ItemRename;
 
 import org.bukkit.ChatColor;
@@ -26,13 +25,17 @@ public class DrivenCar implements Serializable {
 	private boolean isHandlingDamaged;
 	private List<String> modifiers = new ArrayList<String>();
 	private boolean isNPC = false;
+	private double accelMod = 1;
+	private double turnAmountPerTick = 5;
 	
-	public DrivenCar(String name, double speed, double health, boolean isHandlingDamaged, List<String> modifiers){
+	public DrivenCar(String name, double speed, double health, double acceleration, double turnAmountPerTick, boolean isHandlingDamaged, List<String> modifiers){
 		this.setName(name);
 		this.setSpeed(speed);
 		this.setHealth(health);
 		this.setHandlingDamaged(isHandlingDamaged);
 		this.setModifiers(modifiers);
+		this.setAccelMod(acceleration);
+		this.setTurnAmountPerTick(turnAmountPerTick);
 	}
 	
 	private static String getHandleString(boolean isDamaged){
@@ -50,7 +53,9 @@ public class DrivenCar implements Serializable {
 		lore.add(main.colors.getTitle()+"[Speed:] "+main.colors.getInfo()+speed+"x");
 		double max = ucars.config.getDouble("general.cars.health.max");
 		lore.add(main.colors.getTitle()+"[Health:] "+main.colors.getInfo()+health+"/"+max);
-		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+getHandleString(isHandlingDamaged));
+		lore.add(main.colors.getTitle()+"[Handling:] "+main.colors.getInfo()+(10.0d*getTurnAmountPerTick())); //Eg 5degrees/tick = 50
+		lore.add(main.colors.getTitle()+"[Acceleration:] "+main.colors.getInfo()+(getAccelMod()*10.0d));
+		lore.add(main.colors.getTitle()+"[Damage:] "+main.colors.getInfo()+getHandleString(isHandlingDamaged));
 		for(String x:modifiers){
 			lore.add(main.colors.getTitle()+"-Modifier: "+main.colors.getInfo()+x);
 		}
@@ -118,6 +123,28 @@ public class DrivenCar implements Serializable {
 		}
 		this.isNPC = isNPC;
 		return this;
+	}
+
+	public double getTurnAmountPerTick() {
+		if(this.turnAmountPerTick <= 0){
+			this.turnAmountPerTick = 5;
+		}
+		return turnAmountPerTick;
+	}
+
+	public void setTurnAmountPerTick(double turnAmountPerTick) {
+		this.turnAmountPerTick = turnAmountPerTick;
+	}
+
+	public double getAccelMod() {
+		if(this.accelMod <= 0){
+			this.accelMod = 1;
+		}
+		return accelMod;
+	}
+
+	public void setAccelMod(double accelMod) {
+		this.accelMod = accelMod;
 	}
 	
 	

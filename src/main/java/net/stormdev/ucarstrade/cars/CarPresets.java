@@ -77,7 +77,9 @@ public class CarPresets {
 			if(carSect.contains("modifiers")){
 				modifiers = carSect.getStringList("modifiers");
 			}
-			addCarPreset(new CarPreset(name, speed, health, modifiers));
+			double accelMod = carSect.contains("acceleration") ? carSect.getDouble("acceleration") / 10.0d : 1;
+			double turnAmountPerTick = carSect.contains("handling") ? carSect.getDouble("handling") / 10.0d : 5;
+			addCarPreset(new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers));
 		}
 		
 		main.logger.info("Loaded "+getPresets().size() + " car presets!");
@@ -87,12 +89,16 @@ public class CarPresets {
 		private String name;
 		private double speed;
 		private double health;
+		private double acceleration;
+		private double turnAmountPerTick;
 		private List<String> modifiers = new ArrayList<String>();
-		public CarPreset(String name, double speed, double health, List<String> modifiers){
+		public CarPreset(String name, double speed, double health, double accelMod, double turnAmountPerTick, List<String> modifiers){
 			this.name = name;
 			this.speed = speed;
 			this.health = health;
 			this.modifiers = modifiers;
+			this.setAcceleration(accelMod);
+			this.setTurnAmountPerTick(turnAmountPerTick);
 		}
 		public String getName() {
 			return name;
@@ -117,6 +123,18 @@ public class CarPresets {
 		}
 		public void setModifications(List<String> modifiers) {
 			this.modifiers = modifiers;
+		}
+		public double getAcceleration() {
+			return acceleration;
+		}
+		public void setAcceleration(double acceleration) {
+			this.acceleration = acceleration;
+		}
+		public double getTurnAmountPerTick() {
+			return turnAmountPerTick;
+		}
+		public void setTurnAmountPerTick(double turnAmountPerTick) {
+			this.turnAmountPerTick = turnAmountPerTick;
 		}
 		
 		

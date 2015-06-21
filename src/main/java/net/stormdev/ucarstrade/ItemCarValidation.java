@@ -63,6 +63,8 @@ public class ItemCarValidation {
 		double speed = 1;
 		double health = 50;
 		boolean isHandlingDamaged = false;
+		double turnAmountPerTick = 5;
+		double acceleration = 1;
 		List<String> modifiers = new ArrayList<String>();
 		
 		String line = Colors.strip(lore.get(i)).toLowerCase(); //[Speed:] 0.8x
@@ -92,8 +94,39 @@ public class ItemCarValidation {
 				return null;
 			}
 			String handlingRaw = line.replaceFirst(Pattern.quote("[handling:] "), "").trim();
-			if(handlingRaw.equalsIgnoreCase("damaged")){
+			if(handlingRaw.equalsIgnoreCase("damaged")){ //Old style item
 				isHandlingDamaged = true;
+			}
+			try {
+				double d = Double.parseDouble(handlingRaw);
+				turnAmountPerTick = d/10.0d;
+			} catch (NumberFormatException e) {
+				//Oh well; it's the old style item
+			}
+		}
+		
+		if(i+1 >= lore.size()){ //Old style item
+			return new DrivenCar(name, speed, health, 1, 5, isHandlingDamaged, modifiers);
+		}
+		
+		line = Colors.strip(lore.get(i+1)).toLowerCase(); //[Acceleration:] accelMod*10
+		if(line.contains("acceleration")){
+			i++;
+			String accelRaw = line.replaceFirst(Pattern.quote("[acceleration:] "), "").trim();
+			try {
+				double d = Double.parseDouble(accelRaw);
+				acceleration = d/10.0d;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+			
+			line = Colors.strip(lore.get(i+1)).toLowerCase(); //[Damage:] accelMod*10
+			if(line.contains("damage")){
+				i++;
+				String damageRaw = line.replaceFirst(Pattern.quote("[damage:] "), "").trim();
+				if(damageRaw.equalsIgnoreCase("damaged")){ //Old style item
+					isHandlingDamaged = true;
+				}
 			}
 		}
 		
@@ -109,6 +142,6 @@ public class ItemCarValidation {
 		} catch (Exception e) {
 			return null;
 		}
-		return new DrivenCar(name, speed, health, isHandlingDamaged, modifiers);
+		return new DrivenCar(name, speed, health, acceleration, turnAmountPerTick, isHandlingDamaged, modifiers);
 	}
 }

@@ -119,7 +119,7 @@ public class CarShop {
 				}
 				CarPreset cp = cars.get(arrayPos);
 				event.setWillClose(true);
-				DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications());
+				DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), cp.getAcceleration(), cp.getTurnAmountPerTick(), false, cp.getModifications());
 				buyCar(event.getPlayer(), dc);
 				return;
 			}
@@ -217,13 +217,15 @@ public class CarShop {
 					List<String> lore = new ArrayList<String>();
 					lore.add(ChatColor.YELLOW+"Speed: "+cp.getSpeed()+"x");
 					lore.add(ChatColor.YELLOW+"Health: "+cp.getHealth());
+					lore.add(ChatColor.YELLOW+"Acceleration: "+cp.getAcceleration()*10.0d);
+					lore.add(ChatColor.YELLOW+"Handling: "+cp.getTurnAmountPerTick()*10.0d);
 					if(cp.getModifications().size() > 0){
 						lore.add(ChatColor.YELLOW+"Modifications:");
 						for(String n:cp.getModifications()){
 							lore.add(ChatColor.YELLOW+" -"+n);
 						}
 					}
-					lore.add(ChatColor.WHITE+"Price: "+currency+CarValueCalculator.getCarValueForPurchase(new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications())));
+					lore.add(ChatColor.WHITE+"Price: "+currency+CarValueCalculator.getCarValueForPurchase(new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), cp.getAcceleration(), cp.getTurnAmountPerTick(), false, cp.getModifications())));
 					
 					page.setOption(pos, new ItemStack(Material.MINECART), ChatColor.BLUE+cp.getName(), 
 							lore);

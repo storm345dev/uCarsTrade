@@ -15,7 +15,7 @@ public class CarGenerator {
 	public static DrivenCar gen(){
 		if(CarPresets.isCarPresetsUsed()){
 			CarPreset cp = CarPresets.getPresets().get(main.random.nextInt(CarPresets.getPresets().size()));
-			DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), false, cp.getModifications());
+			DrivenCar dc = new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), cp.getAcceleration(), cp.getTurnAmountPerTick(), false, cp.getModifications());
 			return dc;
 		}
 		
@@ -45,9 +45,9 @@ public class CarGenerator {
 		return gen(speeD, health, name, (main.random.nextBoolean()&&main.random.nextBoolean()&&main.random.nextBoolean()));
 	}
 	public static DrivenCar gen(double speed, double health, String name){
-		return new DrivenCar(name, speed, health, false, new ArrayList<String>());
+		return new DrivenCar(name, speed, health, 1, 5, false, new ArrayList<String>());
 	}
 	public static DrivenCar gen(double speed, double health, String name, boolean handlingDamaged){
-		return new DrivenCar(name, speed, health, handlingDamaged, new ArrayList<String>());
+		return new DrivenCar(name, speed, health, 1, 5, handlingDamaged, new ArrayList<String>());
 	}
 }

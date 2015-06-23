@@ -34,6 +34,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -187,6 +188,7 @@ public class UTradeListener implements Listener {
 		}
 		
 		loc.getWorld().playEffect(loc, Effect.EXPLOSION_HUGE, 20);
+		loc.getWorld().playSound(loc, Sound.EXPLODE, 5f, 1f);
 	}
 	
 	@EventHandler

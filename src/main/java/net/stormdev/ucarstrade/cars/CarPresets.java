@@ -7,9 +7,14 @@ import net.stormdev.ucars.trade.main;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+
+import com.useful.ucars.ItemStackFromId;
 
 public class CarPresets {
-	private static boolean isCarPresetsUsed = false;
+	public static boolean isCarPresetsUsed = false;
+	public static boolean isCarAllowedRename = true;
 	private static List<CarPreset> carPresets = new ArrayList<CarPreset>();
 	
 	public static List<CarPreset> getPresets(){
@@ -51,6 +56,10 @@ public class CarPresets {
 			config.set("general.cars.presets.terrafugiatransition.health", 100d);
 			config.set("general.cars.presets.terrafugiatransition.modifiers", new String[]{"Hover Upgrade"});
 		}
+		if(!config.contains("general.cars.presets.allowRename")){
+			config.set("general.cars.presets.allowRename", false);
+		}
+		CarPresets.isCarAllowedRename = config.getBoolean("general.cars.presets.allowRename");
 		setCarPresetsUsed(config.getBoolean("general.cars.presets.enabled"));
 		if(!isCarPresetsUsed()){
 			main.logger.info("Car presets are NOT enabled! Cars will be randomly generated!");
@@ -79,7 +88,16 @@ public class CarPresets {
 			}
 			double accelMod = carSect.contains("acceleration") ? carSect.getDouble("acceleration") / 10.0d : 1;
 			double turnAmountPerTick = carSect.contains("handling") ? carSect.getDouble("handling") / 10.0d : 5;
-			addCarPreset(new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers));
+			MaterialData displayBlock = null;
+			int offset = 0;
+			if(carSect.contains("display")){
+				ItemStack is = ItemStackFromId.get(carSect.getString("display"));
+				displayBlock = is.getData();
+			}
+			if(carSect.contains("displayOffset")){
+				offset = carSect.getInt("displayOffset");
+			}
+			addCarPreset(new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers, displayBlock, offset));
 		}
 		
 		main.logger.info("Loaded "+getPresets().size() + " car presets!");
@@ -91,14 +109,18 @@ public class CarPresets {
 		private double health;
 		private double acceleration;
 		private double turnAmountPerTick;
+		private MaterialData displayBlock;
+		private int displayBlockOffset = 0;
 		private List<String> modifiers = new ArrayList<String>();
-		public CarPreset(String name, double speed, double health, double accelMod, double turnAmountPerTick, List<String> modifiers){
+		public CarPreset(String name, double speed, double health, double accelMod, double turnAmountPerTick, List<String> modifiers, MaterialData displayBlock, int displayBlockOffset){
 			this.name = name;
 			this.speed = speed;
 			this.health = health;
 			this.modifiers = modifiers;
 			this.setAcceleration(accelMod);
 			this.setTurnAmountPerTick(turnAmountPerTick);
+			this.setDisplayBlock(displayBlock);
+			this.setDisplayBlockOffset(displayBlockOffset);
 		}
 		public String getName() {
 			return name;
@@ -136,7 +158,21 @@ public class CarPresets {
 		public void setTurnAmountPerTick(double turnAmountPerTick) {
 			this.turnAmountPerTick = turnAmountPerTick;
 		}
-		
+		public MaterialData getDisplayBlock() {
+			return displayBlock;
+		}
+		public void setDisplayBlock(MaterialData displayBlock) {
+			this.displayBlock = displayBlock;
+		}
+		public boolean hasDisplayBlock(){
+			return this.displayBlock != null;
+		}
+		public int getDisplayBlockOffset() {
+			return displayBlockOffset;
+		}
+		public void setDisplayBlockOffset(int displayBlockOffset) {
+			this.displayBlockOffset = displayBlockOffset;
+		}
 		
 	}
 }

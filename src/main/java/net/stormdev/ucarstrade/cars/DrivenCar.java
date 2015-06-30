@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.ItemRename;
+import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -63,6 +64,23 @@ public class DrivenCar implements Serializable {
 		stack.setItemMeta(meta);
 		stack = ItemRename.rename(stack, name);
 		return stack;
+	}
+	
+	public boolean hasPreset(){
+		return getPreset() != null;
+	}
+	
+	public CarPreset getPreset(){
+		if(!CarPresets.isCarPresetsUsed()){
+			return null;
+		}
+		List<CarPreset> cp = CarPresets.getPresets();
+		for(CarPreset c:new ArrayList<CarPreset>(cp)){
+			if(ChatColor.translateAlternateColorCodes('&', c.getName()).equals(this.name)){
+				return c;
+			}
+		}
+		return null;
 	}
 
 	public double getSpeed() {

@@ -17,7 +17,11 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/spigot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/spigot.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="https://hub.spigotmc.org/javadocs/spigot/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Edward/Documents/Bukkit Servers/MTATestServer/plugins/uCars.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

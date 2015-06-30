@@ -24,6 +24,8 @@ import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucars.utils.UpgradeForSale;
 import net.stormdev.ucarstrade.ItemCarValidation;
+import net.stormdev.ucarstrade.cars.CarPresets;
+import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 import net.stormdev.ucarstrade.displays.DisplayManager;
 import net.stormdev.ucarstrade.displays.DisplayType;
@@ -84,6 +86,7 @@ import com.useful.uCarsAPI.uCarCrashEvent;
 import com.useful.uCarsAPI.uCarRespawnEvent;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CarHealthData;
+import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ClosestFace;
 import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
@@ -541,9 +544,13 @@ public class UTradeListener implements Listener {
         if(save && slotNumber ==2){
 			//They are renaming it
         	ItemStack result = event.getCurrentItem();
-        	String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
-        	car.setName(name);
-        	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed car to: '"+name+"'");
+        	if(!CarPresets.isCarPresetsUsed || CarPresets.isCarAllowedRename){
+        		String name = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+            	car.setName(name);
+            	player.sendMessage(main.colors.getSuccess()+"+"+main.colors.getInfo()+" Renamed car to: '"+name+"'");
+            	return;
+        	}
+        	event.setCancelled(true);
         	return;
 		}
 		InventoryAction a = event.getAction();
@@ -1091,6 +1098,22 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		final Minecart car = (Minecart) event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
+		float yaw = event.getPlayer().getLocation().getYaw()+90;
+		if(yaw < 0){
+			yaw = 360 + yaw;
+		}
+		else if(yaw >= 360){
+			yaw = yaw - 360;
+		}
+		CartOrientationUtil.setYaw(car, yaw);
+		
+		//Display blocks
+		CarPreset cp = c.getPreset();
+		if(cp != null && cp.hasDisplayBlock()){
+			car.setDisplayBlock(cp.getDisplayBlock());
+			car.setDisplayBlockOffset(cp.getDisplayBlockOffset());
+		}
+		
 		in = car.getLocation().getBlock();
 		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
 		Block w = in.getRelative(BlockFace.WEST);

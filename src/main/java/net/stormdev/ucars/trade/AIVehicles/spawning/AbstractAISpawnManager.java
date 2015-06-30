@@ -10,6 +10,7 @@ import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.TrackingData;
 import net.stormdev.ucars.trade.AIVehicles.VelocityData;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
@@ -221,6 +222,13 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				//Make it a car
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
+				
+				CarPreset cp = c.getPreset();
+				if(cp != null && cp.hasDisplayBlock()){
+					m.setDisplayBlock(cp.getDisplayBlock());
+					m.setDisplayBlockOffset(cp.getDisplayBlockOffset());
+				}
+				
 				ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 

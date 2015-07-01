@@ -210,7 +210,7 @@ public class NodesStore {
 	
 	public List<Node> getActiveNodes(ChunkCoord coord){
 		List<Node> chunkNodes = new ArrayList<Node>();
-		for(ChunkCoord key:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+		for(ChunkCoord key:new ArrayList<ChunkCoord>(new HashMap<ChunkCoord, List<Node>>(nodesByActiveChunks).keySet())){
 			if(key.isEqualTo(coord)){
 				chunkNodes = nodesByActiveChunks.get(key);
 			}

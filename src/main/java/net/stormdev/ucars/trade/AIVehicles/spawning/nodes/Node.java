@@ -68,16 +68,22 @@ public class Node implements Serializable {
 		}
 		Block tracker = getLocation().getBlock();
 		
-		Location spawnLoc = tracker.getRelative(BlockFace.UP, 2).getLocation();
+		final Location spawnLoc = tracker.getRelative(BlockFace.UP, 2).getLocation();
 		if(!isRoomForCarToSpawn()){
 			return;
 		}
 		
-		BlockFace carriagewayDir = AITrackFollow.carriagewayDirection(tracker);
+		final BlockFace carriagewayDir = AITrackFollow.carriagewayDirection(tracker);
 		
 		if(carriagewayDir != null){
 			lastSpawnTime = System.currentTimeMillis();
-			main.plugin.aiSpawns.spawnNPCCar(spawnLoc, carriagewayDir);
+			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					main.plugin.aiSpawns.spawnNPCCar(spawnLoc, carriagewayDir);
+					return;
+				}});
 		}
 	}
 	

@@ -184,6 +184,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 	public void spawnNPCCar(Location spawn, final BlockFace carriagewayDir) {
 		spawn = spawn.add(0.5, 0, 0.5);
 		final Location spawnLoc = spawn;
+		final DrivenCar c = CarGenerator.gen().setNPC(true);
 		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO THIS is what is creating the lag
 
 			public void run() {
@@ -217,8 +218,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				v.setCustomName(randomName());
 				v.setCustomNameVisible(true);
 				m.setPassenger(v);
-				
-				final DrivenCar c = CarGenerator.gen().setNPC(true);
+			
 				//Make it a car
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));

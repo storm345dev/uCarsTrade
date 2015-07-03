@@ -882,11 +882,11 @@ public class UTradeListener implements Listener {
 		if(v.hasMetadata("trade.npc")){
 			//Allow it to be hurt
 		}
-		else {
+		/*else {
 			//Part of a car stack
 			event.setDamage(0);
 			event.setCancelled(true);
-		}
+		}*/
 		return;
 	}
 	
@@ -1014,7 +1014,7 @@ public class UTradeListener implements Listener {
 				damage = ucars.config.getDouble("general.cars.health.punchDamage");
 			}
 		}
-		event.setDamage(0);
+		event.setDamage(-70);
 		event.setCancelled(true);
 		if (damage > 0) {
 			double max = ucars.config.getDouble("general.cars.health.default");

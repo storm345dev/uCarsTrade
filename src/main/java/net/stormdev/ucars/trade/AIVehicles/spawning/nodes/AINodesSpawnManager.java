@@ -3,6 +3,7 @@ package net.stormdev.ucars.trade.AIVehicles.spawning.nodes;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -92,7 +93,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					
 					final Node randomNode = activeNodes.get(main.random.nextInt(activeNodes.size()));
 					
-					Location randomNodeLoc = randomNode.getLocation();
+					final Location randomNodeLoc = randomNode.getLocation();
 					
 					int nearCount = 0;
 					for(Player pl:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
@@ -114,7 +115,19 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					
 					boolean closeCar = false;
 					int minSpacing = randomMinCarSpacing();
-					for(Entity e:new ArrayList<Entity>(randomNodeLoc.getWorld().getEntities())){ //PLEASE don't get caught by AsyncCatcher...
+					final List<Entity> ents = new ArrayList<Entity>();
+					try {
+						Bukkit.getScheduler().callSyncMethod(plugin, new Callable<Void>(){
+
+							@Override
+							public Void call() throws Exception {
+								ents.addAll(randomNodeLoc.getWorld().getEntities());
+								return null;
+							}}).get();
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
 						if(!e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
 							continue;
 						}

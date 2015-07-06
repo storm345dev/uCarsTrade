@@ -9,6 +9,8 @@ public interface AISpawnManager {
 	public int getCurrentAICap();
 	public int getMaxAICap();
 	public int getSpawnedAICount();
+	public boolean isEnabled();
+	public void setEnabled(boolean b);
 	public void decrementSpawnedAICount();
 	public void incrementSpawnedAICount();
 	public void setCurrentAICap(int cap);

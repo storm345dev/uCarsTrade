@@ -66,6 +66,9 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 			@Override
 			public void run() { //TODO Scan for nodes async, but if bukkit doesn't like it then will do sync
+				if(!enabled){
+					return;
+				}
 				if(!AINodesSpawnManager.this.isNPCCarsSpawningNow()){
 					return;
 				}

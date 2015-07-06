@@ -130,6 +130,14 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 		}
 	}
 	
+	public void setEnabled(boolean enabled){
+		this.enabled = enabled;
+	}
+	
+	public boolean isEnabled(){
+		return this.enabled;
+	}
+	
 	public abstract void initSpawnTask();
 	
 	@Override

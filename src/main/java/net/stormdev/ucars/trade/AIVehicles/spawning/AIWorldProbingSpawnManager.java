@@ -39,6 +39,9 @@ public class AIWorldProbingSpawnManager extends AbstractAISpawnManager {
 		task = main.plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 			public void run() {
+				if(!enabled){
+					return;
+				}
 				if(spawnedCount >= liveCap || spawnedCount >= cap){
 					return;
 				}

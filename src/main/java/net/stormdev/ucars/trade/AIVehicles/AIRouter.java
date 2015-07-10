@@ -343,9 +343,10 @@ public class AIRouter {
 			vel = data.getMotion();
 			car.removeMetadata("relocatingRoad", main.plugin);
 			car.setVelocity(vel);
-			if(vel.lengthSquared() > 0.01){
+			Vector dirVec = vel.clone().setY(0).normalize();
+			if(dirVec.lengthSquared() > 0.01){
 				Location dirLoc = new Location(car.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
-				dirLoc.setDirection(vel.clone().normalize());
+				dirLoc.setDirection(dirVec);
 				float yaw = dirLoc.getYaw()+90;
 				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
 					yaw += 180;
@@ -421,9 +422,10 @@ public class AIRouter {
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
 			car.setVelocity(vel);
-			if(vel.lengthSquared() > 0.01){
+			Vector dirVec = vel.clone().setY(0).normalize();
+			if(dirVec.lengthSquared() > 0.01){
 				Location dirLoc = new Location(car.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
-				dirLoc.setDirection(vel.clone().normalize());
+				dirLoc.setDirection(dirVec);
 				float yaw = dirLoc.getYaw()+90;
 				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
 					yaw += 180;

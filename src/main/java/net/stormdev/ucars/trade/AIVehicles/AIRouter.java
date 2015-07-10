@@ -22,6 +22,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
 import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.CarDirection;
+import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
@@ -341,6 +343,21 @@ public class AIRouter {
 			vel = data.getMotion();
 			car.removeMetadata("relocatingRoad", main.plugin);
 			car.setVelocity(vel);
+			if(vel.lengthSquared() > 0.01){
+				Location dirLoc = new Location(car.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
+				dirLoc.setDirection(vel.clone().normalize());
+				float yaw = dirLoc.getYaw()+90;
+				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
+					yaw += 180;
+				}*/
+				while(yaw < 0){
+					yaw = 360 + yaw;
+				}
+				while(yaw >= 360){
+					yaw = yaw - 360;
+				}
+				CartOrientationUtil.setYaw(car, yaw);
+			}
 		}
 		else{
 			//Calculate vector to get there...
@@ -404,6 +421,21 @@ public class AIRouter {
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
 			car.setVelocity(vel);
+			if(vel.lengthSquared() > 0.01){
+				Location dirLoc = new Location(car.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
+				dirLoc.setDirection(vel.clone().normalize());
+				float yaw = dirLoc.getYaw()+90;
+				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
+					yaw += 180;
+				}*/
+				while(yaw < 0){
+					yaw = 360 + yaw;
+				}
+				while(yaw >= 360){
+					yaw = yaw - 360;
+				}
+				CartOrientationUtil.setYaw(car, yaw);
+			}
 		}
 		data.setDir(direction);
 		car.removeMetadata("trade.npc", main.plugin);

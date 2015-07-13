@@ -22,9 +22,13 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.util.Vector;
 
 import com.useful.ucars.CarHealthData;
+import com.useful.ucars.CartOrientationUtil;
+import com.useful.ucars.WrapperPlayServerEntityLook;
 import com.useful.ucars.ucars;
 import com.useful.ucarsCommon.StatValue;
 
@@ -199,6 +203,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 			public void run() {
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+				List<Player> nearbyPlayersList = new ArrayList<Player>();
 				if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
 					List<Entity> es = m.getNearbyEntities(2, 2, 2);
 					for(Entity e:es){
@@ -211,6 +216,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					for(Entity e:new ArrayList<Entity>(nearby)){
 						if(e.getType() != EntityType.MINECART){
 							nearby.remove(e);
+						}
+						else if(e instanceof Player){
+							nearbyPlayersList.add((Player) e);
 						}
 					}
 					if(nearby.size() > 2){
@@ -232,6 +240,27 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				//Make it a car
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
+				
+				Location dirLoc = new Location(m.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
+				dirLoc.setDirection(new Vector(carriagewayDir.getModX(), 0, carriagewayDir.getModZ()).normalize());
+				float yaw = dirLoc.getYaw()+90;
+				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
+					yaw += 180;
+				}*/
+				while(yaw < 0){
+					yaw = 360 + yaw;
+				}
+				while(yaw >= 360){
+					yaw = yaw - 360;
+				}
+				CartOrientationUtil.setYaw(m, yaw);
+				WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
+				p.setEntityID(m.getEntityId());
+				p.setYaw(yaw);
+				p.setPitch(m.getLocation().getPitch());
+				for(Player player:nearbyPlayersList){
+					p.sendPacket(player);
+				}
 				
 				CarPreset cp = c.getPreset();
 				if(cp != null && cp.hasDisplayBlock()){

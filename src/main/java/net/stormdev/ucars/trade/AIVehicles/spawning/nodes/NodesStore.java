@@ -168,7 +168,11 @@ public class NodesStore {
 		double maxSquared = Math.pow(maxDistance, 2);
 		
 		for(Node n:active){
-			double distanceSquared = n.getLocation().distanceSquared(location);
+			Location nl = n.getLocation();
+			if(!nl.getWorld().equals(location.getWorld())){
+				continue;
+			}
+			double distanceSquared = nl.distanceSquared(location);
 			if(distanceSquared < maxSquared && distanceSquared > minSquared){
 				res.add(n);
 			}

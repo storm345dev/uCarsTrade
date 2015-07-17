@@ -39,6 +39,11 @@ public class DrivenCar implements Serializable {
 		this.setTurnAmountPerTick(turnAmountPerTick);
 	}
 	
+	public DrivenCar(DrivenCar other){
+		this(other.getName(), other.getSpeed(), other.getHealth(), other.getAccelMod(), other.getTurnAmountPerTick(), other.isHandlingDamaged(), other.getModifiers());
+		this.id = other.getId();
+	}
+	
 	private static String getHandleString(boolean isDamaged){
 		if(isDamaged){
 			return "damaged";

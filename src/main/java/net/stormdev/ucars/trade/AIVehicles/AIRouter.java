@@ -425,7 +425,7 @@ public class AIRouter {
 				yaw = yaw - 360;
 			}
 			CartOrientationUtil.setYaw(car, yaw);
-			Entity pass = car.getPassenger();
+			/*Entity pass = car.getPassenger();
 			WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 			p.setEntityID(car.getEntityId());
 			p.setYaw(yaw);
@@ -442,7 +442,7 @@ public class AIRouter {
 				if(p2 != null){
 					p2.sendPacket(player);
 				}
-			}
+			}*/
 		}
 		
 		

@@ -207,8 +207,6 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				
 				spawnLoc.setYaw(dirLoc.getYaw());
 				
-				Bukkit.broadcastMessage(spawnLoc.getYaw()+"");
-				
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
 				List<Player> nearbyPlayersList = new ArrayList<Player>();
 				if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){

@@ -579,29 +579,38 @@ public class AIRouter {
 		return;
 	}
 	
-	public static void despawnNPCCar(Minecart car, final DrivenCar c){
+	public static void despawnNPCCar(final Minecart car, final DrivenCar c){
 		//Remove me
-		if(car.getPassenger() != null){
-			car.getPassenger().remove();
-		}
-		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
 
 			@Override
 			public void run() {
-				main.plugin.carSaver.carNoLongerInUse(c.getId());
+				Entity pass = car.getPassenger();
+				car.remove();
+				if(pass != null){
+					pass.remove();
+				}
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						main.plugin.carSaver.carNoLongerInUse(c.getId());
+						return;
+					}});
+				
+				main.plugin.aiSpawns.decrementSpawnedAICount();
 				return;
 			}});
-		car.remove();
-		main.plugin.aiSpawns.decrementSpawnedAICount();
 	}
 	
 	public static void despawnNPCCarNow(Minecart car, final DrivenCar c){
 		//Remove me
-		if(car.getPassenger() != null){
-			car.getPassenger().remove();
+		Entity pass = car.getPassenger();
+		car.remove();
+		if(pass != null){
+			pass.remove();
 		}
 		main.plugin.carSaver.carNoLongerInUse(c.getId());
-		car.remove();
 		main.plugin.aiSpawns.decrementSpawnedAICount();
 	}
 	

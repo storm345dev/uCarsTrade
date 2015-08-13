@@ -205,7 +205,14 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				Location dirLoc = new Location(spawnLoc.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
 				dirLoc.setDirection(new Vector(carriagewayDir.getModX(), 0, carriagewayDir.getModZ()).normalize());
 				
-				spawnLoc.setYaw(dirLoc.getYaw());
+				float yaw = dirLoc.getYaw() + 90;
+				while(yaw < 0){
+					yaw = 360 + yaw;
+				}
+				while(yaw >= 360){
+					yaw = yaw - 360;
+				}
+				spawnLoc.setYaw(yaw);
 				
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
 				List<Player> nearbyPlayersList = new ArrayList<Player>();
@@ -246,16 +253,6 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
 				
-				float yaw = dirLoc.getYaw()+90;
-				/*if(event.getDir().equals(CarDirection.BACKWARDS)){
-					yaw += 180;
-				}*/
-				while(yaw < 0){
-					yaw = 360 + yaw;
-				}
-				while(yaw >= 360){
-					yaw = yaw - 360;
-				}
 				CartOrientationUtil.setYaw(m, yaw);
 				WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 				p.setEntityID(m.getEntityId());

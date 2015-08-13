@@ -22,6 +22,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -107,6 +108,13 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				
 				BlockFace dir = AITrackFollow.carriagewayDirection(target);
 				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir);
+				return true;
+			}
+			else if(command.equalsIgnoreCase("debugrotation") && player != null && player.isOp()){
+				Location loc = player.getLocation().add(player.getEyeLocation().getDirection().clone().setY(0).normalize().multiply(2));
+				loc.setYaw(90+45);
+				loc.getWorld().spawnEntity(loc, EntityType.MINECART);
+				sender.sendMessage("Spawned cart with at location with diagonal rotation!");
 				return true;
 			}
 			else if(command.equalsIgnoreCase("ai")){

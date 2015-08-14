@@ -18,14 +18,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ClosestFace;
-import com.useful.ucars.WrapperPlayServerEntityLook;
 import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
@@ -206,7 +204,7 @@ public class AIRouter {
 		}
 		car.removeMetadata(POS_META, main.plugin);
 		car.setMetadata(POS_META, new StatValue(pt, main.plugin));
-		if(pt.getStationaryCount() > 100){ //Being stationary a while
+		if(pt.getStationaryCount() > 200){ //Being stationary a while
 			despawnNPCCar(car, c);
 			return;
 		}

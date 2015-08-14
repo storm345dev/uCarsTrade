@@ -254,13 +254,13 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
 				
 				CartOrientationUtil.setYaw(m, yaw);
-				WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
+				/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 				p.setEntityID(m.getEntityId());
 				p.setYaw(yaw);
 				p.setPitch(m.getLocation().getPitch());
 				for(Player player:nearbyPlayersList){
 					p.sendPacket(player);
-				}
+				}*/
 				
 				CarPreset cp = c.getPreset();
 				if(cp != null && cp.hasDisplayBlock()){

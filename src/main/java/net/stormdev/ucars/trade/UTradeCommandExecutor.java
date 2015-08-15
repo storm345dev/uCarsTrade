@@ -107,7 +107,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				}
 				
 				BlockFace dir = AITrackFollow.carriagewayDirection(target);
-				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir);
+				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir+" ("+dir.getModX()+","+dir.getModZ()+")");
 				return true;
 			}
 			else if(command.equalsIgnoreCase("debugrotation") && player != null && player.isOp()){

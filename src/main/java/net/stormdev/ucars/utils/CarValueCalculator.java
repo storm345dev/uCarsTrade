@@ -45,8 +45,12 @@ public class CarValueCalculator {
 			double h = (health/maxHealth * 100) - defaultHealth + 5;
 			rating = rating + h;
 		}
+		double handling = car.getTurnAmountPerTick();
+		double accel = car.getAccelMod();
+		rating *= (accel*0.75);
+		rating *= (handling / 5.0);
 		int percentExtra = 0;
-		rating -= 50;
+		rating -= 100;
 	    Boolean worse = rating < 0;
 		// ratings - -30 is normally worst, -24 = crap car, 26 = average car, 100+ is great
 		if(rating < 0){

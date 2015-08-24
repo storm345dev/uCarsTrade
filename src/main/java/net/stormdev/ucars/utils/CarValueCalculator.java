@@ -70,7 +70,7 @@ public class CarValueCalculator {
 				percentExtra = 0;
 			}
 			else{
-			percentExtra = ((int)rating-40)/2; //Round to closest int
+			percentExtra = ((int)rating-5)/2; //Round to closest int
 			}
 		}
 		double cost = average;

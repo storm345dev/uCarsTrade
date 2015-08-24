@@ -30,7 +30,7 @@ public class CarValueCalculator {
 			rating = rating - (3-(5*speed));
 		}
 		else {
-			rating = rating + (15*speed);
+			rating = rating + (20*speed);
 		}
 		if(name.length() > 16){
 			rating = rating - 2;

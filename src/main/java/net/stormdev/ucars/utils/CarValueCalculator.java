@@ -27,7 +27,7 @@ public class CarValueCalculator {
 			rating = rating + 1;
 		}
 		else if(speed > 3){
-			rating = rating - (3-5*speed);
+			rating = rating - (3-(5*speed));
 		}
 		else {
 			rating = rating + (10*speed);
@@ -46,6 +46,7 @@ public class CarValueCalculator {
 			rating = rating + h;
 		}
 		int percentExtra = 0;
+		rating -= 50;
 	    Boolean worse = rating < 0;
 		// ratings - -30 is normally worst, -24 = crap car, 26 = average car, 100+ is great
 		if(rating < 0){
@@ -61,11 +62,11 @@ public class CarValueCalculator {
 			}
 		}
 		else{ //Rating is more than 0
-			if(rating < 10){
+			if(rating < 40){
 				percentExtra = 0;
 			}
 			else{
-			percentExtra = (int)rating; //Round to closest int
+			percentExtra = ((int)rating-40)/2; //Round to closest int
 			}
 		}
 		double cost = average;

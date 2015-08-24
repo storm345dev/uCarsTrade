@@ -30,7 +30,7 @@ public class CarValueCalculator {
 			rating = rating - (3-(5*speed));
 		}
 		else {
-			rating = rating + (10*speed);
+			rating = rating + (15*speed);
 		}
 		if(name.length() > 16){
 			rating = rating - 2;
@@ -47,10 +47,10 @@ public class CarValueCalculator {
 		}
 		double handling = car.getTurnAmountPerTick();
 		double accel = car.getAccelMod();
-		rating *= (accel*0.75);
+		rating *= (accel);
 		rating *= (handling / 5.0);
 		int percentExtra = 0;
-		rating -= 100;
+		rating -= 50;
 	    Boolean worse = rating < 0;
 		// ratings - -30 is normally worst, -24 = crap car, 26 = average car, 100+ is great
 		if(rating < 0){
@@ -66,7 +66,7 @@ public class CarValueCalculator {
 			}
 		}
 		else{ //Rating is more than 0
-			if(rating < 40){
+			if(rating < 5){
 				percentExtra = 0;
 			}
 			else{

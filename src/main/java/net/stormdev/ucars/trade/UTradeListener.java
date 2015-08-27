@@ -1113,6 +1113,9 @@ public class UTradeListener implements Listener {
 			car.setDisplayBlock(cp.getDisplayBlock());
 			car.setDisplayBlockOffset(cp.getDisplayBlockOffset());
 		}
+		else if(c.getBaseDisplayBlock() != null){
+			car.setDisplayBlock(c.getBaseDisplayBlock());
+		}
 		
 		in = car.getLocation().getBlock();
 		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to

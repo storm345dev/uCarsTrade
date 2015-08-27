@@ -13,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 import com.useful.ucars.ucars;
 
@@ -37,6 +38,13 @@ public class DrivenCar implements Serializable {
 		this.setModifiers(modifiers);
 		this.setAccelMod(acceleration);
 		this.setTurnAmountPerTick(turnAmountPerTick);
+	}
+	
+	public MaterialData getBaseDisplayBlock(){
+		if(!name.toLowerCase().contains("cop")){
+			return null;
+		}
+		return new ItemStack(Material.COMMAND).getData();
 	}
 	
 	public DrivenCar(DrivenCar other){

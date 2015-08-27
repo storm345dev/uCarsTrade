@@ -39,6 +39,9 @@ public class CarPlaceAPI {
 			car.setDisplayBlock(cp.getDisplayBlock());
 			car.setDisplayBlockOffset(cp.getDisplayBlockOffset());
 		}
+		else if(carData.getBaseDisplayBlock() != null){
+			car.setDisplayBlock(carData.getBaseDisplayBlock());
+		}
 		
 		in = car.getLocation().getBlock();
 		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to

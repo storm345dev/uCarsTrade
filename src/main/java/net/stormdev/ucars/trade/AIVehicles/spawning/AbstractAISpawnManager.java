@@ -267,6 +267,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					m.setDisplayBlock(cp.getDisplayBlock());
 					m.setDisplayBlockOffset(cp.getDisplayBlockOffset());
 				}
+				else if(c.getBaseDisplayBlock() != null){
+					m.setDisplayBlock(c.getBaseDisplayBlock());
+				}
 				
 				ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){

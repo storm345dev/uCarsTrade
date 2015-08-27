@@ -328,7 +328,7 @@ public class UTradeListener implements Listener {
         }*/
     	return;
     }
-	@EventHandler
+	/*@EventHandler
 	void lostCars(final ItemDespawnEvent event){
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable(){
 
@@ -355,7 +355,7 @@ public class UTradeListener implements Listener {
 				return;
 			}});
 		return;
-	}
+	}*/
 	@EventHandler
 	void displayUpgrades(VehicleUpdateEvent event){
 		Vehicle veh = event.getVehicle();

@@ -65,6 +65,13 @@ public class CarSaver {
 		cacheSize();
 	}
 	
+	public void carNoLongerInUseNow(UUID id){
+		inUse.remove(id);
+		cache.remove(id);
+		save();
+		cacheSize();
+	}
+	
 	public void carNowInUse(DrivenCar car){
 		if(car == null || car.getId() == null){
 			throw new RuntimeException("DrivenCar is null!");

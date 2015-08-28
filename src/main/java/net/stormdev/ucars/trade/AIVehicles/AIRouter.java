@@ -608,7 +608,7 @@ public class AIRouter {
 		if(pass != null){
 			pass.remove();
 		}
-		main.plugin.carSaver.carNoLongerInUse(c.getId());
+		main.plugin.carSaver.carNoLongerInUseNow(c.getId());
 		main.plugin.aiSpawns.decrementSpawnedAICount();
 	}
 	

@@ -21,7 +21,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 120l;
-	private int minDistance = 30;
+	private int minDistance = 22;
 	private int maxDistance = 60;
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {

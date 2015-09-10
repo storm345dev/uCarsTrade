@@ -241,6 +241,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				}
 				//It's valid
 				final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+				v.setMetadata("trade.npcvillager", new StatValue(true, main.plugin));
 				v.setAdult();
 				v.setBreed(false);
 				v.setAgeLock(true);

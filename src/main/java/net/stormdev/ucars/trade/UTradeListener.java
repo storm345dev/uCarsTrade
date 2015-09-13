@@ -1115,7 +1115,7 @@ public class UTradeListener implements Listener {
 		}
 		else if(c.getBaseDisplayBlock() != null){
 			car.setDisplayBlock(c.getBaseDisplayBlock());
-			car.setDisplayBlockOffset(-2);
+			car.setDisplayBlockOffset(0);
 		}
 		
 		in = car.getLocation().getBlock();

@@ -41,6 +41,7 @@ public class CarPlaceAPI {
 		}
 		else if(carData.getBaseDisplayBlock() != null){
 			car.setDisplayBlock(carData.getBaseDisplayBlock());
+			car.setDisplayBlockOffset(-2);
 		}
 		
 		in = car.getLocation().getBlock();

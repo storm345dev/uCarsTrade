@@ -879,7 +879,7 @@ public class UTradeListener implements Listener {
 		if(v == null){
 			return;
 		}
-		if(v.hasMetadata("trade.npc")){
+		if(v.hasMetadata("trade.npc") || v.hasMetadata("mta.copentity")){
 			//Allow it to be hurt
 		}
 		/*else {
@@ -1000,7 +1000,7 @@ public class UTradeListener implements Listener {
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
-		if(car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)){
+		if((car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && car.getPassenger().hasMetadata("mta.copentity"))){
 			return; //They punched the villager; don't take car health
 		}
 		CarHealthData health = ucars.listener.getCarHealthHandler(car);
@@ -1115,6 +1115,7 @@ public class UTradeListener implements Listener {
 		}
 		else if(c.getBaseDisplayBlock() != null){
 			car.setDisplayBlock(c.getBaseDisplayBlock());
+			car.setDisplayBlockOffset(-2);
 		}
 		
 		in = car.getLocation().getBlock();

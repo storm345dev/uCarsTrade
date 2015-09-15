@@ -1092,6 +1092,14 @@ public class UTradeListener implements Listener {
 		}
 		
 		Location loc = block.getLocation().add(0, 1.5, 0);
+		
+		if(loc.getY() > loc.getWorld().getMaxHeight()){
+			event.getPlayer().sendMessage(
+					ucars.colors.getError()
+							+ Lang.get("lang.messages.noPlaceHere"));
+			return;
+		}
+		
 		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
 		Block in = loc.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){

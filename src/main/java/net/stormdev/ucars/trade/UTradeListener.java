@@ -1094,6 +1094,7 @@ public class UTradeListener implements Listener {
 		Location loc = block.getLocation().add(0, 1.5, 0);
 		
 		if(loc.getY() >= loc.getWorld().getMaxHeight()){
+			event.setCancelled(true);
 			event.getPlayer().sendMessage(
 					ucars.colors.getError()
 							+ Lang.get("lang.messages.noPlaceHere"));

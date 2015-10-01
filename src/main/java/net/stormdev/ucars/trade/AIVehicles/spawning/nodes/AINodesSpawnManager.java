@@ -21,7 +21,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 50l;
-	private int minDistance = 30;
+	public static int minDistance = 30;
 	private int maxDistance = 70;
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
@@ -99,18 +99,25 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					final Location randomNodeLoc = randomNode.getLocation();
 					
 					int nearCount = 0;
+					boolean cancel = false;
 					for(Player pl:new ArrayList<Player>(Bukkit.getOnlinePlayers())){
 						if(pl.equals(player)){
 							continue;
 						}
 						if(pl.getLocation().distanceSquared(randomNodeLoc) < minDistanceSquared){
-							return; //Don't spawn at node if other player right near it
+							cancel = true;
+							break; //Don't spawn at node if other player right near it
 						}
 						else if(pl.getLocation().distanceSquared(randomNodeLoc) < maxDistanceSquared){
 							//It's also near to them
 							nearCount++;
 						}
 					}
+					
+					if(cancel){
+						continue;
+					}
+					
 					chance = (int) ((nearCount*2) + 1);
 					if(!(main.random.nextInt(chance) <= 1)){ //Avoids LOTS of cars spawning where there's LOTS of players
 						continue;

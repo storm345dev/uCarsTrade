@@ -144,7 +144,7 @@ public class AIRouter {
 					List<Player> pls = new ArrayList<Player>(Bukkit.getOnlinePlayers());
 					double radiusSq = Math.pow(PLAYER_RADIUS, 2);
 					if(car.getTicksLived() > 2400){
-						radiusSq = 400; //20 blocks
+						radiusSq = 35*35; //30 blocks
 					}
 					for(Player pl:pls){
 						double d = pl.getLocation().clone().toVector().subtract(loc.clone().toVector()).lengthSquared();

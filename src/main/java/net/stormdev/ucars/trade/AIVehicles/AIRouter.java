@@ -134,8 +134,7 @@ public class AIRouter {
 		if(!c.isNPC()){
 			//Not an npc
 			return;
-		}
-		
+		}		
 		
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
@@ -144,6 +143,9 @@ public class AIRouter {
 				public void run() {
 					List<Player> pls = new ArrayList<Player>(Bukkit.getOnlinePlayers());
 					double radiusSq = Math.pow(PLAYER_RADIUS, 2);
+					if(car.getTicksLived() > 2400){
+						radiusSq = 400; //20 blocks
+					}
 					for(Player pl:pls){
 						double d = pl.getLocation().clone().toVector().subtract(loc.clone().toVector()).lengthSquared();
 						if(d < radiusSq){

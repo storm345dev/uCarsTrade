@@ -21,18 +21,18 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 50l;
-	private int minDistance = 22;
-	private int maxDistance = 50;
+	private int minDistance = 30;
+	private int maxDistance = 70;
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
 		this.nodes = new NodesStore(nodesSaveFile);
 		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
-			main.config.set("general.ai.minSpawnDistanceFromPlayers", 25);
+			main.config.set("general.ai.minSpawnDistanceFromPlayers", 35);
 		}
 		minDistance = main.config.getInt("general.ai.minSpawnDistanceFromPlayers");
 		if(!main.config.contains("general.ai.maxSpawnDistanceFromPlayers")){
-			main.config.set("general.ai.maxSpawnDistanceFromPlayers", 40);
+			main.config.set("general.ai.maxSpawnDistanceFromPlayers", 70);
 		}
 		maxDistance = main.config.getInt("general.ai.maxSpawnDistanceFromPlayers");
 		AIRouter.PLAYER_RADIUS = maxDistance;

@@ -27,7 +27,7 @@ import com.useful.ucars.ClosestFace;
 import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
-	public static int PLAYER_RADIUS = 20;
+	public static int PLAYER_RADIUS = 70;
 	
 	private static boolean enabled;
 	private static Map<String, Material> trackBlocks = new HashMap<String, Material>();
@@ -123,7 +123,7 @@ public class AIRouter {
 		BlockFace direction = BlockFace.NORTH;
 		Vector vel = car.getVelocity();
 		
-		Location loc = car.getLocation();
+		final Location loc = car.getLocation();
 		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
 		
 		double cx = loc.getX();
@@ -134,7 +134,28 @@ public class AIRouter {
 			//Not an npc
 			return;
 		}
-		List<Entity> nearby = car.getNearbyEntities(PLAYER_RADIUS, 50, PLAYER_RADIUS); //20x20 radius
+		
+		
+		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
+			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+	
+				@Override
+				public void run() {
+					List<Player> pls = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+					double radiusSq = Math.pow(PLAYER_RADIUS, 2);
+					for(Player pl:pls){
+						double d = pl.getLocation().clone().toVector().subtract(loc.clone().toVector()).lengthSquared();
+						if(d < radiusSq){
+							return; //Player in radius
+						}
+					}
+					
+					//No players in radius
+					despawnNPCCar(car, c);
+					return;
+				}});
+		}
+		/*List<Entity> nearby = car.getNearbyEntities(PLAYER_RADIUS, 50, PLAYER_RADIUS); //20x20 radius
 		List<Player> nearbyPlayersList = new ArrayList<Player>();
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
 			//Check if players nearby
@@ -148,7 +169,7 @@ public class AIRouter {
 			if(!nearbyPlayers){
 				despawnNPCCar(car, c);
 			}
-		}
+		}*/
 		
 		/*nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;

@@ -6,6 +6,8 @@ import org.bukkit.util.Vector;
 public class VelocityData {
 	private BlockFace dir;
 	private Vector motion;
+	private volatile boolean stoppedForOtherCar = false;
+	
 	public VelocityData(BlockFace dir, Vector motion){
 		this.setDir(dir);
 		this.setMotion(motion);
@@ -24,5 +26,11 @@ public class VelocityData {
 	}
 	public void setMotion(Vector motion) {
 		this.motion = motion;
+	}
+	public boolean isStoppedForOtherCar() {
+		return stoppedForOtherCar;
+	}
+	public void setStoppedForOtherCar(boolean stoppedForOtherCar) {
+		this.stoppedForOtherCar = stoppedForOtherCar;
 	}
 }

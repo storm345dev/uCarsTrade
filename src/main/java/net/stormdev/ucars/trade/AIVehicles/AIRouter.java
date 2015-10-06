@@ -10,15 +10,16 @@ import net.stormdev.ucars.trade.main;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -66,7 +67,7 @@ public class AIRouter {
 	}
 	
 	public AIRouter(boolean enabled){
-		this.enabled = enabled;
+		AIRouter.enabled = enabled;
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");
 		roadEdge = Material.getMaterial(edgeRaw);
@@ -114,6 +115,15 @@ public class AIRouter {
 		public int getStationaryCount(){
 			return this.stationaryCount;
 		}
+	}
+	
+	public VelocityData getVelocityData(Vehicle car){
+		VelocityData data = new VelocityData(null, null);
+		if(car.hasMetadata("trade.npc")){
+			List<MetadataValue> ms = car.getMetadata("trade.npc");
+			data = (VelocityData) ms.get(0).value();
+		}
+		return data;
 	}
 	
 	public void route(final Minecart car, final DrivenCar c) throws Exception{
@@ -174,7 +184,7 @@ public class AIRouter {
 			}
 		}*/
 		
-		/*nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
+		/*List<Entity> nearby = car.getNearbyEntities(1.5, 1.5, 1.5); //Nearby cars
 		Boolean stop = false;
 		for(Entity e:nearby){
 			if(e.getType() == EntityType.MINECART && e.hasMetadata("trade.npc")){ //Avoid driving into another car
@@ -228,16 +238,6 @@ public class AIRouter {
 		}
 		car.removeMetadata(POS_META, main.plugin);
 		car.setMetadata(POS_META, new StatValue(pt, main.plugin));
-		if(pt.getStationaryCount() > 200){ //Being stationary a while
-			despawnNPCCar(car, c);
-			return;
-		}
-		
-		if(/*stop ||*/ car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
-			car.removeMetadata(POS_META, main.plugin); //Don't count this as being stationary
-			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
-			return;
-		}
 		
 		VelocityData data = new VelocityData(null, null);
 		if(car.hasMetadata("trade.npc")){
@@ -247,6 +247,68 @@ public class AIRouter {
 				direction = data.getDir();
 			}
 			//direction = (BlockFace) ms.get(0).value();
+		}
+		
+		long stationaryRemoveTime = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car) ? 2000:200;
+		
+		if(pt.getStationaryCount() > stationaryRemoveTime){ //Being stationary a while
+			despawnNPCCar(car, c);
+			return;
+		}
+		
+		final VelocityData vd = data;
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				List<Entity> es = car.getWorld().getEntities();
+				Vector carLoc = car.getLocation().toVector();
+				boolean nearbyCars = false;
+				for(Entity e:es){
+					if(e.equals(car)){
+						continue;
+					}
+					if(!e.getType().equals(EntityType.MINECART) || !e.hasMetadata("trade.npc")){
+						continue;
+					}
+					Vector diff = e.getLocation().toVector().clone().subtract(carLoc.clone());
+					if(Math.abs(diff.lengthSquared()) < 12){
+						VelocityData otherCar = getVelocityData((Vehicle) e);
+						if(otherCar.getDir() != null && vd.getDir() != null && otherCar.getDir().equals(vd.getDir())){
+							BlockFace dir = otherCar.getDir();
+							double cx = dir.getModX();
+							double cz = dir.getModZ();
+							
+							if(cx == 0 && Math.abs(diff.getX()) >= 1){
+								continue;
+							}
+							if(cz == 0 && Math.abs(diff.getZ()) >= 1){
+								continue;
+							}
+							if((cx > 0 && diff.getX() < 0) || (cx < 0 && diff.getX() > 0)){
+								continue;
+							}
+							if((cz > 0 && diff.getZ() < 0) || (cz < 0 && diff.getZ() > 0)){
+								continue;
+							}
+							if((cx > 0 && cz > 0 && (diff.getX() < 0 || diff.getZ() < 0))
+									|| (cx < 0 && cz < 0 && (diff.getX() > 0 || diff.getZ() > 0))){
+								continue;
+							}
+							
+							nearbyCars = true;
+							break;
+						}
+					}
+				}
+				
+				vd.setStoppedForOtherCar(nearbyCars);
+				return;
+			}});
+		
+		if(/*stop ||*/data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
+			return;
 		}
 		
 		Material ut = under.getType();

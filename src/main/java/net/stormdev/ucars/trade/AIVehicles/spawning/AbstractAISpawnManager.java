@@ -28,21 +28,20 @@ import org.bukkit.util.Vector;
 
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.CartOrientationUtil;
-import com.useful.ucars.WrapperPlayServerEntityLook;
 import com.useful.ucars.ucars;
 import com.useful.ucarsCommon.StatValue;
 
 public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 	protected main plugin;
-	protected boolean enabled;
-	protected boolean fullEnable;
+	protected volatile boolean enabled;
+	protected volatile boolean fullEnable;
 	protected static Material roadEdge;
 	protected Material junction;
 	protected List<String> aiNames;
 	protected static int cap = 30;
-	protected static int liveCap = 5;
-	protected static int spawnedCount = 0;
+	protected static volatile int liveCap = 5;
+	protected static volatile int spawnedCount = 0;
 	
 	public AbstractAISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;

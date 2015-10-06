@@ -21,14 +21,14 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	private NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 50l;
-	public static int minDistance = 25;
+	public static int minDistance = 30;
 	private int maxDistance = 70;
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
 		this.nodes = new NodesStore(nodesSaveFile);
 		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
-			main.config.set("general.ai.minSpawnDistanceFromPlayers", 25);
+			main.config.set("general.ai.minSpawnDistanceFromPlayers", 30);
 		}
 		minDistance = main.config.getInt("general.ai.minSpawnDistanceFromPlayers");
 		if(!main.config.contains("general.ai.maxSpawnDistanceFromPlayers")){
@@ -51,7 +51,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	}
 	
 	private boolean randomDoSpawn(){
-		return main.random.nextInt(3) < 1; //1/3 chance
+		return main.random.nextInt(4) < 1; //1/4 chance
 	}
 	
 	private int randomMinCarSpacing(){
@@ -65,7 +65,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 			@Override
-			public void run() { //TODO Scan for nodes async, but if bukkit doesn't like it then will do sync
+			public void run() {
 				if(!enabled){
 					return;
 				}

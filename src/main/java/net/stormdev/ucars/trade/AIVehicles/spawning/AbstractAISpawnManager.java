@@ -172,15 +172,19 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 	@Override
 	public void decrementSpawnedAICount() {
-		spawnedCount--;
-		if(spawnedCount < 0){
-			spawnedCount = 0;
+		synchronized(spawnedCount+""){
+			spawnedCount--;
+			if(spawnedCount < 0){
+				spawnedCount = 0;
+			}
 		}
 	}
 
 	@Override
 	public void incrementSpawnedAICount() {
-		spawnedCount++;
+		synchronized(spawnedCount+""){
+			spawnedCount++;
+		}
 	}
 
 	@Override

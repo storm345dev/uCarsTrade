@@ -1000,7 +1000,7 @@ public class UTradeListener implements Listener {
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
-		if((car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && car.getPassenger().hasMetadata("mta.copentity"))){
+		if((car.getPassenger() != null && car.getPassenger().getType().equals(EntityType.PLAYER)) || (car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && car.getPassenger().hasMetadata("mta.copentity"))){
 			return; //They punched the villager; don't take car health
 		}
 		CarHealthData health = ucars.listener.getCarHealthHandler(car);

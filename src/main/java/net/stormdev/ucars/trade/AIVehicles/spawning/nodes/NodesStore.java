@@ -253,9 +253,9 @@ public class NodesStore {
 		int chunkX = nodeChunk.getX();
 		int chunkZ = nodeChunk.getZ();
 		
-		//Generate the 7x7 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
-		for(int x = chunkX -7;x<=chunkX+7;x++){
-			for(int z = chunkZ -7;z<=chunkZ+7;z++){
+		//Generate the 6x6 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
+		for(int x = chunkX -6;x<=chunkX+7;x++){
+			for(int z = chunkZ -6;z<=chunkZ+7;z++){
 				ChunkCoord coord = new ChunkCoord(nodeWorld, x, z);
 				
 				List<Node> chunkNodes = new ArrayList<Node>();

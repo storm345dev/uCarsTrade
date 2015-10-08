@@ -41,7 +41,7 @@ public class ItemCarValidation {
 		int i = 0;
 		if(!Colors.strip((lore.get(i))).toLowerCase().contains("[speed:]")){
 			String firstLine = Colors.strip((lore.get(i))).toLowerCase();
-			if(firstLine.equalsIgnoreCase("plane")){
+			if(firstLine.equalsIgnoreCase("plane") || firstLine.equalsIgnoreCase("helicopter") || !firstLine.equalsIgnoreCase("car")){
 				return null;
 			}
 			else if(!firstLine.equalsIgnoreCase("car")){ //It doesn't say car...

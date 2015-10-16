@@ -84,7 +84,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					int chance = 53;
+					int chance = 60;
 					chance -= (activeNodes.size()*0.5d); //Make it more likely to spawn a car; the more nodes there are active
 					if(chance < 2){
 						chance = 2;
@@ -118,7 +118,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					chance = (int) ((nearCount*2.5) + 1);
+					chance = (int) ((nearCount*3.5) + 1);
 					if(!(main.random.nextInt(chance) <= 1)){ //Avoids LOTS of cars spawning where there's LOTS of players
 						continue;
 					}

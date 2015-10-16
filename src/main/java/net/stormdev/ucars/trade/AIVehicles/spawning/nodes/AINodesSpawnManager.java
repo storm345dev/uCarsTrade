@@ -51,7 +51,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	}
 	
 	private boolean randomDoSpawn(){
-		return main.random.nextInt(8) < 1; //1/8 chance
+		return main.random.nextInt(7) < 1; //1/7 chance
 	}
 	
 	private int randomMinCarSpacing(){
@@ -85,7 +85,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					
 					int chance = 50;
-					chance -= (activeNodes.size()*0.3d); //Make it more likely to spawn a car; the more nodes there are active
+					chance -= (activeNodes.size()*0.4d); //Make it more likely to spawn a car; the more nodes there are active
 					if(chance < 2){
 						chance = 2;
 					}

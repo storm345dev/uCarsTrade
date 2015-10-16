@@ -84,7 +84,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					int chance = 50;
+					int chance = 45;
 					chance -= (activeNodes.size()*0.4d); //Make it more likely to spawn a car; the more nodes there are active
 					if(chance < 2){
 						chance = 2;

@@ -119,7 +119,10 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					
 					chance = (int) ((nearCount*2.3) + 1);
-					if(!(main.random.nextInt(chance) <= 1)){ //Avoids LOTS of cars spawning where there's LOTS of players
+					if(chance < 50){
+						chance = 50;
+					}
+					if(!(main.random.nextInt(100) <= chance)){ //Avoids LOTS of cars spawning where there's LOTS of players
 						continue;
 					}
 					

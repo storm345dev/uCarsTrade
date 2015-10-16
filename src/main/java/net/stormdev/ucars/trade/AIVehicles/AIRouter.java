@@ -257,11 +257,11 @@ public class AIRouter {
 		}
 		
 		final VelocityData vd = data;
+		final List<Entity> es = car.getWorld().getEntities();
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override
 			public void run() {
-				List<Entity> es = car.getWorld().getEntities();
 				Vector carLoc = car.getLocation().toVector();
 				boolean nearbyCars = false;
 				for(Entity e:es){

@@ -20,7 +20,7 @@ import com.useful.ucarsCommon.StatValue;
 
 public class CarPlaceAPI {
 	public static Minecart placeCar(DrivenCar carData, Location placeLoc, Player placer, float direction){
-		Location loc = placeLoc.clone().add(0, 1.5, 0);
+		Location loc = placeLoc.clone().add(0, 1.6, 0);
 		loc.setYaw(direction + 270);
 		Block in = loc.getBlock();
 		final Minecart car = (Minecart) placeLoc.getWorld().spawnEntity(loc, EntityType.MINECART);

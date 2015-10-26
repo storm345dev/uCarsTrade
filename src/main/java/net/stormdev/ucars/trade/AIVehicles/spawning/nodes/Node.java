@@ -51,16 +51,23 @@ public class Node implements Serializable {
 	}
 	
 	public boolean isRoomForCarToSpawn(){ //Checks if there is room for a car to spawn
+		if(this.carSafeToSpawn){
+			return true;
+		}
 		Block block = getLocation().getBlock();
 		
 		for(int i=1;i<=3;i++){
 			Block relative = block.getRelative(BlockFace.UP, i);
 			if(relative.isEmpty() || relative.isLiquid()){
+				this.carSafeToSpawn = true;
 				return true;
 			}
 		}
 		return false;
 	}
+	
+	private transient BlockFace savedDir = null;
+	private transient boolean carSafeToSpawn = false;
 	
 	public void spawnAICarIfLogicalToDoSo(){
 		if((System.currentTimeMillis() - lastSpawnTime) < 2500){ //2.5 second cooldown
@@ -73,7 +80,7 @@ public class Node implements Serializable {
 			return;
 		}
 		
-		final BlockFace carriagewayDir = AITrackFollow.carriagewayDirection(tracker);
+		final BlockFace carriagewayDir = savedDir == null ? AITrackFollow.carriagewayDirection(tracker) : savedDir;
 		
 		if(carriagewayDir != null){
 			lastSpawnTime = System.currentTimeMillis();

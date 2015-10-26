@@ -82,8 +82,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					if(newCap > cap){
 						newCap = cap;
 					}
-					if(newCap < 2){
-						newCap = 2; //Min of 2
+					if(newCap < 10){
+						newCap = 10; //Min of 2
 					}
 					liveCap = newCap;
 				}

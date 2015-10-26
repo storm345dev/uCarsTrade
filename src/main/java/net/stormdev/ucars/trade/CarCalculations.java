@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Minecart;
 import org.bukkit.util.Vector;
 
@@ -38,7 +37,7 @@ public class CarCalculations {
 	}
 	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
 		UUID id = cart.getUniqueId();
-		DrivenCar car = main.plugin.carSaver.getCarInUse(id);
+		DrivenCar car = main.plugin.carSaver.getCarInUse(cart);
 		if(car == null){
 			return current;
 		}
@@ -55,7 +54,7 @@ public class CarCalculations {
 		return current;
 	}
 	public Boolean isAuCar(Minecart car){
-		if(main.plugin.carSaver.isAUCar(car.getUniqueId())){
+		if(main.plugin.carSaver.isAUCar(car)){
 			return true;
 		}
 		if(car.hasMetadata("kart.racing")){

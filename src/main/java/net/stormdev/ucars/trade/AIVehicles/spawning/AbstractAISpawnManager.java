@@ -104,7 +104,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						if(!cart.hasMetadata("trade.npc")){
 							continue;
 						}
-						final DrivenCar c = main.plugin.carSaver.getCarInUse(cart.getUniqueId());
+						final DrivenCar c = main.plugin.carSaver.getCarInUse(cart);
 						if(c == null){
 							continue;
 						}
@@ -172,19 +172,33 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 	@Override
 	public void decrementSpawnedAICount() {
-		synchronized(spawnedCount+""){
-			spawnedCount--;
-			if(spawnedCount < 0){
-				spawnedCount = 0;
-			}
-		}
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				synchronized(spawnedCount+""){
+					spawnedCount--;
+					if(spawnedCount < 0){
+						spawnedCount = 0;
+					}
+				}
+				return;
+			}});
+		
 	}
 
 	@Override
 	public void incrementSpawnedAICount() {
-		synchronized(spawnedCount+""){
-			spawnedCount++;
-		}
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				synchronized(spawnedCount+""){
+					spawnedCount++;
+				}
+				return;
+			}});
+		
 	}
 
 	@Override
@@ -281,7 +295,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					@Override
 					public void run() {
 						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
-							plugin.carSaver.carNowInUse(c);
+							plugin.carSaver.carNowInUse(m, c);
 							incrementSpawnedAICount();
 						}
 						return;

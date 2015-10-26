@@ -14,43 +14,46 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.useful.ucarsCommon.StatValue;
+
 public class CarSaver {
+	private static final String META = "car.drivenCarMeta";
 	private volatile Map<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
-	private volatile Map<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();
+	/*private volatile Map<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();*/
 	
 	File newSaveFile = null;
 	public CarSaver(File newSaveFile){
 		this.newSaveFile = newSaveFile;
 	}
 	
-	public boolean isAUCar(UUID carId){
-		if(cacheSize()){
-			if(cache.containsKey(carId)){
-				return true;
-			}
+	public boolean isAUCar(Vehicle v){
+		if(v.hasMetadata(META)){
+			return true;
 		}
+		return inUse.containsKey(v.getUniqueId());
+	}
+	
+	public boolean isAUCarWithEntityID(UUID carId){
 		return inUse.containsKey(carId);
 	}
 	
-	public DrivenCar getCarInUse(UUID carId){
-		if(cacheSize()){
-			DrivenCar dc = cache.get(carId);
-			if(dc != null){
-				return dc;
+	public DrivenCar getCarInUse(Entity cart){
+		if(cart.hasMetadata(META)){
+			try {
+				return (DrivenCar) cart.getMetadata(META).get(0).value();
+			} catch (Exception e) {
+				cart.removeMetadata(META, main.plugin);
 			}
 		}
-		return inUse.get(carId);
+		return inUse.get(cart.getUniqueId());
 	}
 	
-	private boolean cacheSize(){
-		synchronized(CarSaver.this){
-			while(cache.size() > main.plugin.carCache){
-				cache.remove(cache.keySet().toArray(new UUID[]{})[0]);
-			}
-			return inUse.size() > cache.size();
-		}
+	public DrivenCar getCarInUseWithEntityID(UUID carId){
+		return inUse.get(carId);
 	}
 	
 	public void carNoLongerInUse(final DrivenCar car){
@@ -63,9 +66,7 @@ public class CarSaver {
 						throw new RuntimeException("DrivenCar is null!");
 					}
 					inUse.remove(car.getId());
-					cache.remove(car.getId());
 					asyncSave();
-					cacheSize();
 				}
 				return;
 			}});
@@ -78,30 +79,22 @@ public class CarSaver {
 			public void run() {
 				synchronized(CarSaver.this){
 					inUse.remove(id);
-					cache.remove(id);
 					asyncSave();
-					cacheSize();
 				}
 				return;
 			}});	
 	}
 	
 	public void carNoLongerInUseNow(final UUID id){
-		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-
-			@Override
-			public void run() {
-				synchronized(CarSaver.this){
-					inUse.remove(id);
-					cache.remove(id);
-					save();
-					cacheSize();
-				}
-				return;
-			}});
+		synchronized(CarSaver.this){
+			inUse.remove(id);
+			save();
+		}
 	}
 	
-	public void carNowInUse(final DrivenCar car){
+	public void carNowInUse(final Vehicle v, final DrivenCar car){
+		v.removeMetadata(META, main.plugin);
+		v.setMetadata(META, new StatValue(car, main.plugin));
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override
@@ -111,9 +104,24 @@ public class CarSaver {
 				}
 				synchronized(CarSaver.this){
 					inUse.put(car.getId(), car);
-					cache.put(car.getId(), car);
 					asyncSave();
-					cacheSize();
+				}
+				return;
+			}});
+		
+	}
+	
+	public void carNowInUseNoEntity(final DrivenCar car){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				if(car == null || car.getId() == null){
+					throw new RuntimeException("DrivenCar is null!");
+				}
+				synchronized(CarSaver.this){
+					inUse.put(car.getId(), car);
+					asyncSave();
 				}
 				return;
 			}});
@@ -148,7 +156,6 @@ public class CarSaver {
 		if(this.inUse == null){
 			this.inUse = new ConcurrentHashMap<UUID, DrivenCar>();
 		}
-		cacheSize();
 	}
 	public void save(){
 		asyncSave();

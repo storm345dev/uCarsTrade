@@ -47,7 +47,6 @@ import org.bukkit.entity.Boat;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -63,7 +62,6 @@ import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -134,14 +132,14 @@ public class UTradeListener implements Listener {
 				player.getVehicle().eject();
 			}
 		}
-		plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){ //TODO
+		plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
 			public void run() {
 				c.setNPC(false);
 				vehicle.removeMetadata("trade.npc", plugin);
 				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
 				plugin.getServer().getPluginManager().callEvent(evt);
-				plugin.carSaver.carNowInUse(c); //Update changes to car, aka it's not an npc
+				plugin.carSaver.carNowInUse(vehicle, c); //Update changes to car, aka it's not an npc
 				if(setPassenger){
 					vehicle.setPassenger(player);
 				}
@@ -198,13 +196,13 @@ public class UTradeListener implements Listener {
 	void respawn(uCarRespawnEvent event){
 		UUID old = event.getOldEntityId();
 		UUID newId = event.getNewEntityId();
-		DrivenCar d = plugin.carSaver.getCarInUse(old);
+		DrivenCar d = plugin.carSaver.getCarInUseWithEntityID(old);
 		if(d == null){
 			return;
 		}
 		d.setId(newId);
 		plugin.carSaver.carNoLongerInUse(old);
-		plugin.carSaver.carNowInUse(d);
+		plugin.carSaver.carNowInUse(event.getNewCar(), d);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST) //Get called first
@@ -224,7 +222,7 @@ public class UTradeListener implements Listener {
 		
 		if(cart.hasMetadata("trade.npc")){
 			
-			final DrivenCar c = plugin.carSaver.getCarInUse(cart.getUniqueId());
+			final DrivenCar c = plugin.carSaver.getCarInUse(cart);
 			if(c == null){
 				return;
 			}
@@ -248,7 +246,7 @@ public class UTradeListener implements Listener {
 				return;
 			}
 			final Minecart m = (Minecart) v;
-			final DrivenCar c = plugin.carSaver.getCarInUse(m.getUniqueId());
+			final DrivenCar c = plugin.carSaver.getCarInUse(m);
 			if(c == null
 					|| !c.isNPC()){
 				return; //Not a car or not an npc car
@@ -263,7 +261,7 @@ public class UTradeListener implements Listener {
 							//No longer an NPC car
 							m.removeMetadata("trade.npc", main.plugin);
 							c.setNPC(false);
-							plugin.carSaver.carNowInUse(c);
+							plugin.carSaver.carNowInUse(m, c);
 						}
 						return;
 					}}, 2l);				
@@ -905,7 +903,7 @@ public class UTradeListener implements Listener {
 			event.setDroppedExp(0);
 			event.getDrops().clear();
 			if(e instanceof Villager && v.hasMetadata("trade.npc")){ //Handle as if car is stolen
-				final DrivenCar c = plugin.carSaver.getCarInUse(v.getUniqueId());
+				final DrivenCar c = plugin.carSaver.getCarInUse(v);
 				if(c == null || !(v instanceof Minecart)){
 					return;
 				}
@@ -914,7 +912,7 @@ public class UTradeListener implements Listener {
 				if(!(e.getLastDamageCause() instanceof EntityDamageByEntityEvent)){
 					c.setNPC(false);
 					m.removeMetadata("trade.npc", main.plugin);
-					plugin.carSaver.carNowInUse(c);
+					plugin.carSaver.carNowInUse(m, c);
 					return;
 				}
 				EntityDamageByEntityEvent ev = (EntityDamageByEntityEvent) e.getLastDamageCause();
@@ -928,7 +926,7 @@ public class UTradeListener implements Listener {
 				if(!(damager instanceof Player)){
 					c.setNPC(false);
 					m.removeMetadata("trade.npc", main.plugin);
-					plugin.carSaver.carNowInUse(c);
+					plugin.carSaver.carNowInUse(m, c);
 					return;
 				}
 				final Player player = (Player) damager;
@@ -1159,7 +1157,7 @@ public class UTradeListener implements Listener {
 			event.getPlayer().getInventory().setItemInHand(placed);
 		event.setCancelled(true);
 		c.setId(car.getUniqueId());
-		plugin.carSaver.carNowInUse(c);
+		plugin.carSaver.carNowInUse(car, c);
 		String name = c.getName();
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
@@ -1179,7 +1177,7 @@ public class UTradeListener implements Listener {
 			return; //Don't damage the car
 		}
 		UUID id = cart.getUniqueId();
-		DrivenCar car = plugin.carSaver.getCarInUse(id);
+		DrivenCar car = plugin.carSaver.getCarInUse(cart);
 		if(car == null){
 			cart.remove(); //Stop invalid cars from keeping on driving
 			return;
@@ -1207,7 +1205,7 @@ public class UTradeListener implements Listener {
 			return; //Don't destroy the car
 		}
 		UUID id = cart.getUniqueId();
-		DrivenCar car = plugin.carSaver.getCarInUse(id);
+		DrivenCar car = plugin.carSaver.getCarInUse(cart);
 		if(car == null){
 			cart.remove(); //IDK
 			return;

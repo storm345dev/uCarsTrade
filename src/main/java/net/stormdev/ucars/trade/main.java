@@ -39,6 +39,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
@@ -465,8 +466,8 @@ public class main extends JavaPlugin {
 			for(World w:Bukkit.getWorlds()){
 				for(Entity e:new ArrayList<Entity>(w.getEntities())){
 					try {
-						if(e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
-							final DrivenCar c = plugin.carSaver.getCarInUse(e.getUniqueId());
+						if(e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc") && e instanceof Vehicle){
+							final DrivenCar c = plugin.carSaver.getCarInUse((Vehicle) e);
 							if(c == null
 									|| !c.isNPC()){
 								continue; //Not a car or not an npc car

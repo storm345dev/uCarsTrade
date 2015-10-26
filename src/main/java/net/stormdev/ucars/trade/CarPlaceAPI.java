@@ -71,7 +71,7 @@ public class CarPlaceAPI {
 		 */
 		car.setMetadata("trade.car", new StatValue(true, main.plugin));
 		carData.setId(car.getUniqueId());
-		main.plugin.carSaver.carNowInUse(carData);
+		main.plugin.carSaver.carNowInUse(car, carData);
 		String name = carData.getName();
 		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
 		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");

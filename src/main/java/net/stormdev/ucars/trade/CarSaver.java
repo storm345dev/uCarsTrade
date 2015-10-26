@@ -6,16 +6,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class CarSaver {
-	private volatile ConcurrentHashMap<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
-	private volatile ConcurrentHashMap<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();
+	private volatile Map<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
+	private volatile Map<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();
 	
 	File newSaveFile = null;
 	public CarSaver(File newSaveFile){
@@ -42,44 +45,79 @@ public class CarSaver {
 	}
 	
 	private boolean cacheSize(){
-		while(cache.size() > main.plugin.carCache){
-			cache.remove(cache.keySet().toArray(new UUID[]{})[0]);
+		synchronized(CarSaver.this){
+			while(cache.size() > main.plugin.carCache){
+				cache.remove(cache.keySet().toArray(new UUID[]{})[0]);
+			}
+			return inUse.size() > cache.size();
 		}
-		return inUse.size() > cache.size();
 	}
 	
-	public void carNoLongerInUse(DrivenCar car){
-		if(car == null || car.getId() == null){
-			throw new RuntimeException("DrivenCar is null!");
-		}
-		inUse.remove(car.getId());
-		cache.remove(car.getId());
-		asyncSave();
-		cacheSize();
+	public void carNoLongerInUse(final DrivenCar car){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				synchronized(CarSaver.this){
+					if(car == null || car.getId() == null){
+						throw new RuntimeException("DrivenCar is null!");
+					}
+					inUse.remove(car.getId());
+					cache.remove(car.getId());
+					asyncSave();
+					cacheSize();
+				}
+				return;
+			}});
 	}
 	
-	public void carNoLongerInUse(UUID id){
-		inUse.remove(id);
-		cache.remove(id);
-		asyncSave();
-		cacheSize();
+	public void carNoLongerInUse(final UUID id){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				synchronized(CarSaver.this){
+					inUse.remove(id);
+					cache.remove(id);
+					asyncSave();
+					cacheSize();
+				}
+				return;
+			}});	
 	}
 	
-	public void carNoLongerInUseNow(UUID id){
-		inUse.remove(id);
-		cache.remove(id);
-		save();
-		cacheSize();
+	public void carNoLongerInUseNow(final UUID id){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				synchronized(CarSaver.this){
+					inUse.remove(id);
+					cache.remove(id);
+					save();
+					cacheSize();
+				}
+				return;
+			}});
 	}
 	
-	public void carNowInUse(DrivenCar car){
-		if(car == null || car.getId() == null){
-			throw new RuntimeException("DrivenCar is null!");
-		}
-		inUse.put(car.getId(), car);
-		cache.put(car.getId(), car);
-		asyncSave();
-		cacheSize();
+	public void carNowInUse(final DrivenCar car){
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				if(car == null || car.getId() == null){
+					throw new RuntimeException("DrivenCar is null!");
+				}
+				synchronized(CarSaver.this){
+					inUse.put(car.getId(), car);
+					cache.put(car.getId(), car);
+					asyncSave();
+					cacheSize();
+				}
+				return;
+			}});
+		
 	}
 	
 	public void asyncSave(){
@@ -125,7 +163,7 @@ public class CarSaver {
 		}
 		saveHashMap(inUse, this.newSaveFile.getAbsolutePath());
 	}
-	public static void saveHashMap(ConcurrentHashMap<UUID, DrivenCar> map, String path)
+	public static void saveHashMap(Map<UUID, DrivenCar> map, String path)
 	{
 		try
 		{
@@ -141,7 +179,7 @@ public class CarSaver {
 		}
 	}
 	@SuppressWarnings("unchecked")
-	public static ConcurrentHashMap<UUID, DrivenCar> loadHashMap(String path)
+	public static Map<UUID, DrivenCar> loadHashMap(String path)
 	{
 		try
 		{
@@ -158,13 +196,19 @@ public class CarSaver {
 					//CLear invalid file
 				}
 				ois.close();
-				result = new ConcurrentHashMap<UUID, DrivenCar>();
+				result = new HashMap<UUID, DrivenCar>();
 			}
 	        ois.close();
 			try {
-				return (ConcurrentHashMap<UUID, DrivenCar>) result;
+				Map<UUID, DrivenCar> res = (Map<UUID, DrivenCar>) result;
+				if(res instanceof ConcurrentHashMap){
+					Map<UUID, DrivenCar> r = res;
+					res = new HashMap<UUID, DrivenCar>();
+					res.putAll(r);
+				}
+				return res;
 			} catch (Exception e) {
-				return new ConcurrentHashMap<UUID, DrivenCar>();
+				return new HashMap<UUID, DrivenCar>();
 			}
 		}
 		catch(Exception e)

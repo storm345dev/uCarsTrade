@@ -214,23 +214,23 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 	@Override
 	public void spawnNPCCar(Location spawn, final BlockFace carriagewayDir) {
 		spawn = spawn.add(0.5, 0, 0.5);
+		Location dirLoc = new Location(spawn.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
+		dirLoc.setDirection(new Vector(carriagewayDir.getModX(), 0, carriagewayDir.getModZ()).normalize());
+		
+		float yaw = dirLoc.getYaw() + 90;
+		while(yaw < 0){
+			yaw = 360 + yaw;
+		}
+		while(yaw >= 360){
+			yaw = yaw - 360;
+		}
+		spawn.setYaw(yaw);
+		final float ya = yaw;
 		final Location spawnLoc = spawn;
 		final DrivenCar c = CarGenerator.gen().setNPC(true);
 		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO THIS is what is creating the lag
 
-			public void run() {
-				Location dirLoc = new Location(spawnLoc.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
-				dirLoc.setDirection(new Vector(carriagewayDir.getModX(), 0, carriagewayDir.getModZ()).normalize());
-				
-				float yaw = dirLoc.getYaw() + 90;
-				while(yaw < 0){
-					yaw = 360 + yaw;
-				}
-				while(yaw >= 360){
-					yaw = yaw - 360;
-				}
-				spawnLoc.setYaw(yaw);
-				
+			public void run() {				
 				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
 				List<Player> nearbyPlayersList = new ArrayList<Player>();
 				if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
@@ -271,7 +271,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				c.setId(m.getUniqueId());
 				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
 				
-				CartOrientationUtil.setYaw(m, yaw);
+				CartOrientationUtil.setYaw(m, ya);
 				/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 				p.setEntityID(m.getEntityId());
 				p.setYaw(yaw);

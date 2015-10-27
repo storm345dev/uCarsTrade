@@ -106,7 +106,11 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				
-				BlockFace dir = AITrackFollow.carriagewayDirection(target);
+				BlockFace dir = AITrackFollow.carriagewayDirection(target).getDirection();
+				if(dir == null){
+					sender.sendMessage(ChatColor.GREEN+"Road direction: Continue");
+					return true;
+				}
 				sender.sendMessage(ChatColor.GREEN+"Road direction: "+dir+" ("+dir.getModX()+","+dir.getModZ()+")");
 				return true;
 			}
@@ -150,7 +154,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					sender.sendMessage(ChatColor.RED+"You need to stand above the road tracker block!!");
 					return true;
 				}
-				BlockFace dir = AITrackFollow.carriagewayDirection(under);
+				BlockFace dir = AITrackFollow.carriagewayDirection(under).getDirection();
 				if(dir == null){
 					sender.sendMessage(ChatColor.RED+"Cannot spawn car where there is no determinable direction!");
 					return true;

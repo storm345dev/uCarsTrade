@@ -343,7 +343,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				int distance = randomDistanceAmount();
 				while(distance > 0){
 					//Need to follow the road
-					TrackingData data = AITrackFollow.nextBlock(current, followDir, junction, null, false);
+					TrackingData data = AITrackFollow.nextBlock(current, new VelocityData(followDir, new Vector(0,0,0)), AITrackFollow.carriagewayDirection(current), null);
 					
 					current = data.nextBlock;
 					followDir = data.dir;
@@ -364,7 +364,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					}
 				}
 				BlockFace carDirection = followDir;
-				carDirection = AITrackFollow.carriagewayDirection(current);
+				carDirection = AITrackFollow.carriagewayDirection(current).getDirection();
 				if(carDirection == null){
 					//Not a valid road structure
 					return;

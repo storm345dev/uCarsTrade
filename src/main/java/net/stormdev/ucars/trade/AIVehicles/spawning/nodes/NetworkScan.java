@@ -321,7 +321,7 @@ public class NetworkScan {
 
 				@Override
 				public BlockFace call() throws Exception {
-					return AITrackFollow.carriagewayDirection(block);
+					return AITrackFollow.carriagewayDirection(block).getDirection();
 				}});
 			BlockFace dir = null;
 			try {

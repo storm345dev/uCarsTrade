@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import net.milkbowl.vault.economy.Economy;
 import net.stormdev.ucars.shops.CarShop;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteMethod;
 import net.stormdev.ucars.trade.AIVehicles.spawning.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.AIWorldProbingSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
@@ -79,6 +80,7 @@ public class main extends JavaPlugin {
 	public BukkitTask lagReducer = null;
 	public int carCache = 20;
 	public SpawnMethod aiSpawnMethod = SpawnMethod.WORLD_PROBE;
+	public RouteMethod aiRouteMethod = RouteMethod.ORE;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -242,6 +244,12 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.enable")) {
 				config.set("general.ai.enable", false);
 			}
+        	if (!config.contains("general.ai.routing")) {
+				config.set("general.ai.routing", RouteMethod.ORE.name());
+			}
+        	else {
+        		this.aiRouteMethod = RouteMethod.valueOf(config.getString("general.ai.routing"));
+        	}
         	if (!config.contains("general.ai.trackerBlock.a")) {
 				config.set("general.ai.trackerBlock.a", "DIAMOND_ORE");
 			}

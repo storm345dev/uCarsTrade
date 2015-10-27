@@ -1,6 +1,9 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.trade.AIVehicles.routing.BlockRouteData;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteBlockType;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteDecoder;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -36,7 +39,15 @@ public class AITrackFollow {
 		return null;
 	}
 	
-	public static BlockFace carriagewayDirection(Block roadSpawnBlock){
+	public static BlockRouteData carriagewayDirection(Block roadSpawnBlock){
+		if(AIRouter.isEncodedRouting()){
+			return RouteDecoder.getDirection(roadSpawnBlock.getType(), roadSpawnBlock.getData());
+		}
+		
+		if(roadSpawnBlock.getType().equals(AIRouter.junction)){
+			return new BlockRouteData(RouteBlockType.JUNCTION, null);
+		}
+		
 		String currentType = AIRouter.getTrackBlockType(roadSpawnBlock.getType());
 		if(currentType != null){
 			int currentPos = AIRouter.getTrackBlockIndexByType(currentType);
@@ -51,10 +62,10 @@ public class AITrackFollow {
 					String top = s.getLine(0);
 					if(top != null && top.length() > 0){
 						try {
-							return BlockFace.valueOf(top);
+							return new BlockRouteData(RouteBlockType.DIRECTIONAL, BlockFace.valueOf(top));
 						} catch (Exception e) {
 							if(top.equalsIgnoreCase("NONE") || top.equalsIgnoreCase("NULL")){
-								return null;
+								return new BlockRouteData(RouteBlockType.CONTINUE, null);
 							}
 							//Not a road related sign
 						}
@@ -68,7 +79,7 @@ public class AITrackFollow {
 					}
 					int pos = AIRouter.getTrackBlockIndexByType(type);
 					if(pos == nextPos && pos != currentPos){
-						return pDir;
+						return new BlockRouteData(RouteBlockType.DIRECTIONAL, pDir);
 					}
 				}
 				for(BlockFace pDir: AITrackFollow.diagonalDirs()){
@@ -79,7 +90,7 @@ public class AITrackFollow {
 					}
 					int pos = AIRouter.getTrackBlockIndexByType(type);
 					if(pos == nextPos && pos != currentPos){
-						return pDir;
+						return new BlockRouteData(RouteBlockType.DIRECTIONAL, pDir);
 					}
 				}
 			}
@@ -151,17 +162,68 @@ public class AITrackFollow {
 			return null;
 		}
 		
-		return dir;
+		return new BlockRouteData(RouteBlockType.DIRECTIONAL, dir);
 	}
 	
-	public static TrackingData nextBlock(Block current, BlockFace dir, Material junctionBlock, Entity vehicle, boolean atJ){ //TODO WTf why doesn't this listen to dir signs, etc...
+	public static TrackingData nextBlock(Block current, VelocityData vd, BlockRouteData routeData, Entity vehicle){ //TODO WTf why doesn't this listen to dir signs, etc...
+		BlockFace dir = routeData.getDirection() != null ? routeData.getDirection() : vd.getDir();
+		
+		if(AIRouter.isEncodedRouting()){
+			//arg0 = block to drive to next
+			//arg1 = direction of new block
+			//arg2 = is next block a junction
+			if(!routeData.isJunction() || vd.isInProgressOfTurningAtJunction()){
+				Block cr = current.getRelative(dir);
+				BlockRouteData brd = carriagewayDirection(cr);
+				if(brd.getType() == null){
+					cr = cr.getRelative(BlockFace.UP);
+					brd = carriagewayDirection(cr);
+					if(brd.getType() == null){
+						cr = cr.getRelative(BlockFace.DOWN, 2);
+						brd = carriagewayDirection(cr);
+						if(brd.getType() == null){ //No road beyond here
+							return new TrackingData(current, dir, routeData.isJunction());
+						}
+					}
+				}
+				return new TrackingData(cr, dir, brd.isJunction());
+			}
+			//At a junction
+			BlockFace leftCheck = nextLeftFace(dir);
+			BlockFace rightCheck = nextRightFace(dir);
+			BlockFace behind = dir.getOppositeFace();
+			while(!leftCheck.equals(behind) && !rightCheck.equals(behind)){
+				Block left = current.getRelative(leftCheck);
+				Block right = current.getRelative(rightCheck);
+				
+				//Check right first
+				BlockRouteData brd = carriagewayDirection(right);
+				if(brd.getType()!=null){
+					vd.setInProgressOfTurningAtJunction(true);
+					return new TrackingData(right, rightCheck, 
+							true);
+				}
+				
+				//Then check left
+				brd = carriagewayDirection(left);
+				if(brd.getType()!=null){
+					vd.setInProgressOfTurningAtJunction(true);
+					return new TrackingData(left, leftCheck, 
+							true);
+				}
+			}
+			
+			return new TrackingData(current.getRelative(dir), dir, false); 
+		}		
+		
 		Block cr = current.getRelative(dir);
-		TrackBlock ch = checkIfTracker(current, cr, junctionBlock);
+		
+		TrackBlock ch = checkIfOreTracker(current, cr);
 		boolean turn = false;
 		if(ch != null){
 			Block check = ch.block;
 			if(check != null){
-				if(/*ch.junction*/atJ && main.random.nextBoolean()
+				if(/*ch.junction*/routeData.isJunction() && main.random.nextBoolean()
 						&& (vehicle != null && !vehicle.hasMetadata("npc.turning"))){
 					turn = true;
 					/*return new TrackingData(check, dir, true); //TODO Maybe don't handle junction turns before we even get there...
@@ -170,7 +232,7 @@ public class AITrackFollow {
 					if(vehicle != null){
 						vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
 					}
-					return new TrackingData(check, dir, false, ch.junction);
+					return new TrackingData(check, dir, ch.junction);
 				}
 			}
 		}
@@ -184,8 +246,8 @@ public class AITrackFollow {
 		while(!leftCheck.equals(behind) && !rightCheck.equals(behind)){
 			Block lb = current.getRelative(leftCheck);
 			Block rb = current.getRelative(rightCheck);
-			TrackBlock clb = checkIfTracker(current, lb, junctionBlock);
-			TrackBlock crb = checkIfTracker(current, rb, junctionBlock);
+			TrackBlock clb = checkIfOreTracker(current, lb);
+			TrackBlock crb = checkIfOreTracker(current, rb);
 			//Check right first
 			if(crb != null) {
 				if(vehicle != null){
@@ -199,7 +261,7 @@ public class AITrackFollow {
 					}
 				}
 				return new TrackingData(crb.block, rightCheck, 
-						crb.junction, chJ);
+						chJ);
 			}
 			else if(clb != null){
 				if(vehicle != null){
@@ -213,7 +275,7 @@ public class AITrackFollow {
 					}
 				}
 				TrackingData res = new TrackingData(clb.block, leftCheck, 
-						clb.junction, chJ);
+						chJ);
 				return res;
 			}
 			//Didn't find a block to follow on
@@ -221,9 +283,10 @@ public class AITrackFollow {
 			rightCheck = nextRightFace(rightCheck);
 		}
 		
-		return new TrackingData(current, dir, false, chJ); //Where we came from isnt road, stay where we are
+		return new TrackingData(current, dir, chJ); //Where we came from isnt road, stay where we are
 	}
-	public static TrackBlock checkIfTracker(Block current, Block check, Material junction){
+	public static TrackBlock checkIfOreTracker(Block current, Block check){
+		Material junction = AIRouter.junction;
 		if(AIRouter.isTrackBlock(check.getType())){
 			current = check;
 			return new TrackBlock(current, false);
@@ -269,6 +332,19 @@ public class AITrackFollow {
 				|| dir.equals(BlockFace.SOUTH_EAST)
 				|| dir.equals(BlockFace.SOUTH_WEST)
 				|| dir.equals(BlockFace.NORTH_WEST);
+	}
+	
+	public static BlockFace[] allDirs(){ //used for iterating over dirs for pattern matching
+		return new BlockFace[]{
+				BlockFace.NORTH,
+				BlockFace.NORTH_EAST,
+				BlockFace.EAST,
+				BlockFace.SOUTH_EAST,
+				BlockFace.SOUTH,
+				BlockFace.SOUTH_WEST,
+				BlockFace.WEST,
+				BlockFace.NORTH_WEST
+		};
 	}
 	
 	public static BlockFace[] compassDirs(){ //used for iterating over dirs for pattern matching

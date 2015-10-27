@@ -47,7 +47,10 @@ public class Node implements Serializable {
 	}
 	
 	public BlockFace getCarriagewayDirection(){
-		return AITrackFollow.carriagewayDirection(getLocation().getBlock());
+		if(savedDir == null){
+			savedDir = AITrackFollow.carriagewayDirection(getLocation().getBlock()).getDirection();
+		}
+		return savedDir;
 	}
 	
 	public boolean isRoomForCarToSpawn(){ //Checks if there is room for a car to spawn
@@ -80,7 +83,7 @@ public class Node implements Serializable {
 			return;
 		}
 		
-		final BlockFace carriagewayDir = savedDir == null ? AITrackFollow.carriagewayDirection(tracker) : savedDir;
+		final BlockFace carriagewayDir = getCarriagewayDirection();
 		
 		if(carriagewayDir != null){
 			lastSpawnTime = System.currentTimeMillis();

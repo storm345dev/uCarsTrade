@@ -82,8 +82,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					if(newCap > cap){
 						newCap = cap;
 					}
-					if(newCap < 10){
-						newCap = 10; //Min of 2
+					if(newCap < 1){
+						newCap = 1; //Min of 1
 					}
 					liveCap = newCap;
 				}
@@ -228,76 +228,103 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 		final float ya = yaw;
 		final Location spawnLoc = spawn;
 		final DrivenCar c = CarGenerator.gen().setNPC(true);
-		plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO THIS is what is creating the lag
+		
+		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
-			public void run() {				
-				final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
-				List<Player> nearbyPlayersList = new ArrayList<Player>();
+			@Override
+			public void run() {
+				List<Player> nearbyPlayers = new ArrayList<Player>();
+				List<Entity> all;
+				final List<Entity> nearby = new ArrayList<Entity>();
 				if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
-					List<Entity> es = m.getNearbyEntities(2, 2, 2);
-					for(Entity e:es){
-						if(e.getType() == EntityType.MINECART){
-							m.remove();
-							return; //Already a car in close proximity
-						}
-					}
-					List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 50, AIRouter.PLAYER_RADIUS));
-					for(Entity e:new ArrayList<Entity>(nearby)){
-						if(e.getType() != EntityType.MINECART){
-							nearby.remove(e);
-						}
-						else if(e instanceof Player){
-							nearbyPlayersList.add((Player) e);
-						}
-					}
-					if(nearby.size() > 2){
-						//Too many in area
-						m.remove();
+					try {
+						all = new ArrayList<Entity>(spawnLoc.getWorld().getEntities());
+					} catch (Exception e1) {
 						return;
 					}
-				}
-				//It's valid
-				final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
-				v.setMetadata("trade.npcvillager", new StatValue(true, main.plugin));
-				v.setAdult();
-				v.setBreed(false);
-				v.setAgeLock(true);
-				v.setCanPickupItems(false);
-				v.setCustomName(randomName());
-				v.setCustomNameVisible(true);
-				m.setPassenger(v);
-			
-				//Make it a car
-				c.setId(m.getUniqueId());
-				m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
-				
-				CartOrientationUtil.setYaw(m, ya);
-				/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
-				p.setEntityID(m.getEntityId());
-				p.setYaw(yaw);
-				p.setPitch(m.getLocation().getPitch());
-				for(Player player:nearbyPlayersList){
-					p.sendPacket(player);
-				}*/
-				
-				CarPreset cp = c.getPreset();
-				if(cp != null && cp.hasDisplayBlock()){
-					m.setDisplayBlock(cp.getDisplayBlock());
-					m.setDisplayBlockOffset(cp.getDisplayBlockOffset());
-				}
-				else if(c.getBaseDisplayBlock() != null){
-					m.setDisplayBlock(c.getBaseDisplayBlock());
-				}
-				
-				ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
-				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-
-					@Override
-					public void run() {
-						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
-							plugin.carSaver.carNowInUse(m, c);
-							incrementSpawnedAICount();
+					
+					Vector loc = spawnLoc.toVector().clone();
+					for(Entity e:all){
+						Vector pLoc = e.getLocation().toVector();
+						double dist = pLoc.distanceSquared(loc);
+						if(dist < 2 && e instanceof Minecart){
+							nearby.add(e);
 						}
+						if(dist < AIRouter.PLAYER_RADIUS_SQ && e instanceof Player){
+							nearbyPlayers.add((Player) e);
+						} 
+					}
+				}
+				
+				final List<Player> nearbyPlayersList = nearbyPlayers;
+				plugin.getServer().getScheduler().runTask(plugin, new Runnable(){
+
+					public void run() {				
+						final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+						
+						if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
+							if(nearby.size() > 1){
+								m.remove();
+							}
+							List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 50, AIRouter.PLAYER_RADIUS));
+							for(Entity e:new ArrayList<Entity>(nearby)){
+								if(e.getType() != EntityType.MINECART){
+									nearby.remove(e);
+								}
+								else if(e instanceof Player){
+									nearbyPlayersList.add((Player) e);
+								}
+							}
+							if(nearby.size() > 2){
+								//Too many in area
+								m.remove();
+								return;
+							}
+						}
+						//It's valid
+						final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+						v.setMetadata("trade.npcvillager", new StatValue(true, main.plugin));
+						v.setAdult();
+						v.setBreed(false);
+						v.setAgeLock(true);
+						v.setCanPickupItems(false);
+						v.setCustomName(randomName());
+						v.setCustomNameVisible(true);
+						m.setPassenger(v);
+					
+						//Make it a car
+						c.setId(m.getUniqueId());
+						m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null), plugin));
+						
+						CartOrientationUtil.setYaw(m, ya);
+						/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
+						p.setEntityID(m.getEntityId());
+						p.setYaw(yaw);
+						p.setPitch(m.getLocation().getPitch());
+						for(Player player:nearbyPlayersList){
+							p.sendPacket(player);
+						}*/
+						
+						CarPreset cp = c.getPreset();
+						if(cp != null && cp.hasDisplayBlock()){
+							m.setDisplayBlock(cp.getDisplayBlock());
+							m.setDisplayBlockOffset(cp.getDisplayBlockOffset());
+						}
+						else if(c.getBaseDisplayBlock() != null){
+							m.setDisplayBlock(c.getBaseDisplayBlock());
+						}
+						
+						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
+						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+							@Override
+							public void run() {
+								if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
+									plugin.carSaver.carNowInUse(m, c);
+									incrementSpawnedAICount();
+								}
+								return;
+							}});
 						return;
 					}});
 				return;

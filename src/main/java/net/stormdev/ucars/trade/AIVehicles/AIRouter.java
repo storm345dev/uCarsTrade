@@ -30,6 +30,7 @@ import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
 	public static int PLAYER_RADIUS = 70;
+	public static double PLAYER_RADIUS_SQ = Math.pow(PLAYER_RADIUS, 2);
 	
 	private static boolean enabled;
 	private static Map<String, Material> trackBlocks = new HashMap<String, Material>();
@@ -223,30 +224,31 @@ public class AIRouter {
 		
 		final String POS_META = "car.npc.position"; //This bit checks if the car has been stationary for a while and if so despawns it
 		PositionTracking pt = null;
-		if(car.hasMetadata(POS_META)){
-			try {
-				pt = (PositionTracking) car.getMetadata(POS_META).get(0).value();
-			} catch (Exception e) {
-				//Invalid meta...
-			}
+		try {
+			pt = (PositionTracking) car.getMetadata(POS_META).get(0).value();
+		} catch (Exception e) {
+			//Invalid meta...
 		}
+		boolean newMeta = false;
 		if(pt == null){
+			newMeta = true;
 			pt = new PositionTracking(car.getLocation());
 		}
 		else {
 			pt.updateLocation(car.getLocation());
 		}
-		car.removeMetadata(POS_META, main.plugin);
-		car.setMetadata(POS_META, new StatValue(pt, main.plugin));
+		if(newMeta){
+			car.removeMetadata(POS_META, main.plugin);
+			car.setMetadata(POS_META, new StatValue(pt, main.plugin));
+		}
 		
 		VelocityData data = new VelocityData(null, null);
-		if(car.hasMetadata("trade.npc")){
-			List<MetadataValue> ms = car.getMetadata("trade.npc");
-			data = (VelocityData) ms.get(0).value();
+		try {
+			data = (VelocityData) car.getMetadata("trade.npc").get(0).value();
 			if(data.getDir() != null){
 				direction = data.getDir();
 			}
-			//direction = (BlockFace) ms.get(0).value();
+		} catch (Exception e1) {
 		}
 		
 		long stationaryRemoveTime = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car) ? 2000:200;
@@ -312,14 +314,15 @@ public class AIRouter {
 		}
 		
 		Material ut = under.getType();
+		boolean utTrackBlock = isTrackBlock(ut);
 		
-		if(!isTrackBlock(ut) && ut != junction){
+		if(!utTrackBlock && ut != junction){
 			Block u= under.getRelative(BlockFace.DOWN);
 			ut = u.getType();
-			if(!isTrackBlock(ut) && ut != junction){
+			if(!utTrackBlock && ut != junction){
 				u = under.getRelative(BlockFace.UP);
 				ut = u.getType();
-				if(!isTrackBlock(ut) && ut != junction){
+				if(!utTrackBlock && ut != junction){
 					relocateRoad(car, under, loc, ut==junction, data);
 					return;
 				}
@@ -364,7 +367,7 @@ public class AIRouter {
 		}
 		
 		//Recalculate dir pretty goddam often
-		if(AIRouter.isTrackBlock(under.getType())){
+		if(utTrackBlock){
 			BlockFace bf = AITrackFollow.carriagewayDirection(under);
 			if(bf != null){
 				direction = bf;

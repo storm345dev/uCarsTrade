@@ -42,14 +42,12 @@ public class CarSaver {
 	}
 	
 	public DrivenCar getCarInUse(Entity cart){
-		if(cart.hasMetadata(META)){
-			try {
-				return (DrivenCar) cart.getMetadata(META).get(0).value();
-			} catch (Exception e) {
-				cart.removeMetadata(META, main.plugin);
-			}
+		try {
+			return (DrivenCar) cart.getMetadata(META).get(0).value();
+		} catch (Exception e) {
+			cart.removeMetadata(META, main.plugin);
+			return inUse.get(cart.getUniqueId());
 		}
-		return inUse.get(cart.getUniqueId());
 	}
 	
 	public DrivenCar getCarInUseWithEntityID(UUID carId){

@@ -57,7 +57,7 @@ public class AIRouter {
 				return true;
 			}
 		}
-		return false;
+		return mat.equals(junction);
 	}
 	
 	public static String getTrackBlockType(Material mat){

@@ -19,6 +19,14 @@ public class BlockRouteData implements Serializable {
 		return this.direction;
 	}
 	
+	public void setDirection(BlockFace dir){
+		this.direction = dir;
+	}
+	
+	public void setType(RouteBlockType type){
+		this.type = type;
+	}
+	
 	public RouteBlockType getType(){
 		return this.type;
 	}

@@ -7,6 +7,8 @@ import java.util.Set;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
+import net.stormdev.ucars.trade.AIVehicles.routing.NetworkConversionScan;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteMethod;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.NetworkScan;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.Node;
@@ -162,6 +164,30 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				
 				main.plugin.aiSpawns.spawnNPCCar(under.getRelative(BlockFace.UP, 2).getLocation(), dir);
 				sender.sendMessage(ChatColor.GREEN+"Car spawned!");
+				return true;
+			}
+			else if(command.equalsIgnoreCase("convertnetwork")){
+				if(!AIRouter.isAIEnabled()){
+					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
+					return true;
+				}
+				if(sender instanceof Player && !(sender.isOp())){
+					sender.sendMessage(ChatColor.RED+"Sorry this feature is for ops only - And with v. good reason!");
+					return true;
+				}
+				if(main.plugin.aiRouteMethod.equals(RouteMethod.ENCODED)){
+					sender.sendMessage(ChatColor.RED+"You already have encoded ");
+					return true;
+				}
+				sender.sendMessage(ChatColor.YELLOW+"Commencing network scan and replacing of blocks... If you didn't backup the server then cross your fingers!");
+				final Player pl = player;
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						new NetworkConversionScan(pl);
+						return;
+					}});
 				return true;
 			}
 			else if(command.equalsIgnoreCase("ainodes")){

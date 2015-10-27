@@ -126,7 +126,7 @@ public class AITrackFollow {
 			if(NE != null && SW != null
 					&& SE != null && NW != null){
 				//At some complex junction some give up trying to spawn here
-				return null;
+				return new BlockRouteData(null, null);
 			}
 			//  '/' = NW + SE edges
 			//  '\' = SW + NE edges
@@ -144,7 +144,7 @@ public class AITrackFollow {
 			}
 			else{
 				//Unable to find any road elements
-				return null;
+				return new BlockRouteData(null, null);
 			}
 		}
 		else if(east != null){ //Road is N/S bound
@@ -159,7 +159,7 @@ public class AITrackFollow {
 			}
 		}
 		else{
-			return null;
+			return new BlockRouteData(null, null);
 		}
 		
 		return new BlockRouteData(RouteBlockType.DIRECTIONAL, dir);

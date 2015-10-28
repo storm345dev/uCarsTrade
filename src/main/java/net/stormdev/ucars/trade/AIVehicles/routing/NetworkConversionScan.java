@@ -23,7 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class NetworkConversionScan { 
-	private static int SCAN_BRANCH_LIMIT = 1000;
+	private static int SCAN_BRANCH_LIMIT = 1500;
 	public static class Logger {
 		private UUID startPlayerUUID;
 		

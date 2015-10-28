@@ -162,28 +162,31 @@ public class NetworkConversionScan {
 		
 		/*roughSize = roadNetwork.size();*/
 		
-		int i=0;
-		Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
-		for(Entry<Block, BlockRouteData> blockLoc:all){
-			i++;
-			/*sleep();*/
-			BlockRouteData brd = blockLoc.getValue();
-			final Block bl = blockLoc.getKey();
-			final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
-			try {
-				Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
+		
+		final Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
+		final int size = all.size();
+		try {
+			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
 
-					@Override
-					public Void call() throws Exception {
+				@Override
+				public Void call() throws Exception {
+					int i=0;
+					for(Entry<Block, BlockRouteData> blockLoc:all){
+						i++;
+						/*sleep();*/
+						BlockRouteData brd = blockLoc.getValue();
+						final Block bl = blockLoc.getKey();
+						final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
 						bl.setType(Material.STAINED_GLASS);
 						bl.setData((byte) data);
-						return null;
-					}}).get();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			logger.log("Replacing control blocks "+i+"/"+roughSize+"!");
+						logger.log("Replacing control blocks "+i+"/"+size+"!");
+					}
+					return null;
+				}}).get();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		
 		logger.log("Block replacing complete!");
 	}
 	

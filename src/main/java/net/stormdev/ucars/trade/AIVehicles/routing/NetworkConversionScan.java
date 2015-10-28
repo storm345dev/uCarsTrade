@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -162,7 +163,8 @@ public class NetworkConversionScan {
 		/*roughSize = roadNetwork.size();*/
 		
 		int i=0;
-		for(Entry<Block, BlockRouteData> blockLoc:roadNetwork.entrySet()){
+		Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
+		for(Entry<Block, BlockRouteData> blockLoc:all){
 			i++;
 			/*sleep();*/
 			BlockRouteData brd = blockLoc.getValue();

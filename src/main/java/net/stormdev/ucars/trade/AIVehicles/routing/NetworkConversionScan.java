@@ -155,6 +155,7 @@ public class NetworkConversionScan {
 			return;
 		}
 		
+		logger.log("Generating block list...");
 		final List<Block> all = new ArrayList<Block>(roadNetwork.keySet());
 		try {
 			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){

@@ -156,27 +156,23 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		try {
-			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
+		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
 
-				@Override
-				public Void call() throws Exception {
-					int size = all.size();
-					for(int i=0;i<size;i++){
-						Block bl = all.get(i);
-						BlockRouteData brd = roadNetwork.get(bl);
-						int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
-						bl.setType(Material.STAINED_GLASS);
-						bl.setData((byte) data);
-						logger.log("Replacing control blocks "+(i+1)+"/"+size+"!");
-					}
-					return null;
-				}}).get();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		logger.log("Block replacing complete!");
+			@Override
+			public void run() {
+				int size = all.size();
+				for(int i=0;i<size;i++){
+					Block bl = all.get(i);
+					BlockRouteData brd = roadNetwork.get(bl);
+					int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
+					bl.setType(Material.STAINED_GLASS);
+					bl.setData((byte) data);
+					logger.log("Replacing control blocks "+(i+1)+"/"+size+"!");
+				}
+				logger.log("Block replacing complete!");
+				nextStage();
+				return;
+			}});
 	}
 	
 	public void finish(){
@@ -196,7 +192,6 @@ public class NetworkConversionScan {
 		switch(stage){
 		case REPLACE_ROAD_NETWORK_BLOCKS: {
 			replaceRoadNetwork();
-			nextStage();
 		}
 			break;
 		case SCAN_ROAD_NETWORK_BLOCKS: {

@@ -43,10 +43,8 @@ public class NetworkConversionScan {
 	}
 	
 	public static enum Stage {
-		/*REVALIDATE_EXISTING_NODES(0),*/
 		SCAN_ROAD_NETWORK_BLOCKS(1),
 		REPLACE_ROAD_NETWORK_BLOCKS(2);
-		/*CHECK_NODES(3),*/
 		
 		private int pos;
 		private Stage(int pos){
@@ -72,7 +70,6 @@ public class NetworkConversionScan {
 	private Location origin = null;
 	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
 	private volatile Map<Block, BlockRouteData> roadNetwork = new HashMap<Block, BlockRouteData>();
-	/*private volatile List<Node> nodes = new ArrayList<Node>();*/
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
 	
@@ -160,9 +157,6 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		/*roughSize = roadNetwork.size();*/
-		
-		
 		final Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
 		final int size = all.size();
 		try {
@@ -173,7 +167,6 @@ public class NetworkConversionScan {
 					int i=0;
 					for(Entry<Block, BlockRouteData> blockLoc:all){
 						i++;
-						/*sleep();*/
 						BlockRouteData brd = blockLoc.getValue();
 						final Block bl = blockLoc.getKey();
 						final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
@@ -199,30 +192,17 @@ public class NetworkConversionScan {
 		roadNetwork.clear();
 		roadNetwork = null;
 		restTimeChecker.cancel();
-		/*nodes.clear();
-		nodes = null;*/
 		logger.log("Network scanning terminated!");
 		logger = null;
-		System.gc(); //Try and get java to garbage collect all the junk now it's done with
 	}
 	
 	private void startStage(){
 		switch(stage){
-		/*case CHECK_NODES: {
-			checkNodes();
-			nextStage();
-		}*/
-			/*break;*/
 		case REPLACE_ROAD_NETWORK_BLOCKS: {
 			replaceRoadNetwork();
 			nextStage();
 		}
 			break;
-		/*case REVALIDATE_EXISTING_NODES: {
-			rescanNodes();
-			nextStage();
-		}*/
-			/*break;*/
 		case SCAN_ROAD_NETWORK_BLOCKS: {
 			scanRoadNetwork();
 			nextStage();
@@ -232,73 +212,6 @@ public class NetworkConversionScan {
 			break;
 		}
 	}
-	
-	/*public void saveNodes(){
-		logger.log("Saving "+nodes.size()+" nodes into the correct chunks for them to be 'active' inside of (5x5 chunk grid with node at center FYI)...");
-		
-		for(Node node:nodes){
-			spawnManager.getNodesStore().setNodeIntoCorrectActiveChunks(node);
-		}
-		
-		spawnManager.getNodesStore().asyncSave();
-		
-		main.config.set("general.ai.spawnMethod", SpawnMethod.NODES.name());
-		main.plugin.saveConfig();
-		
-		logger.log("Successfully saved the nodes! Villager cars should now start spawning!");
-	}*/
-	
-	/*public void checkNodes(){ //Not used anymore... (Waste of processing)
-		logger.log("Starting validation of placed nodes, this could also take a long time...");
-		
-		int removed = 0;
-		for(final Node node:new ArrayList<Node>(nodes)){
-			Future<Boolean> validation = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){
-
-				@Override
-				public Boolean call() throws Exception {
-					if(!node.isValid()){
-						return false;
-					}
-					
-					for(Node otherNode:new ArrayList<Node>(nodes)){
-						if(otherNode.equals(node)){
-							continue; //SAME node
-						}
-						double distanceSquared = otherNode.getLocation().distanceSquared(node.getLocation());
-						if(distanceSquared <= 49){ //Nodes too close together!
-							BlockFace n1Dir = node.getCarriagewayDirection();
-							BlockFace n2Dir = otherNode.getCarriagewayDirection();
-							if(!n1Dir.getOppositeFace().equals(n2Dir)){ //Allow close nodes if on different sides of the road
-								double absModX = Math.abs(diff.getX()); //If re-implemented, diff is the vector to get from the first node to the second
-								double absModZ = Math.abs(diff.getZ());
-								if(absModX < 2 || absModZ < 2){ //Check if on same carriageway (Breaks at corners, but is accurate enough)
-									return false;
-								}
-							}
-						}
-					}
-					return true;
-				}});
-			try {
-				if(!validation.get()){
-					nodes.remove(node);
-					removed++;
-				}
-			} catch (Exception e) {
-				//uh oh
-				e.printStackTrace();
-			}
-			Thread.yield();
-			try {
-				Thread.sleep(REST_TIME);
-			} catch (InterruptedException e) {
-				//kk
-			} //Give it time to recover
-		}
-		
-		logger.log("Validated placed nodes successfully! "+removed+" nodes were removed! There are "+nodes.size()+" valid nodes on this network!");
-	}*/
 	
 	private void sleep(){
 		Thread.yield();

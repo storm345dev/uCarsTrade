@@ -158,7 +158,6 @@ public class NetworkConversionScan {
 		}
 		
 		final Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
-		final int size = all.size();
 		try {
 			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
 
@@ -172,7 +171,7 @@ public class NetworkConversionScan {
 						final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
 						bl.setType(Material.STAINED_GLASS);
 						bl.setData((byte) data);
-						logger.log("Replacing control blocks "+i+"/"+size+"!");
+						logger.log("Replacing control blocks "+i+"/"+all.size()+"!");
 					}
 					return null;
 				}}).get();
@@ -289,10 +288,11 @@ public class NetworkConversionScan {
 				}
 			}
 		}
-		if(queuedBranches.size() > 0 && scansRunning < 1){
+		int sr = scansRunning;
+		if(queuedBranches.size() > 0 && sr < 1){
 			return 1; //Don't stop the scan...
 		}
-		return scansRunning;
+		return sr;
 	}
 	
 	private volatile List<Block> queuedBranches = new ArrayList<Block>();

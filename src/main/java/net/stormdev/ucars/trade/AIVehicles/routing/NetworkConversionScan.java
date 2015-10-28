@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 public class NetworkConversionScan { 
 	private static int SCAN_BRANCH_LIMIT = 1500;
@@ -67,8 +68,8 @@ public class NetworkConversionScan {
 	private Logger logger = null;
 	private Location origin = null;
 	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
-	private volatile List<Block> all = new ArrayList<Block>();
-	private volatile Map<Block, BlockRouteData> roadNetwork = new HashMap<Block, BlockRouteData>();
+	private volatile List<Vector> allBlocks = new ArrayList<Vector>();
+	private volatile Map<String, BlockRouteData> roadNetworkBlocks = new HashMap<String, BlockRouteData>();
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
 	
@@ -152,7 +153,7 @@ public class NetworkConversionScan {
 	}
 	
 	private void replaceRoadNetwork(){
-		if(roadNetwork == null){
+		if(roadNetworkBlocks == null){
 			return;
 		}
 		
@@ -160,10 +161,11 @@ public class NetworkConversionScan {
 
 			@Override
 			public void run() {
-				int size = all.size();
+				int size = allBlocks.size();
 				for(int i=0;i<size;i++){
-					Block bl = all.get(i);
-					BlockRouteData brd = roadNetwork.get(bl);
+					Vector vec = allBlocks.get(i);
+					Block bl = getBlock(vec); //TODO DONT use blocks as keys!
+					BlockRouteData brd = roadNetworkBlocks.get(getKey(vec));
 					int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
 					bl.setType(Material.STAINED_GLASS);
 					bl.setData((byte) data);
@@ -181,8 +183,8 @@ public class NetworkConversionScan {
 		main.plugin.saveConfig();
 		origin.getWorld().save();
 		origin = null;
-		roadNetwork.clear();
-		roadNetwork = null;
+		roadNetworkBlocks.clear();
+		roadNetworkBlocks = null;
 		restTimeChecker.cancel();
 		logger.log("Network scanning terminated!");
 		logger = null;
@@ -217,10 +219,10 @@ public class NetworkConversionScan {
 	}
 	
 	public void scanRoadNetwork(){
-		if(roadNetwork == null){
-			roadNetwork = new HashMap<Block, BlockRouteData>();
+		if(roadNetworkBlocks == null){
+			roadNetworkBlocks = new HashMap<String, BlockRouteData>();
 		}
-		roadNetwork.clear(); //In case it isn't already
+		roadNetworkBlocks.clear(); //In case it isn't already
 		logger.log("Starting indexing of the road network... (This could take a long time)");
 		
 		blockScan(origin.getBlock());
@@ -238,7 +240,7 @@ public class NetworkConversionScan {
 			} catch (InterruptedException e) {
 				//oh well
 			}
-			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size()+" Current network size: "+roughSize);
+			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedExtraBranches.size()+" Current network size: "+roughSize);
 		}
 		int count = 0;
 		while(((countScanBranches() <= 0) || (System.currentTimeMillis() - lastStartTime) > 120000) && count < 5){ //Give it 5 extra seconds after scanning the network for safety
@@ -256,15 +258,19 @@ public class NetworkConversionScan {
 		/*roughSize = roadNetwork.size();*/ //Make sure it's correct or it looks dodgy
 	}
 	
+	private Block getBlock(Vector v){
+		return new Location(origin.getWorld(), v.getX(), v.getY(), v.getZ()).getBlock();
+	}
+	
 	private int countScanBranches(){
-		if(queuedBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
+		if(queuedExtraBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
 			int toStart = SCAN_BRANCH_LIMIT - scansRunning;
-			if(toStart > queuedBranches.size()){
-				toStart = queuedBranches.size();
+			if(toStart > queuedExtraBranches.size()){
+				toStart = queuedExtraBranches.size();
 			}
 			for(int i=0;i<toStart && scansRunning<SCAN_BRANCH_LIMIT;i++){
-				final Block b = queuedBranches.get(0);
-				queuedBranches.remove(0);
+				final Block b = getBlock(queuedExtraBranches.get(0));
+				queuedExtraBranches.remove(0);
 				incrementScansRunning();
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
@@ -282,7 +288,7 @@ public class NetworkConversionScan {
 			}
 		}
 		int sr = scansRunning;
-		if(queuedBranches.size() > 0 && sr < 1){
+		if(queuedExtraBranches.size() > 0 && sr < 1){
 			return 1; //Don't stop the scan...
 		}
 		return sr;
@@ -290,11 +296,15 @@ public class NetworkConversionScan {
 	
 	private volatile boolean finishedScan = false;
 	
-	private volatile List<Block> queuedBranches = new ArrayList<Block>();
+	private volatile List<Vector> queuedExtraBranches = new ArrayList<Vector>();
 	
 	private volatile long lastStartTime = 0;
 	private volatile int scansRunning = 1;
 	private volatile int roughSize = 0; //rough because of thread synchronizing
+	
+	private String getKey(Vector v){
+		return v.getX()+""+v.getY()+""+v.getZ();
+	}
 	
 	private synchronized void incrementScansRunning(){
 		scansRunning++;
@@ -310,16 +320,18 @@ public class NetworkConversionScan {
 			return;
 		}
 		lastStartTime = System.currentTimeMillis();
+		Vector vec = block.getLocation().toVector().clone();
+		String key = getKey(vec);
 		if(block == null){
 			decrementScansRunning();
 			return;
 		}
-		if(roadNetwork.containsKey(block)){
+		if(roadNetworkBlocks.containsKey(key)){
 			decrementScansRunning();
 			return;
 		}
 		if(scansRunning > NetworkConversionScan.SCAN_BRANCH_LIMIT){
-			queuedBranches.add(block);
+			queuedExtraBranches.add(vec);
 			decrementScansRunning();
 			return;
 		}
@@ -342,8 +354,8 @@ public class NetworkConversionScan {
 				brd.setDirection(null);
 			}
 			roughSize++;
-			all.add(block);
-			roadNetwork.put(block, brd);
+			allBlocks.add(vec);
+			roadNetworkBlocks.put(key, brd);
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){
 

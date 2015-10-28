@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -157,21 +155,20 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		final Set<Entry<Block, BlockRouteData>> all = roadNetwork.entrySet();
+		final List<Block> all = new ArrayList<Block>(roadNetwork.keySet());
 		try {
 			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
 
 				@Override
 				public Void call() throws Exception {
-					int i=0;
-					for(Entry<Block, BlockRouteData> blockLoc:all){
-						i++;
-						BlockRouteData brd = blockLoc.getValue();
-						final Block bl = blockLoc.getKey();
-						final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
+					int size = all.size();
+					for(int i=0;i<size;i++){
+						Block bl = all.get(i);
+						BlockRouteData brd = roadNetwork.get(bl);
+						int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
 						bl.setType(Material.STAINED_GLASS);
 						bl.setData((byte) data);
-						logger.log("Replacing control blocks "+i+"/"+all.size()+"!");
+						logger.log("Replacing control blocks "+(i+1)+"/"+size+"!");
 					}
 					return null;
 				}}).get();

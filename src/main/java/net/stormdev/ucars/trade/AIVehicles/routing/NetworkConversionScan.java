@@ -67,6 +67,7 @@ public class NetworkConversionScan {
 	private Logger logger = null;
 	private Location origin = null;
 	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
+	private volatile List<Block> all = new ArrayList<Block>();
 	private volatile Map<Block, BlockRouteData> roadNetwork = new HashMap<Block, BlockRouteData>();
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
@@ -155,8 +156,6 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		logger.log("Generating block list...");
-		final List<Block> all = new ArrayList<Block>(roadNetwork.keySet());
 		try {
 			Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Void>(){
 
@@ -234,6 +233,7 @@ public class NetworkConversionScan {
 		roadScanOutput();
 		
 		logger.log("Road network indexed!");
+		finishedScan = true;
 	}
 	
 	private void roadScanOutput(){
@@ -293,6 +293,8 @@ public class NetworkConversionScan {
 		return sr;
 	}
 	
+	private volatile boolean finishedScan = false;
+	
 	private volatile List<Block> queuedBranches = new ArrayList<Block>();
 	
 	private volatile long lastStartTime = 0;
@@ -308,6 +310,10 @@ public class NetworkConversionScan {
 	}
 	
 	private void blockScan(final Block block){
+		if(finishedScan){
+			decrementScansRunning();
+			return;
+		}
 		lastStartTime = System.currentTimeMillis();
 		if(block == null){
 			decrementScansRunning();
@@ -341,6 +347,7 @@ public class NetworkConversionScan {
 				brd.setDirection(null);
 			}
 			roughSize++;
+			all.add(block);
 			roadNetwork.put(block, brd);
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){

@@ -184,11 +184,11 @@ public class NetworkConversionScan {
 	}
 	
 	public void finish(){
-		origin = null;
 		main.plugin.aiRouteMethod = RouteMethod.ENCODED;
 		main.config.set("general.ai.routing", RouteMethod.ENCODED.name());
 		main.plugin.saveConfig();
 		origin.getWorld().save();
+		origin = null;
 		roadNetwork.clear();
 		roadNetwork = null;
 		restTimeChecker.cancel();

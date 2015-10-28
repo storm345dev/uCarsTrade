@@ -159,12 +159,12 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		int prevPercent = -1;
+		roughSize = roadNetwork.size();
 		
 		int i=0;
 		for(Entry<Block, BlockRouteData> blockLoc:roadNetwork.entrySet()){
 			i++;
-			sleep();
+			/*sleep();*/
 			BlockRouteData brd = blockLoc.getValue();
 			final Block bl = blockLoc.getKey();
 			final int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
@@ -180,11 +180,7 @@ public class NetworkConversionScan {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			int percent = (int) Math.floor((i/((double)roughSize)) * 100.0d);
-			if(percent != prevPercent){
-				prevPercent = percent;
-				logger.log("Replacing control blocks "+percent+"%!");
-			}
+			logger.log("Replacing control blocks "+i+"/"+roughSize+"!");
 		}
 		logger.log("Block replacing complete!");
 	}

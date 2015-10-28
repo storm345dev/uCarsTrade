@@ -159,7 +159,7 @@ public class NetworkConversionScan {
 			return;
 		}
 		
-		roughSize = roadNetwork.size();
+		/*roughSize = roadNetwork.size();*/
 		
 		int i=0;
 		for(Entry<Block, BlockRouteData> blockLoc:roadNetwork.entrySet()){
@@ -343,7 +343,7 @@ public class NetworkConversionScan {
 			roadScanOutput();
 			return;
 		}
-		roughSize = roadNetwork.size(); //Make sure it's correct or it looks dodgy
+		/*roughSize = roadNetwork.size();*/ //Make sure it's correct or it looks dodgy
 	}
 	
 	private int countScanBranches(){

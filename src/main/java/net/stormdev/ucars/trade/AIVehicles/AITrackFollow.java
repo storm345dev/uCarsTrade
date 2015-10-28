@@ -186,33 +186,56 @@ public class AITrackFollow {
 						}
 					}
 				}
+				if(!routeData.isJunction() && !brd.isJunction()){
+					vd.setInProgressOfTurningAtJunction(false);
+				}
 				return new TrackingData(cr, dir, brd.isJunction());
 			}
 			//At a junction
+			
+			if(main.random.nextBoolean()){ //Don't turn off
+				vd.setInProgressOfTurningAtJunction(true);
+				return new TrackingData(current.getRelative(dir), dir, false); 
+			}
+			
+			if(dir == null){
+				dir = BlockFace.NORTH;
+			}
+			
 			BlockFace leftCheck = nextLeftFace(dir);
 			BlockFace rightCheck = nextRightFace(dir);
 			BlockFace behind = dir.getOppositeFace();
 			while(!leftCheck.equals(behind) && !rightCheck.equals(behind)){
-				Block left = current.getRelative(leftCheck);
-				Block right = current.getRelative(rightCheck);
-				
-				//Check right first
-				BlockRouteData brd = carriagewayDirection(right);
-				if(brd.getType()!=null){
-					vd.setInProgressOfTurningAtJunction(true);
-					return new TrackingData(right, rightCheck, 
-							true);
+				try {
+					Block left = current.getRelative(leftCheck);
+					Block right = current.getRelative(rightCheck);
+					
+					//Check right first
+					BlockRouteData brd = carriagewayDirection(right);
+					if(brd.getType()!=null){
+						/*vd.setDir(rightCheck);*/
+						vd.setInProgressOfTurningAtJunction(true);
+						return new TrackingData(right, rightCheck, 
+								true);
+					}
+					
+					//Then check left
+					brd = carriagewayDirection(left);
+					if(brd.getType()!=null){
+						/*vd.setDir(leftCheck);*/
+						vd.setInProgressOfTurningAtJunction(true);
+						return new TrackingData(left, leftCheck, 
+								true);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				
-				//Then check left
-				brd = carriagewayDirection(left);
-				if(brd.getType()!=null){
-					vd.setInProgressOfTurningAtJunction(true);
-					return new TrackingData(left, leftCheck, 
-							true);
-				}
+				leftCheck = nextLeftFace(leftCheck);
+				rightCheck = nextRightFace(rightCheck);
 			}
 			
+			vd.setInProgressOfTurningAtJunction(true);
 			return new TrackingData(current.getRelative(dir), dir, false); 
 		}		
 		
@@ -237,6 +260,10 @@ public class AITrackFollow {
 			}
 		}
 		boolean chJ = ch!=null?ch.junction:false;
+		
+		if(dir == null){
+			dir = BlockFace.NORTH;
+		}
 		
 		//Need to get right/left of it
 		BlockFace leftCheck = nextLeftFace(dir);

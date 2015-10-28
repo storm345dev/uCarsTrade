@@ -131,7 +131,7 @@ public class AIRouter {
 	}
 	
 	public VelocityData getVelocityData(Vehicle car){
-		VelocityData data = new VelocityData(null, null);
+		VelocityData data = new VelocityData(null, null, car.getLocation());
 		if(car.hasMetadata("trade.npc")){
 			List<MetadataValue> ms = car.getMetadata("trade.npc");
 			data = (VelocityData) ms.get(0).value();
@@ -234,27 +234,7 @@ public class AIRouter {
 			}
 		}*/
 		
-		final String POS_META = "car.npc.position"; //This bit checks if the car has been stationary for a while and if so despawns it
-		PositionTracking pt = null;
-		try {
-			pt = (PositionTracking) car.getMetadata(POS_META).get(0).value();
-		} catch (Exception e) {
-			//Invalid meta...
-		}
-		boolean newMeta = false;
-		if(pt == null){
-			newMeta = true;
-			pt = new PositionTracking(car.getLocation());
-		}
-		else {
-			pt.updateLocation(car.getLocation());
-		}
-		if(newMeta){
-			car.removeMetadata(POS_META, main.plugin);
-			car.setMetadata(POS_META, new StatValue(pt, main.plugin));
-		}
-		
-		VelocityData data = new VelocityData(null, null);
+		VelocityData data = new VelocityData(null, null, car.getLocation());
 		try {
 			data = (VelocityData) car.getMetadata("trade.npc").get(0).value();
 			if(data.getDir() != null){
@@ -265,11 +245,11 @@ public class AIRouter {
 			car.setMetadata("trade.npc", new StatValue(data, main.plugin));
 		}
 		
-		BlockFace originalDir = direction;
+		data.updateLocation(car.getLocation());
 		
 		long stationaryRemoveTime = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car) ? 2000:200;
 		
-		if(pt.getStationaryCount() > stationaryRemoveTime){ //Being stationary a while
+		if(data.getStationaryCount() > stationaryRemoveTime){ //Being stationary a while
 			despawnNPCCar(car, c);
 			return;
 		}
@@ -368,7 +348,7 @@ public class AIRouter {
 			}
 		}
 		
-		if(brm.getDirection() == null){ //Not on a road
+		if((brm.getDirection() == null && direction == null) || brm.getType() == null){ //Not on a road
 			//Try to recover
 			relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);
 			return;
@@ -384,7 +364,7 @@ public class AIRouter {
 		}
 		
 		//Now we need to route it...
-		TrackingData nextTrack = AITrackFollow.nextBlock(under, vd, brm, car); //TODO Not always returning, ever; even when calculation ended...
+		TrackingData nextTrack = AITrackFollow.nextBlock(under, vd, brm, car);
 		
 		if(direction != nextTrack.dir && !vd.isInProgressOfTurningAtJunction() && !brm.isJunction()){
 			direction = nextTrack.dir;
@@ -397,26 +377,31 @@ public class AIRouter {
 		if(nextTrack.forJunction){
 			keepVel = false; //make it recalculate so we can go slower
 		}
-		if(brm.isJunction()&&!vd.isInProgressOfTurningAtJunction()){
+		if(vd.isInProgressOfTurningAtJunction()){
+			keepVel = false;
+			direction = nextTrack.dir;
+			vd.resetUpdatesSinceTurn();
+		}
+		/*if(brm.isJunction()&&!vd.isInProgressOfTurningAtJunction()){
 			keepVel = false;
 			direction = nextTrack.dir;
 			data.setMotion(null);
 			car.setMetadata("car.atJunction", new StatValue(nextTrack.dir, main.plugin));
 		}
 		else if(brm.isJunction() && car.hasMetadata("car.atJunction")){
-			/*try {
+			try {
 				direction = (BlockFace) car.getMetadata("car.atJunction").get(0).value();
 			} catch (Exception e) {
 				//invalid meta
 				car.removeMetadata("car.atJunction", main.plugin);
-			}*/
+			}
 			nextTrack.nextBlock = under.getRelative(direction);
 			keepVel = true;
 		}
 		else if(!brm.isJunction() && car.hasMetadata("car.atJunction")){
 			car.removeMetadata("car.atJunction", main.plugin);
 			keepVel = false; //Recalcualte faster speed vector
-		}
+		}*/
 		
 		Block next = nextTrack.nextBlock;
 		Block road = next.getRelative(BlockFace.UP);

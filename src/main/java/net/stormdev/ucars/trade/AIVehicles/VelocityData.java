@@ -1,5 +1,6 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
+import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
@@ -9,10 +10,26 @@ public class VelocityData {
 	private volatile int updatesSinceTurn = 0;
 	private volatile boolean stoppedForOtherCar = false;
 	private volatile boolean inProgressOfTurningAtJunction = false;
+	private volatile Location current;
+	private volatile int stationaryCount = 0;
 	
-	public VelocityData(BlockFace dir, Vector motion){
+	public VelocityData(BlockFace dir, Vector motion, Location current){
 		this.setDir(dir);
 		this.setMotion(motion);
+		this.current = current;
+	}
+	public void updateLocation(Location loc){
+		if(loc.distanceSquared(current) < 2){
+			stationaryCount++;
+		}
+		else {
+			stationaryCount = 0;
+			current = loc;
+		}
+	}
+	
+	public int getStationaryCount(){
+		return this.stationaryCount;
 	}
 	public BlockFace getDir() {
 		return dir;

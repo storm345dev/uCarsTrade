@@ -422,10 +422,10 @@ public class NetworkConversionScan {
 					}}).get();
 			} catch (Exception e1) {
 				e1.printStackTrace();
-				brd = new BlockRouteData(RouteBlockType.DIRECTIONAL, null);
+				brd = new BlockRouteData(RouteBlockType.CONTINUE, null);
 			}
 			if(brd.getType() == null){
-				brd.setType(RouteBlockType.DIRECTIONAL);
+				brd.setType(RouteBlockType.CONTINUE);
 				brd.setDirection(null);
 			}
 			roughSize++;

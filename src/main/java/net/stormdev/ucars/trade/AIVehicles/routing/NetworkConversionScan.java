@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.md_5.bungee.api.ChatColor;
@@ -241,7 +240,7 @@ public class NetworkConversionScan {
 			} catch (InterruptedException e) {
 				//oh well
 			}
-			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedExtraBranches.size()+" Current network size: "+roughSize);
+			logger.log("Currently active scan branches: "+scansRunning+" Queued extra branches: "+queuedBranches.size()+" Current network size: "+roughSize);
 		}
 		int count = 0;
 		while(((countScanBranches() <= 0) || (System.currentTimeMillis() - lastStartTime) > 120000) && count < 5){ //Give it 5 extra seconds after scanning the network for safety
@@ -276,14 +275,14 @@ public class NetworkConversionScan {
 	}
 	
 	private int countScanBranches(){
-		if(queuedExtraBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
+		if(queuedBranches.size() > 0 && scansRunning < SCAN_BRANCH_LIMIT){
 			int toStart = SCAN_BRANCH_LIMIT - scansRunning;
-			if(toStart > queuedExtraBranches.size()){
-				toStart = queuedExtraBranches.size();
+			if(toStart > queuedBranches.size()){
+				toStart = queuedBranches.size();
 			}
 			for(int i=0;i<toStart && scansRunning<SCAN_BRANCH_LIMIT;i++){
-				final Block b = getBlock(queuedExtraBranches.get(0));
-				queuedExtraBranches.remove(0);
+				final Block b = queuedBranches.get(0);
+				queuedBranches.remove(0);
 				incrementScansRunning();
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
@@ -301,7 +300,7 @@ public class NetworkConversionScan {
 			}
 		}
 		int sr = scansRunning;
-		if(queuedExtraBranches.size() > 0 && sr < 1){
+		if(queuedBranches.size() > 0 && sr < 1){
 			return 1; //Don't stop the scan...
 		}
 		return sr;
@@ -309,7 +308,7 @@ public class NetworkConversionScan {
 	
 	private volatile boolean finishedScan = false;
 	
-	private volatile List<Vector> queuedExtraBranches = new ArrayList<Vector>();
+	private volatile List<Block> queuedBranches = new ArrayList<Block>();
 	
 	private volatile long lastStartTime = 0;
 	private volatile int scansRunning = 1;
@@ -333,18 +332,18 @@ public class NetworkConversionScan {
 			return;
 		}
 		lastStartTime = System.currentTimeMillis();
-		Vector vec = block.getLocation().toVector().clone();
-		String key = getKey(vec);
 		if(block == null){
 			decrementScansRunning();
 			return;
 		}
+		Vector vec = block.getLocation().toVector().clone();
+		String key = getKey(vec);
 		if(roadNetworkBlocks.containsKey(key)){
 			decrementScansRunning();
 			return;
 		}
 		if(scansRunning > NetworkConversionScan.SCAN_BRANCH_LIMIT){
-			queuedExtraBranches.add(vec);
+			queuedBranches.add(block);
 			decrementScansRunning();
 			return;
 		}

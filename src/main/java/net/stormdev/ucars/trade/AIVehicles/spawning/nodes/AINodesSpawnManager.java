@@ -20,7 +20,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private static NodesStore nodes = null;
 	private BukkitTask task = null;
-	private long spawnRate = 50l;
+	private long spawnRate = 70l;
 	public static int minDistance = 30;
 	private int maxDistance = 70;
 	
@@ -51,7 +51,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	}
 	
 	private boolean randomDoSpawn(){
-		return main.random.nextInt(7) < 1; //1/7 chance
+		return main.random.nextInt(6) < 1; //1/7 chance
 	}
 	
 	private int randomMinCarSpacing(){

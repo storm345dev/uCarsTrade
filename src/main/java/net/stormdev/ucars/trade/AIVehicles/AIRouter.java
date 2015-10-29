@@ -42,10 +42,8 @@ public class AIRouter {
 	public static Material junction;
 	private uCarsAPI api;
 	
-	public static RouteMethod method = RouteMethod.ORE;
-	
 	public static boolean isEncodedRouting(){
-		return method.equals(RouteMethod.ENCODED);
+		return main.plugin.aiRouteMethod.equals(RouteMethod.ENCODED);
 	}
 	
 	public static boolean isTrackBlock(Material mat){
@@ -79,7 +77,6 @@ public class AIRouter {
 	}
 	
 	public AIRouter(boolean enabled){
-		AIRouter.method = main.plugin.aiRouteMethod;
 		AIRouter.enabled = enabled;
 		String edgeRaw = main.config.getString("general.ai.roadEdgeBlock");
 		String junRaw = main.config.getString("general.ai.junctionBlock");

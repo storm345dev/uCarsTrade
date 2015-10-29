@@ -30,33 +30,54 @@ public class NodesStore {
 	private Map<ChunkCoord, List<Node>> nodesByActiveChunks = new HashMap<ChunkCoord, List<Node>>(); //Each chunk has a list of nodes which are within activation radius(within 5x5 chunks with this at center) of it
 	private File saveFile = null;
 	
+	public static boolean beingModified = false;
+	
 	public NodesStore(File saveFile){
 		this.saveFile = saveFile;
 		load();
 	}
 	
 	public int getNodeCount(){
-		//Have to actually count nodes...
-		List<Node> counted = new ArrayList<Node>();
-		for(ChunkCoord chunkCoord:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
-			List<Node> nodes = nodesByActiveChunks.get(chunkCoord);
-			for(Node n:nodes){
-				boolean alreadyCounted = false;
-				for(Node countedNode:counted){
-					if(n.equals(countedNode)){
-						alreadyCounted = true;
-						break;
-					}
-				}
-				if(!alreadyCounted){
-					counted.add(n);
-				}
+		if(beingModified){
+			synchronized(this){
+				return nodeCount();
 			}
 		}
-		return counted.size();
+		return nodeCount();
+	}
+	
+	private int nodeCount(){
+		//Have to actually count nodes...
+				List<Node> counted = new ArrayList<Node>();
+				for(ChunkCoord chunkCoord:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+					List<Node> nodes = nodesByActiveChunks.get(chunkCoord);
+					for(Node n:nodes){
+						boolean alreadyCounted = false;
+						for(Node countedNode:counted){
+							if(n.equals(countedNode)){
+								alreadyCounted = true;
+								break;
+							}
+						}
+						if(!alreadyCounted){
+							counted.add(n);
+						}
+					}
+				}
+				return counted.size();
 	}
 	
 	public void removeNode(Node node){
+		if(beingModified){
+			synchronized(this){
+				removeANode(node);
+				return;
+			}
+		}
+		removeANode(node);
+	}
+	
+	private void removeANode(Node node){
 		for(ChunkCoord key: new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
 			List<Node> nodes = nodesByActiveChunks.get(key);
 			if(node != null && nodes.contains(node)){
@@ -213,6 +234,15 @@ public class NodesStore {
 	}
 	
 	public List<Node> getActiveNodes(ChunkCoord coord){
+		if(beingModified){
+			synchronized(this){
+				return getChunkActiveNodes(coord);
+			}
+		}
+		return getChunkActiveNodes(coord);
+	}
+	
+	private List<Node> getChunkActiveNodes(ChunkCoord coord){
 		List<Node> chunkNodes = new ArrayList<Node>();
 		for(ChunkCoord key:new ArrayList<ChunkCoord>(new HashMap<ChunkCoord, List<Node>>(nodesByActiveChunks).keySet())){
 			if(key.isEqualTo(coord)){
@@ -223,67 +253,72 @@ public class NodesStore {
 	}
 	
 	public synchronized void setNodeIntoCorrectActiveChunks(final Node node){ //Also works to update the node
-		Chunk nodeChunk = null;
-		World nodeWorld = null;
-		if(Bukkit.isPrimaryThread()){
-			nodeChunk = node.getChunk();
-			nodeWorld = nodeChunk.getWorld();
-		}
-		else {
-			try {
-				Future<Chunk> getChunk = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Chunk>(){
-
-					@Override
-					public Chunk call() {
-						return node.getChunk();
-					}});
-				nodeChunk = getChunk.get();
-				final Chunk nc = nodeChunk;
-				Future<World> getWorld = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<World>(){
-
-					@Override
-					public World call() {
-						return nc.getWorld();
-					}});
-				nodeWorld = getWorld.get();
-			} catch (Exception e) {
-				e.printStackTrace();
+		beingModified = true;
+		try {
+			Chunk nodeChunk = null;
+			World nodeWorld = null;
+			if(Bukkit.isPrimaryThread()){
+				nodeChunk = node.getChunk();
+				nodeWorld = nodeChunk.getWorld();
 			}
-		}
-		int chunkX = nodeChunk.getX();
-		int chunkZ = nodeChunk.getZ();
-		
-		//Generate the 6x6 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
-		for(int x = chunkX -6;x<=chunkX+7;x++){
-			for(int z = chunkZ -6;z<=chunkZ+7;z++){
-				ChunkCoord coord = new ChunkCoord(nodeWorld, x, z);
-				
-				List<Node> chunkNodes = new ArrayList<Node>();
-				for(ChunkCoord key:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
-					if(key.isEqualTo(coord)){
-						chunkNodes = nodesByActiveChunks.get(key);
-					}
+			else {
+				try {
+					Future<Chunk> getChunk = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Chunk>(){
+
+						@Override
+						public Chunk call() {
+							return node.getChunk();
+						}});
+					nodeChunk = getChunk.get();
+					final Chunk nc = nodeChunk;
+					Future<World> getWorld = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<World>(){
+
+						@Override
+						public World call() {
+							return nc.getWorld();
+						}});
+					nodeWorld = getWorld.get();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				
-				boolean alreadySet = false;
-				for(Node n:new ArrayList<Node>(chunkNodes)){
-					if(!n.isEqualTo(node)){
-						continue;
-					}
-					if(n.equals(node)){ //Node already set and java objects are equal
-						alreadySet = true;
-						break;
-					}
-					chunkNodes.remove(n); //Node on list is the same place, but different java object; needs updating
-				}
-				
-				if(alreadySet){
-					continue; //Move onto next chunk
-				}
-				
-				chunkNodes.add(node);
-				nodesByActiveChunks.put(coord, chunkNodes);
 			}
+			int chunkX = nodeChunk.getX();
+			int chunkZ = nodeChunk.getZ();
+			
+			//Generate the 6x6 grid with this chunk at the center and then add the node to the list; if it isn't already (NO duplicate nodes)
+			for(int x = chunkX -6;x<=chunkX+7;x++){
+				for(int z = chunkZ -6;z<=chunkZ+7;z++){
+					ChunkCoord coord = new ChunkCoord(nodeWorld, x, z);
+					
+					List<Node> chunkNodes = new ArrayList<Node>();
+					for(ChunkCoord key:new ArrayList<ChunkCoord>(nodesByActiveChunks.keySet())){
+						if(key.isEqualTo(coord)){
+							chunkNodes = nodesByActiveChunks.get(key);
+						}
+					}
+					
+					boolean alreadySet = false;
+					for(Node n:new ArrayList<Node>(chunkNodes)){
+						if(!n.isEqualTo(node)){
+							continue;
+						}
+						if(n.equals(node)){ //Node already set and java objects are equal
+							alreadySet = true;
+							break;
+						}
+						chunkNodes.remove(n); //Node on list is the same place, but different java object; needs updating
+					}
+					
+					if(alreadySet){
+						continue; //Move onto next chunk
+					}
+					
+					chunkNodes.add(node);
+					nodesByActiveChunks.put(coord, chunkNodes);
+				}
+			}
+		} finally {
+			beingModified = false;
 		}
 	}
 	

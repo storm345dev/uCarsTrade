@@ -18,7 +18,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class AINodesSpawnManager extends AbstractAISpawnManager {
 
-	private NodesStore nodes = null;
+	private static NodesStore nodes = null;
 	private BukkitTask task = null;
 	private long spawnRate = 50l;
 	public static int minDistance = 30;
@@ -26,7 +26,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
-		this.nodes = new NodesStore(nodesSaveFile);
+		nodes = new NodesStore(nodesSaveFile);
 		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
 			main.config.set("general.ai.minSpawnDistanceFromPlayers", 30);
 		}
@@ -39,8 +39,8 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		plugin.saveConfig();
 	}
 	
-	public NodesStore getNodesStore(){
-		return this.nodes;
+	public static NodesStore getNodesStore(){
+		return nodes;
 	}
 
 	@Override

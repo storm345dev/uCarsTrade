@@ -369,7 +369,7 @@ public class NetworkScan {
 				continue;
 			}
 			//Place a node here!
-			Node n = new Node(block.getLocation());
+			Node n = new Node(block.getLocation(), dir);
 			spawnManager.getNodesStore().setNodeIntoCorrectActiveChunks(n);
 			sleep(); 
 		}

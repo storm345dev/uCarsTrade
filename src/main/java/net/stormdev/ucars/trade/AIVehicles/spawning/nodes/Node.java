@@ -16,10 +16,13 @@ import org.bukkit.block.BlockFace;
 public class Node implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private SerializableLocation trackerBlockSloc = null;
+	private BlockFace direction;
 	private transient volatile long lastSpawnTime = -1l; //Stops lots spawning at node at once
 	
-	public Node(Location location){
+	public Node(Location location, BlockFace direction){
+		this.loc = location;
 		this.trackerBlockSloc = new SerializableLocation(location);
+		this.direction = direction;
 		getCarriagewayDirection();
 	}
 	
@@ -54,10 +57,11 @@ public class Node implements Serializable {
 	}
 	
 	public BlockFace getCarriagewayDirection(){
-		if(savedDir == null){
-			savedDir = AITrackFollow.carriagewayDirection(getLocation().getBlock()).getDirection();
+		if(direction == null){
+			direction = AITrackFollow.carriagewayDirection(getLocation().getBlock()).getDirection();
+			AINodesSpawnManager.getNodesStore().asyncSave();
 		}
-		return savedDir;
+		return direction;
 	}
 	
 	public boolean isRoomForCarToSpawn(){ //Checks if there is room for a car to spawn
@@ -76,7 +80,6 @@ public class Node implements Serializable {
 		return false;
 	}
 	
-	private transient BlockFace savedDir = null;
 	private transient boolean carSafeToSpawn = false;
 	
 	public void spawnAICarIfLogicalToDoSo(){

@@ -62,19 +62,20 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
 				double tps = DynamicLagReducer.getTPS();
-				if(score > 75 && tps > 19.4){
+				if(score > 75 && tps > 18.5){
 					newCap++;
 				}
-				else if(score < 70 || tps < 17.5){
+				else if(score < 70 || tps < 16.9){
 					newCap *= 0.5; //Half
-				}
-				else if(score < 70 || tps < 18){
 					newCap -= 10;
 				}
-				else if(score < 70 || tps < 19){
+				else if(score < 70 || tps < 17.0){
+					newCap -= 10;
+				}
+				else if(score < 70 || tps < 17.5){
 					newCap -= 5;
 				}
-				else if(score < 75 || tps < 19){
+				else if(score < 75 || tps < 18){
 					newCap--;
 				}
 				
@@ -82,8 +83,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					if(newCap > cap){
 						newCap = cap;
 					}
-					if(newCap < 1){
-						newCap = 1; //Min of 1
+					if(newCap < 3){
+						newCap = 3; //Min of 3
 					}
 					liveCap = newCap;
 				}

@@ -54,7 +54,7 @@ public class Node implements Serializable {
 	}
 	
 	public boolean isRoomForCarToSpawn(){ //Checks if there is room for a car to spawn
-		if(this.carSafeToSpawn){
+		if(!main.plugin.checkSpawnSafety || this.carSafeToSpawn){
 			return true;
 		}
 		Block block = getLocation().getBlock();
@@ -76,9 +76,9 @@ public class Node implements Serializable {
 		if((System.currentTimeMillis() - lastSpawnTime) < 2500){ //2.5 second cooldown
 			return;
 		}
-		Block tracker = getLocation().getBlock();
+		/*Block tracker = getLocation().getBlock();*/
 		
-		final Location spawnLoc = tracker.getRelative(BlockFace.UP, 2).getLocation();
+		final Location spawnLoc = /*tracker.getRelative(BlockFace.UP, 2)*/getLocation().clone().add(0, 2, 0);
 		if(!isRoomForCarToSpawn()){
 			return;
 		}

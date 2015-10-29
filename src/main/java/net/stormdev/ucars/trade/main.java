@@ -81,6 +81,7 @@ public class main extends JavaPlugin {
 	public int carCache = 20;
 	public SpawnMethod aiSpawnMethod = SpawnMethod.WORLD_PROBE;
 	public RouteMethod aiRouteMethod = RouteMethod.ORE;
+	public boolean checkSpawnSafety = false;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -281,6 +282,12 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.ai.spawnMethod")) {
 				config.set("general.ai.spawnMethod", SpawnMethod.WORLD_PROBE.name());
 			}
+        	if(!config.contains("general.ai.checkSpawnSafety")){
+        		config.set("general.ai.checkSpawnSafety", checkSpawnSafety);
+        	}
+        	else {
+        		checkSpawnSafety = config.getBoolean("general.ai.checkSpawnSafety");
+        	}
         	if (!config.contains("general.ai.canSteal")) {
 				config.set("general.ai.canSteal", true);
 			}

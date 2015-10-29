@@ -176,8 +176,8 @@ public class UTradeCommandExecutor implements CommandExecutor {
 					return true;
 				}
 				if(main.plugin.aiRouteMethod.equals(RouteMethod.ENCODED)){
-					sender.sendMessage(ChatColor.RED+"You already have encoded ");
-					return true;
+					main.plugin.aiRouteMethod = RouteMethod.ORE;
+					sender.sendMessage(ChatColor.ITALIC+"Switched back to ORE route following for the duration of the conversion...");
 				}
 				sender.sendMessage(ChatColor.YELLOW+"Commencing network scan and replacing of blocks... If you didn't backup the server then cross your fingers!");
 				final Player pl = player;

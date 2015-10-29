@@ -3,7 +3,6 @@ package net.stormdev.ucars.trade.AIVehicles.routing;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -69,7 +68,7 @@ public class NetworkConversionScan {
 	private Location origin = null;
 	private Stage stage = Stage.SCAN_ROAD_NETWORK_BLOCKS;
 	private volatile List<Vector> allBlocks = new ArrayList<Vector>();
-	private volatile Map<String, BlockRouteData> roadNetworkBlocks = new HashMap<String, BlockRouteData>();
+	private volatile List<BlockRouteData> roadNetwork = new ArrayList<BlockRouteData>();
 	private volatile long REST_TIME = 50; //Rest time between calculations
 	private volatile BukkitTask restTimeChecker = null;
 	
@@ -153,7 +152,7 @@ public class NetworkConversionScan {
 	}
 	
 	private void replaceRoadNetwork(){
-		if(roadNetworkBlocks == null){
+		if(roadNetwork == null){
 			return;
 		}
 		
@@ -165,7 +164,7 @@ public class NetworkConversionScan {
 				for(int i=0;i<size;i++){
 					Vector vec = allBlocks.get(i);
 					Block bl = getBlock(vec); //TODO DONT use blocks as keys!
-					BlockRouteData brd = roadNetworkBlocks.get(getKey(vec));
+					BlockRouteData brd = roadNetwork.get(i);
 					int data = RouteDecoder.getDataFromDir(brd.getType(), brd.getDirection());
 					bl.setType(Material.STAINED_GLASS);
 					bl.setData((byte) data);
@@ -183,8 +182,8 @@ public class NetworkConversionScan {
 		main.plugin.saveConfig();
 		origin.getWorld().save();
 		origin = null;
-		roadNetworkBlocks.clear();
-		roadNetworkBlocks = null;
+		roadNetwork.clear();
+		roadNetwork = null;
 		restTimeChecker.cancel();
 		logger.log("Network scanning terminated!");
 		logger = null;
@@ -219,10 +218,10 @@ public class NetworkConversionScan {
 	}
 	
 	public void scanRoadNetwork(){
-		if(roadNetworkBlocks == null){
-			roadNetworkBlocks = new HashMap<String, BlockRouteData>();
+		if(roadNetwork == null){
+			roadNetwork = new ArrayList<BlockRouteData>();
 		}
-		roadNetworkBlocks.clear(); //In case it isn't already
+		roadNetwork.clear(); //In case it isn't already
 		logger.log("Starting indexing of the road network... (This could take a long time)");
 		
 		blockScan(origin.getBlock());
@@ -338,7 +337,7 @@ public class NetworkConversionScan {
 		}
 		Vector vec = block.getLocation().toVector().clone();
 		String key = getKey(vec);
-		if(roadNetworkBlocks.containsKey(key)){
+		if(allBlocks.contains(vec)){
 			decrementScansRunning();
 			return;
 		}
@@ -366,8 +365,10 @@ public class NetworkConversionScan {
 				brd.setDirection(null);
 			}
 			roughSize++;
-			allBlocks.add(vec);
-			roadNetworkBlocks.put(key, brd);
+			synchronized(this){
+				roadNetwork.add(brd);
+				allBlocks.add(vec);
+			}
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){
 

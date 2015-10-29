@@ -20,14 +20,21 @@ public class Node implements Serializable {
 	
 	public Node(Location location){
 		this.trackerBlockSloc = new SerializableLocation(location);
+		getCarriagewayDirection();
 	}
 	
 	public void setLocation(Location loc){
+		this.loc = loc;
 		this.trackerBlockSloc = new SerializableLocation(loc);
 	}
 	
+	private transient Location loc;
+	
 	public Location getLocation(){
-		return trackerBlockSloc.getLocation(Bukkit.getServer());
+		if(loc == null){
+			loc = trackerBlockSloc.getLocation(Bukkit.getServer());
+		}
+		return loc;
 	}
 	
 	public Chunk getChunk(){

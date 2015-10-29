@@ -88,7 +88,6 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					}
 					liveCap = newCap;
 				}
-				
 				return;
 			}}, 100l, 100l); //Every 5s
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main.plugin, new Runnable(){

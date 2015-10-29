@@ -83,13 +83,19 @@ public class DrivenCar implements Serializable {
 		return getPreset() != null;
 	}
 	
+	private transient CarPreset preset;
+	
 	public CarPreset getPreset(){
 		if(!CarPresets.isCarPresetsUsed()){
 			return null;
 		}
+		if(preset != null){
+			return preset;
+		}
 		List<CarPreset> cp = CarPresets.getPresets();
 		for(CarPreset c:new ArrayList<CarPreset>(cp)){
 			if(ChatColor.translateAlternateColorCodes('&', c.getName()).equals(this.name)){
+				preset = c;
 				return c;
 			}
 		}

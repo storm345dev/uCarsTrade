@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import net.md_5.bungee.api.ChatColor;
@@ -258,8 +259,20 @@ public class NetworkConversionScan {
 		/*roughSize = roadNetwork.size();*/ //Make sure it's correct or it looks dodgy
 	}
 	
-	private Block getBlock(Vector v){
-		return new Location(origin.getWorld(), v.getX(), v.getY(), v.getZ()).getBlock();
+	private Block getBlock(final Vector v){
+		if(Bukkit.isPrimaryThread()){
+			return new Location(origin.getWorld(), v.getX(), v.getY(), v.getZ()).getBlock();
+		}
+		try {
+			return Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Block>(){
+
+				@Override
+				public Block call() throws Exception {
+					return new Location(origin.getWorld(), v.getX(), v.getY(), v.getZ()).getBlock();
+				}}).get();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 	private int countScanBranches(){

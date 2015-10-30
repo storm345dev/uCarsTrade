@@ -62,20 +62,20 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				int score = DynamicLagReducer.getResourceScore();
 				int newCap = liveCap;
 				double tps = DynamicLagReducer.getTPS();
-				if(score > 75 && tps > 18.5){
+				if(score > 75 && tps > 19.5){
 					newCap++;
 				}
-				else if(score < 70 || tps < 16.9){
+				else if(score < 70 || tps < 17){
 					newCap *= 0.5; //Half
 					newCap -= 10;
 				}
-				else if(score < 70 || tps < 17.0){
+				else if(score < 70 || tps < 18){
 					newCap -= 10;
 				}
-				else if(score < 70 || tps < 17.5){
+				else if(score < 70 || tps < 18.5){
 					newCap -= 5;
 				}
-				else if(score < 75 || tps < 18){
+				else if(score < 75 || tps < 18.6){
 					newCap--;
 				}
 				
@@ -176,7 +176,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 			@Override
 			public void run() {
-				synchronized(spawnedCount+""){
+				synchronized(AbstractAISpawnManager.this){
 					spawnedCount--;
 					if(spawnedCount < 0){
 						spawnedCount = 0;
@@ -193,7 +193,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 			@Override
 			public void run() {
-				synchronized(spawnedCount+""){
+				synchronized(AbstractAISpawnManager.this){
 					spawnedCount++;
 				}
 				return;

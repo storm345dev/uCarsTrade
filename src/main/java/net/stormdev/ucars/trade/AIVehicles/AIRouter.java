@@ -701,11 +701,10 @@ public class AIRouter {
 
 					@Override
 					public void run() {
+						main.plugin.aiSpawns.decrementSpawnedAICount();
 						main.plugin.carSaver.carNoLongerInUse(c.getId());
 						return;
-					}});
-				
-				main.plugin.aiSpawns.decrementSpawnedAICount();
+					}});				
 				return;
 			}});
 	}

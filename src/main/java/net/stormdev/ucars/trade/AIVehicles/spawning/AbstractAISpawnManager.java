@@ -314,11 +314,11 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							m.setDisplayBlock(c.getBaseDisplayBlock());
 						}
 						
-						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 							@Override
 							public void run() {
+								ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 								if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
 									plugin.carSaver.carNowInUse(m, c);
 									incrementSpawnedAICount();

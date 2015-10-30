@@ -137,8 +137,14 @@ public class UTradeListener implements Listener {
 			public void run() {
 				c.setNPC(false);
 				vehicle.removeMetadata("trade.npc", plugin);
-				CarStealEvent evt = new CarStealEvent(vehicle, player, c);
-				plugin.getServer().getPluginManager().callEvent(evt);
+				final CarStealEvent evt = new CarStealEvent(vehicle, player, c);
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						plugin.getServer().getPluginManager().callEvent(evt);
+						return;
+					}});
 				plugin.carSaver.carNowInUse(vehicle, c); //Update changes to car, aka it's not an npc
 				if(setPassenger){
 					vehicle.setPassenger(player);

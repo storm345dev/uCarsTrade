@@ -154,13 +154,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					Bukkit.getScheduler().runTask(plugin, new Runnable(){
-
-						@Override
-						public void run() {
-							randomNode.spawnAICarIfLogicalToDoSo();
-							return;
-						}});
+					randomNode.spawnAICarIfLogicalToDoSo();
 				}
 				return;
 			}}, spawnRate, spawnRate);

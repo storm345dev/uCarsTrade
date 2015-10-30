@@ -91,12 +91,12 @@ public class CarSaver {
 	}
 	
 	public void carNowInUse(final Vehicle v, final DrivenCar car){
-		v.removeMetadata(META, main.plugin);
-		v.setMetadata(META, new StatValue(car, main.plugin));
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override
 			public void run() {
+				v.removeMetadata(META, main.plugin);
+				v.setMetadata(META, new StatValue(car, main.plugin));
 				if(car == null || car.getId() == null){
 					throw new RuntimeException("DrivenCar is null!");
 				}

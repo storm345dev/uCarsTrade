@@ -1,7 +1,6 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import net.stormdev.ucarstrade.cars.DrivenCar;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,7 +22,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Villager;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -249,28 +246,7 @@ public class AIRouter {
 			return;
 		}		
 		
-		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
-			Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-	
-				@Override
-				public void run() {
-					List<Player> pls = new ArrayList<Player>(Bukkit.getOnlinePlayers());
-					double radiusSq = Math.pow(PLAYER_RADIUS, 2);
-					if(car.getTicksLived() > 2400){
-						radiusSq = 35*35; //30 blocks
-					}
-					for(Player pl:pls){
-						double d = pl.getLocation().clone().toVector().subtract(loc.clone().toVector()).lengthSquared();
-						if(d < radiusSq){
-							return; //Player in radius
-						}
-					}
-					
-					//No players in radius
-					despawnNPCCar(car, c);
-					return;
-				}});
-		}
+		
 		/*List<Entity> nearby = car.getNearbyEntities(PLAYER_RADIUS, 50, PLAYER_RADIUS); //20x20 radius
 		List<Player> nearbyPlayersList = new ArrayList<Player>();
 		if(main.random.nextInt(5) < 1){ // 1 in 5 chance
@@ -350,6 +326,25 @@ public class AIRouter {
 
 			@Override
 			public void run() {
+				
+				if(main.random.nextInt(5) < 1){ // 1 in 5 chance
+					List<Player> pls = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+					double radiusSq = Math.pow(PLAYER_RADIUS, 2);
+					if(car.getTicksLived() > 2400){
+						radiusSq = 35*35; //30 blocks
+					}
+					for(Player pl:pls){
+						double d = pl.getLocation().clone().toVector().subtract(loc.clone().toVector()).lengthSquared();
+						if(d < radiusSq){
+							return; //Player in radius
+						}
+					}
+					
+					//No players in radius
+					despawnNPCCar(car, c);
+					return;
+				}
+				
 				Vector carLoc = car.getLocation().toVector();
 				boolean nearbyCars = false;
 				for(Entity e:es){
@@ -717,12 +712,7 @@ public class AIRouter {
 		final Vector vel = new Vector(x,y,z); //Go to block
 		vd.setMotion(vel);
 		
-		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
-
-			@Override
-			public void run() {
-				car.setVelocity(vel);
-			}});
+		car.setVelocity(vel);
 	}
 	
 	public void relocateRoad(Minecart car, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
@@ -882,7 +872,7 @@ public class AIRouter {
 	
 	public static void despawnNPCCar(final Minecart car, final DrivenCar c){
 		//Remove me
-		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+		Runnable run = new Runnable(){
 
 			@Override
 			public void run() {
@@ -900,7 +890,13 @@ public class AIRouter {
 						return;
 					}});				
 				return;
-			}});
+			}};
+		if(Bukkit.isPrimaryThread()){
+			run.run();
+		}
+		else {
+			Bukkit.getScheduler().runTask(main.plugin, run);
+		}
 	}
 	
 	public static void despawnNPCCarNow(Minecart car, final DrivenCar c){

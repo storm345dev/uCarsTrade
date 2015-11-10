@@ -170,17 +170,20 @@ public class CarSaver {
 	}
 	public static void saveHashMap(Map<UUID, DrivenCar> map, String path)
 	{
-		try
-		{
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
-			oos.writeObject(map);
-			oos.flush();
-			oos.close();
-			//Handle I/O exceptions
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
+		synchronized(map){
+			HashMap<?, ?> hm = new HashMap<UUID, DrivenCar>(map);
+			try
+			{
+				ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+				oos.writeObject(hm);
+				oos.flush();
+				oos.close();
+				//Handle I/O exceptions
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	@SuppressWarnings("unchecked")

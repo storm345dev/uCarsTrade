@@ -11,6 +11,7 @@ public class VelocityData {
 	private volatile boolean stoppedForOtherCar = false;
 	private volatile boolean inProgressOfTurningAtJunction = false;
 	private volatile Location current;
+	private volatile Location targetBlockLoc = null;
 	private volatile int stationaryCount = 0;
 	
 	public VelocityData(BlockFace dir, Vector motion, Location current){
@@ -70,5 +71,11 @@ public class VelocityData {
 	}
 	public void setUpdatesSinceTurn(int updatesSinceTurn) {
 		this.updatesSinceTurn = updatesSinceTurn;
+	}
+	public Location getTargetBlockLoc() {
+		return targetBlockLoc;
+	}
+	public void setTargetBlockLoc(Location targetBlockLoc) {
+		this.targetBlockLoc = targetBlockLoc;
 	}
 }

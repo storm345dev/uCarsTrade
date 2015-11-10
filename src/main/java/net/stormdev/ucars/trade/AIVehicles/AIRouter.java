@@ -1,6 +1,7 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import net.stormdev.ucarstrade.cars.DrivenCar;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
@@ -22,6 +24,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Villager;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -41,6 +44,79 @@ public class AIRouter {
 	private Material roadEdge;
 	public static Material junction;
 	private uCarsAPI api;
+	
+	private volatile boolean runRoutingTask = true;
+	
+	private void startRoutingTask(){
+		new Thread(){
+			@Override
+			public void run(){				
+				long lastTickTime = System.currentTimeMillis();
+				long nextTickTime;
+				while(enabled && runRoutingTask){
+					lastTickTime = System.currentTimeMillis();
+					nextTickTime = lastTickTime+50;
+					//Update time info so we can be roughly every tick
+					
+					try {
+						for(World world:Bukkit.getServer().getWorlds()){
+							List<Entity> entities;
+							try {
+								entities = new ArrayList<Entity>(world.getEntities());
+							} catch (ConcurrentModificationException e) {
+								//Oh well; better performance to do this async and just let it fail sometimes
+								continue;
+							}
+							
+							for(Entity e:entities){
+								if(!(e instanceof Minecart)){
+									continue;
+								}
+								final Minecart m = (Minecart) e;
+								final DrivenCar c = main.plugin.carSaver.getCarInUse(m);
+								if(c == null
+										|| !c.isNPC()){
+									continue; //Not a car or not an npc car
+								}
+								Entity driver = m.getPassenger();
+								if(driver == null || !(driver instanceof Villager)){
+									Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable(){
+
+										@Override
+										public void run() {
+											if(c.isNPC() && m.isValid() && !m.isDead()){
+												//No longer an NPC car
+												m.removeMetadata("trade.npc", main.plugin);
+												c.setNPC(false);
+												main.plugin.carSaver.carNowInUse(m, c);
+											}
+											return;
+										}}, 2l);				
+									continue;
+								}
+								//Use AIRouter to route it
+								route(m, c);
+							}
+						}
+					} catch(Exception e){
+						e.printStackTrace();
+					}
+					
+					//Wait about a tick in time
+					long sleepTime = nextTickTime-System.currentTimeMillis();
+					if(sleepTime > 0){
+						try {
+							Thread.sleep(sleepTime);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						Thread.yield();
+					}
+				}
+				return;
+			}
+		}.start();
+	}
 	
 	public static boolean isEncodedRouting(){
 		return main.plugin.aiRouteMethod.equals(RouteMethod.ENCODED);
@@ -98,6 +174,13 @@ public class AIRouter {
 			enabled = false;
 		}
 		api = uCarsAPI.getAPI();
+		if(enabled){
+			this.startRoutingTask();
+		}
+	}
+	
+	public void stopRoutingTask(){
+		this.runRoutingTask = false;
 	}
 	
 	public static boolean isAIEnabled(){
@@ -145,7 +228,7 @@ public class AIRouter {
 		Vector vel = car.getVelocity();
 		
 		final Location loc = car.getLocation();
-		Block under = loc.getBlock().getRelative(BlockFace.DOWN, 2);
+		Block under = loc.clone().add(0, -2, 0).getBlock();
 		
 		double cx = loc.getX();
 		double cy = loc.getY();
@@ -302,7 +385,13 @@ public class AIRouter {
 			}});
 				
 		if(/*stop ||*/data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
-			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
+			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
+					return;
+				}});
 			return;
 		}
 
@@ -315,7 +404,10 @@ public class AIRouter {
 				under = under.getRelative(BlockFace.UP, 2);
 				brm = AITrackFollow.carriagewayDirection(under);
 				if(brm.getType() == null){
-					relocateRoad(car, under.getRelative(BlockFace.DOWN), loc, false, data);
+					/*relocateRoad(car, under.getRelative(BlockFace.DOWN), loc, false, data);*/
+					/*despawnNPCCar(car, c);
+*/
+					findRoad(car, c, speed, under.getRelative(BlockFace.DOWN), loc, false, data);
 					return;
 				}
 			}
@@ -335,7 +427,9 @@ public class AIRouter {
 				}
 			}
 			else{
-				relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);
+				/*despawnNPCCar(car, c);
+*/				/*relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);*/
+				findRoad(car, c, speed, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);
 				return;
 			}
 		}
@@ -347,8 +441,10 @@ public class AIRouter {
 		
 		if((brm.getDirection() == null && direction == null) || brm.getType() == null){ //Not on a road
 			//Try to recover
-			relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);
-			return;
+			/*relocateRoad(car, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);*/
+			findRoad(car, c, speed, car.getLocation().getBlock().getRelative(BlockFace.DOWN, 2), loc, brm.isJunction(), data);
+			/*despawnNPCCar(car, c);
+*/			return;
 		}
 		
 		if(brm.getDirection() != null){
@@ -401,10 +497,11 @@ public class AIRouter {
 		}*/
 		
 		Block next = nextTrack.nextBlock;
-		Block road = next.getRelative(BlockFace.UP);
+		Block road = next/*.getRelative(BlockFace.UP)*/;
 		while(isTrackBlock(road.getType())){
 			road = road.getRelative(BlockFace.UP);
 		}
+		vd.setTargetBlockLoc(road.getLocation().clone().add(0, -1, 0));
 		Block toDrive = road.getRelative(BlockFace.UP);
 		if(!toDrive.isEmpty()){
 			//Car has hit a wall
@@ -425,8 +522,14 @@ public class AIRouter {
 		
 		if(keepVel){
 			vel = data.getMotion();
-			car.removeMetadata("relocatingRoad", main.plugin);
-			car.setVelocity(vel);
+			final Vector v = vel;
+			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					car.setVelocity(v);
+					return;
+				}});
 			vd.incrementUpdatesSinceTurn();
 		}
 		else{
@@ -490,7 +593,14 @@ public class AIRouter {
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
-			car.setVelocity(vel);
+			final Vector v = vel;
+			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+				@Override
+				public void run() {
+					car.setVelocity(v);
+					return;
+				}});
 		}
 		Vector dirVec = vel.clone().setY(0).normalize();
 		if(dirVec.lengthSquared() > 0.01){
@@ -529,6 +639,100 @@ public class AIRouter {
 		
 		data.setDir(direction);		
 		return;
+	}
+	
+	public void findRoad(final Minecart car, DrivenCar c, double speed, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
+		vd.resetUpdatesSinceTurn();
+		
+		if(vd.getTargetBlockLoc() == null){
+			despawnNPCCar(car, c);
+			return;
+		}
+		
+		Location road = vd.getTargetBlockLoc().clone();
+		Block rb = road.getBlock();
+		Material rbt = rb.getType();
+		String rName = rbt.name().toLowerCase();
+		if(!isTrackBlock(rbt)){
+			despawnNPCCar(car, c);
+			return;
+		}
+		
+		Location toDriveLoc = road.add(0, 2, 0);
+		Block toDrive = toDriveLoc.getBlock();
+		if(!toDrive.isEmpty()){
+			despawnNPCCar(car, c);
+			return;
+		}
+		
+		Location carLoc = car.getLocation();
+
+		double cx = carLoc.getX();
+		double cy = carLoc.getY();
+		double cz = carLoc.getZ();
+		
+		//Calculate vector to get there...
+		double tx = toDrive.getX() + 0.5;
+		double ty = toDrive.getY() + 0.1;
+		if(rName.contains("step") && !rName.contains("double") 
+				&& ((int)rb.getData())<8 //Makes sure it's a bottom slab
+				){
+			ty -= 0.5;
+		}
+		if(rName.contains("carpet")){
+			ty -= 0.9;
+		}
+		double tz = toDrive.getZ() + 0.5;
+		
+		double x = tx - cx /*+ 0.5*/;
+		double y = ty - cy;
+		double z = tz - cz /*+ 0.5*/;
+		
+		/*if(y > 0.2){ //Going up
+			y+=0.2; //Help climb smoother
+		}*/
+		
+		double px = Math.abs(x);
+		double pz = Math.abs(z);
+		boolean ux = px > pz ? false:true;
+
+		double mult = speed * 0.15;
+		
+		if(y<2){
+			if (ux) {
+				// x is smaller
+				// long mult = (long) (pz/speed);
+				x = (x / pz) * mult;
+				z = (z / pz) * mult;
+			} else {
+				// z is smaller
+				// long mult = (long) (px/speed);
+				x = (x / px) * mult;
+				z = (z / px) * mult;
+			}
+		}
+/*			if(px > 0.1 && pz > 0.1 && AITrackFollow.isCompassDir(direction)) { //They aren't going in a totally straight line, slow it down so they don't wiggle everywhere
+			//System.out.println("DECREMENTING VECTOR");
+			x *= 0.1;
+			z *= 0.1;
+		}*/
+		/*if(AITrackFollow.isDiagonalDir(direction)){
+			x *= 0.3;
+			z *= 0.3;
+		}*/
+		/*if(y>0.2){ //Going upwards
+			y += 3;
+		}*/
+		
+		final Vector vel = new Vector(x,y,z); //Go to block
+		vd.setMotion(vel);
+		
+		Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				car.setVelocity(vel);
+			}});
 	}
 	
 	public void relocateRoad(Minecart car, Block under, Location currentLoc, boolean atJunction, VelocityData vd){

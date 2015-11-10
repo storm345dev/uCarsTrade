@@ -65,17 +65,17 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				if(score > 75 && tps > 19.5){
 					newCap++;
 				}
-				else if(score < 70 || tps < 17){
+				else if(score < 70 || tps < 18){
 					newCap *= 0.5; //Half
 					newCap -= 10;
 				}
-				else if(score < 70 || tps < 18){
+				else if(score < 70 || tps < 18.6){
 					newCap -= 10;
 				}
-				else if(score < 70 || tps < 18.5){
+				else if(score < 70 || tps < 18.8){
 					newCap -= 5;
 				}
-				else if(score < 75 || tps < 18.6){
+				else if(score < 75 || tps < 19.1){
 					newCap--;
 				}
 				

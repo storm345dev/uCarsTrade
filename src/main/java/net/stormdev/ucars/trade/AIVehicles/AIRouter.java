@@ -45,9 +45,9 @@ public class AIRouter {
 	public static Material junction;
 	private uCarsAPI api;
 	
-	private volatile boolean runRoutingTask = true;
+	/*private volatile boolean runRoutingTask = true;*/
 	
-	private void startRoutingTask(){
+	/*private void startRoutingTask(){
 		new Thread(){
 			@Override
 			public void run(){				
@@ -95,7 +95,17 @@ public class AIRouter {
 									continue;
 								}
 								//Use AIRouter to route it
-								route(m, c);
+								Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
+
+									@Override
+									public void run() {
+										try {
+											route(m, c);
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+										return;
+									}});
 							}
 						}
 					} catch(Exception e){
@@ -116,7 +126,7 @@ public class AIRouter {
 				return;
 			}
 		}.start();
-	}
+	}*/
 	
 	public static boolean isEncodedRouting(){
 		return main.plugin.aiRouteMethod.equals(RouteMethod.ENCODED);
@@ -174,14 +184,14 @@ public class AIRouter {
 			enabled = false;
 		}
 		api = uCarsAPI.getAPI();
-		if(enabled){
+		/*if(enabled){
 			this.startRoutingTask();
-		}
+		}*/
 	}
 	
-	public void stopRoutingTask(){
+	/*public void stopRoutingTask(){
 		this.runRoutingTask = false;
-	}
+	}*/
 	
 	public static boolean isAIEnabled(){
 		return enabled && main.plugin.aiSpawns.isNPCCarsSpawningNow();
@@ -385,13 +395,7 @@ public class AIRouter {
 			}});
 				
 		if(/*stop ||*/data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
-			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
-
-				@Override
-				public void run() {
-					car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
-					return;
-				}});
+			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}
 
@@ -522,14 +526,7 @@ public class AIRouter {
 		
 		if(keepVel){
 			vel = data.getMotion();
-			final Vector v = vel;
-			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
-
-				@Override
-				public void run() {
-					car.setVelocity(v);
-					return;
-				}});
+			car.setVelocity(vel);
 			vd.incrementUpdatesSinceTurn();
 		}
 		else{
@@ -593,14 +590,7 @@ public class AIRouter {
 			vel = new Vector(x,y,z); //Go to block
 			car.removeMetadata("relocatingRoad", main.plugin);
 			data.setMotion(vel);
-			final Vector v = vel;
-			Bukkit.getScheduler().runTask(main.plugin, new Runnable(){
-
-				@Override
-				public void run() {
-					car.setVelocity(v);
-					return;
-				}});
+			car.setVelocity(vel);
 		}
 		Vector dirVec = vel.clone().setY(0).normalize();
 		if(dirVec.lengthSquared() > 0.01){

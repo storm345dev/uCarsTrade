@@ -244,7 +244,7 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	
-	/*@EventHandler
+	@EventHandler
 	void NpcController(VehicleUpdateEvent event){
 		try {
 			Vehicle v = event.getVehicle();
@@ -279,7 +279,7 @@ public class UTradeListener implements Listener {
 			//Removed by worldedit etc....
 		}
 		return;
-	}*/
+	}
 	
     @EventHandler (priority = EventPriority.LOW) //Call early
     void vehicleExit(VehicleExitEvent event){

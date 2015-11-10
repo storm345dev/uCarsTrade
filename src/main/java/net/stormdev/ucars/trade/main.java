@@ -478,7 +478,6 @@ public class main extends JavaPlugin {
 			ucars.unHookPlugin(this);
 			}
 			this.aiSpawns.shutdown();
-			this.aiController.stopRoutingTask();
 			for(World w:Bukkit.getWorlds()){
 				for(Entity e:new ArrayList<Entity>(w.getEntities())){
 					try {

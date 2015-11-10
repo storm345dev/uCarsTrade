@@ -54,7 +54,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		if(getSpawnedAICount() < 1){
 			return true;
 		}
-		return main.random.nextInt(getSpawnedAICount()) < 1; //1/7 chance
+		return main.random.nextInt(7) < 1; //1/7 chance
 	}
 	
 	private int randomMinCarSpacing(){

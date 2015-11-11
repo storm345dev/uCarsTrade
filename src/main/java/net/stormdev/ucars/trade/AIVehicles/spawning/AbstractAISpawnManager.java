@@ -233,6 +233,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 
 			@Override
 			public void run() {
+				c.getPreset(); //Init preset if not already
+				
 				List<Player> nearbyPlayers = new ArrayList<Player>();
 				List<Entity> all;
 				final List<Entity> nearby = new ArrayList<Entity>();
@@ -257,7 +259,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				}
 				
 				final List<Player> nearbyPlayersList = nearbyPlayers;
-				plugin.getServer().getScheduler().runTask(plugin, new Runnable(){
+				final String name = randomName();
+				plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO Lag causing task
 
 					public void run() {				
 						final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
@@ -288,7 +291,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						v.setBreed(false);
 						v.setAgeLock(true);
 						v.setCanPickupItems(false);
-						v.setCustomName(randomName());
+						v.setCustomName(name);
 						v.setCustomNameVisible(true);
 						m.setPassenger(v);
 					
@@ -314,17 +317,11 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							m.setDisplayBlock(c.getBaseDisplayBlock());
 						}
 						
-						Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
-
-							@Override
-							public void run() {
-								ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
-								if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
-									plugin.carSaver.carNowInUse(m, c);
-									incrementSpawnedAICount();
-								}
-								return;
-							}});
+						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
+						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned
+							plugin.carSaver.carNowInUse(m, c);
+							incrementSpawnedAICount();
+						}
 						return;
 					}});
 				return;

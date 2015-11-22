@@ -262,7 +262,10 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				final String name = randomName();
 				plugin.getServer().getScheduler().runTask(plugin, new Runnable(){ //TODO Lag causing task
 
-					public void run() {				
+					public void run() {		
+						if(!spawnLoc.getChunk().isLoaded()){
+							return;
+						}
 						final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
 						
 						if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){

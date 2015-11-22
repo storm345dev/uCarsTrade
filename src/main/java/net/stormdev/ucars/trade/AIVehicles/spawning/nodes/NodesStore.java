@@ -206,7 +206,11 @@ public class NodesStore {
 	}
 	
 	public List<Node> getActiveNodes(final Location location){
-		Chunk chunk = null;
+		int cx = location.getBlockX() >> 4;
+		int cz = location.getBlockZ() >> 4;
+		ChunkCoord cord = new ChunkCoord(location.getWorld(), cx, cz);
+		return getActiveNodes(cord);
+		/*Chunk chunk = null;
 		if(Bukkit.isPrimaryThread()){
 			chunk = location.getChunk();
 		}
@@ -226,7 +230,7 @@ public class NodesStore {
 		if(chunk == null){
 			return new ArrayList<Node>();
 		}
-		return getActiveNodes(chunk);
+		return getActiveNodes(chunk);*/
 	}
 	
 	public List<Node> getActiveNodes(Chunk chunk){
@@ -243,12 +247,12 @@ public class NodesStore {
 	}
 	
 	private List<Node> getChunkActiveNodes(ChunkCoord coord){
-		List<Node> chunkNodes = new ArrayList<Node>();
+		List<Node> chunkNodes = nodesByActiveChunks.get(coord);/*new ArrayList<Node>();
 		for(ChunkCoord key:new ArrayList<ChunkCoord>(new HashMap<ChunkCoord, List<Node>>(nodesByActiveChunks).keySet())){
 			if(key.isEqualTo(coord)){
 				chunkNodes = nodesByActiveChunks.get(key);
 			}
-		}
+		}*/
 		return chunkNodes;
 	}
 	

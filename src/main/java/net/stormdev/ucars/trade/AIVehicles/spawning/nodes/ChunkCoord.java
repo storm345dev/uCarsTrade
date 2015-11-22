@@ -77,6 +77,11 @@ public class ChunkCoord implements Serializable {
 	}
 	
 	@Override
+	public int hashCode(){
+		return worldUUID.hashCode()+x+z;
+	}
+	
+	@Override
 	public boolean equals(Object obj){
 		if(!(obj instanceof ChunkCoord)){
 			return false;

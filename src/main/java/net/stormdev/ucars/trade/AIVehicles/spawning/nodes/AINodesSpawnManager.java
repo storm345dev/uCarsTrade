@@ -3,7 +3,6 @@ package net.stormdev.ucars.trade.AIVehicles.spawning.nodes;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -27,14 +26,18 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
 		nodes = new NodesStore(nodesSaveFile);
-		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
-			main.config.set("general.ai.minSpawnDistanceFromPlayers", 30);
-		}
-		minDistance = main.config.getInt("general.ai.minSpawnDistanceFromPlayers");
 		if(!main.config.contains("general.ai.maxSpawnDistanceFromPlayers")){
 			main.config.set("general.ai.maxSpawnDistanceFromPlayers", 70);
 		}
 		maxDistance = main.config.getInt("general.ai.maxSpawnDistanceFromPlayers");
+		maxDistance = Math.min(maxDistance, (Bukkit.getServer().getViewDistance()*16)-10);
+		if(!main.config.contains("general.ai.minSpawnDistanceFromPlayers")){
+			main.config.set("general.ai.minSpawnDistanceFromPlayers", 30);
+		}
+		minDistance = main.config.getInt("general.ai.minSpawnDistanceFromPlayers");
+		if(maxDistance - minDistance < 10){
+			minDistance = maxDistance - 10;
+		}
 		AIRouter.PLAYER_RADIUS = maxDistance;
 		plugin.saveConfig();
 	}
@@ -54,7 +57,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		if(getSpawnedAICount() < 1){
 			return true;
 		}
-		return main.random.nextInt(7) < 1; //1/7 chance
+		return main.random.nextInt(7) < 1;
 	}
 	
 	private int randomMinCarSpacing(){
@@ -133,22 +136,16 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					int minSpacing = randomMinCarSpacing();
 					final List<Entity> ents = new ArrayList<Entity>();
 					try {
-						Bukkit.getScheduler().callSyncMethod(plugin, new Callable<Void>(){
-
-							@Override
-							public Void call() throws Exception {
-								ents.addAll(randomNodeLoc.getWorld().getEntities());
-								return null;
-							}}).get();
+						ents.addAll(randomNodeLoc.getWorld().getEntities());
 					} catch (Exception e1) {
-						e1.printStackTrace();
+						continue;
 					}
 					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
 						if(!e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
 							continue;
 						}
 						Location l = e.getLocation();
-						if(l.distanceSquared(randomNodeLoc) < minSpacing){
+						if(l.toVector().clone().subtract(randomNodeLoc.toVector()).lengthSquared() < minSpacing){
 							closeCar = true;
 							break;
 						}

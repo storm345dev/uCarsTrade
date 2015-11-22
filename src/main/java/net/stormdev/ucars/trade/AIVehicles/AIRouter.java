@@ -877,10 +877,10 @@ public class AIRouter {
 			@Override
 			public void run() {
 				Entity pass = car.getPassenger();
-				car.remove();
 				if(pass != null){
 					pass.remove();
 				}
+				car.remove();
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 					@Override

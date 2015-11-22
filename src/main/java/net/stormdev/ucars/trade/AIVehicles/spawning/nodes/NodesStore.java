@@ -209,7 +209,11 @@ public class NodesStore {
 		int cx = location.getBlockX() >> 4;
 		int cz = location.getBlockZ() >> 4;
 		ChunkCoord cord = new ChunkCoord(location.getWorld(), cx, cz);
-		return getActiveNodes(cord);
+		List<Node> res = getActiveNodes(cord);
+		if(res == null){
+			return new ArrayList<Node>();
+		}
+		return res;
 		/*Chunk chunk = null;
 		if(Bukkit.isPrimaryThread()){
 			chunk = location.getChunk();

@@ -19,7 +19,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private static NodesStore nodes = null;
 	private BukkitTask task = null;
-	private long spawnRate = 80l;
+	private long spawnRate = 60l;
 	public static int minDistance = 30;
 	private int maxDistance = 70;
 	
@@ -90,7 +90,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					int chance = 50;
+					int chance = 35;
 					chance -= (activeNodes.size()*0.5d); //Make it more likely to spawn a car; the more nodes there are active
 					if(chance < 2){
 						chance = 2;
@@ -125,8 +125,8 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					
 					chance = (int) ((nearCount*2.3) + 1);
-					if(chance < 50){
-						chance = 50;
+					if(chance < 20){
+						chance = 20;
 					}
 					if(!(main.random.nextInt(100) <= chance)){ //Avoids LOTS of cars spawning where there's LOTS of players
 						continue;

@@ -259,18 +259,12 @@ public class UTradeListener implements Listener {
 			}
 			Entity driver = ucars.listener.getDrivingPassengerOfCar(m);
 			if(driver == null || !(driver instanceof Villager)){
-				Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
-
-					@Override
-					public void run() {
-						if(c.isNPC() && m.isValid() && !m.isDead()){
-							//No longer an NPC car
-							m.removeMetadata("trade.npc", main.plugin);
-							c.setNPC(false);
-							plugin.carSaver.carNowInUse(m, c);
-						}
-						return;
-					}}, 2l);				
+				if(c.isNPC() && m.isValid() && !m.isDead()){
+					//No longer an NPC car
+					m.removeMetadata("trade.npc", main.plugin);
+					c.setNPC(false);
+					plugin.carSaver.carNowInUse(m, c);
+				}				
 				return;
 			}
 			//Use AIRouter to route it

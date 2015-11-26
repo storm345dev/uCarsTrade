@@ -29,6 +29,10 @@ public class VelocityData {
 		}
 	}
 	
+	public void notStationary(){
+		stationaryCount = 0;
+	}
+	
 	public int getStationaryCount(){
 		return this.stationaryCount;
 	}

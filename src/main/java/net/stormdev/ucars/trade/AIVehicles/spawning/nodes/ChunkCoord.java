@@ -78,7 +78,11 @@ public class ChunkCoord implements Serializable {
 	
 	@Override
 	public int hashCode(){
-		return worldUUID.hashCode()+x+z;
+		int hashCode = 0;
+	    hashCode = (hashCode * 397) ^ this.worldUUID.hashCode();
+	    hashCode = (hashCode * 397) ^ this.x;
+	    hashCode = (hashCode * 397) ^ this.z;
+	    return hashCode;
 	}
 	
 	@Override

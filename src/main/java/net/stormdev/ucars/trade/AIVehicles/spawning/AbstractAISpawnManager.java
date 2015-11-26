@@ -10,6 +10,7 @@ import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.TrackingData;
 import net.stormdev.ucars.trade.AIVehicles.VelocityData;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
@@ -296,6 +297,11 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						v.setCanPickupItems(false);
 						v.setCustomName(name);
 						v.setCustomNameVisible(true);
+						try {
+							NoMobAI.noAI(v);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 						m.setPassenger(v);
 					
 						//Make it a car

@@ -170,7 +170,7 @@ public class CarSaver {
 	}
 	public static void saveHashMap(Map<UUID, DrivenCar> map, String path)
 	{
-		synchronized(map){
+		synchronized(main.plugin.carSaver){
 			HashMap<?, ?> hm = new HashMap<UUID, DrivenCar>(map);
 			try
 			{

@@ -312,8 +312,8 @@ public class AIRouter {
 		}
 		
 		data.updateLocation(car.getLocation());
-		
-		long stationaryRemoveTime = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car) ? 2000:200;
+		boolean supposedToBeStopped = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car);
+		long stationaryRemoveTime = supposedToBeStopped ? 2000:200;
 		
 		if(data.getStationaryCount() > stationaryRemoveTime){ //Being stationary a while
 			despawnNPCCar(car, c);
@@ -389,7 +389,8 @@ public class AIRouter {
 				return;
 			}});
 				
-		if(/*stop ||*/data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car)){
+		if(/*stop ||*/supposedToBeStopped){
+			vd.notStationary();
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}

@@ -19,7 +19,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private static NodesStore nodes = null;
 	private BukkitTask task = null;
-	private long spawnRate = 60l;
+	private long spawnRate = 35l;
 	public static int minDistance = 30;
 	private int maxDistance = 70;
 	
@@ -57,11 +57,11 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		if(getSpawnedAICount() < 1){
 			return true;
 		}
-		return main.random.nextInt(3) < 1;
+		return main.random.nextInt(4) < 1;
 	}
 	
-	private int randomMinCarSpacing(){
-		return main.random.nextInt(10-3) + 3;
+	private int randomMinCarSpacingSquared(){
+		return main.random.nextInt(100-4) + 4;
 	}
 
 	@Override
@@ -90,13 +90,13 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					int chance = 35;
+					int chance = 20;
 					chance -= (activeNodes.size()*0.5d); //Make it more likely to spawn a car; the more nodes there are active
-					if(chance < 2){
-						chance = 2;
+					if(chance < 0){
+						chance = 0;
 					}
 					
-					if(!(main.random.nextInt(chance) < 1)){
+					if(!(chance == 0 || main.random.nextInt(chance) < 1)){
 						continue;
 					}
 					
@@ -124,24 +124,21 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					chance = (int) ((nearCount*2.3) + 1);
-					if(chance < 20){
-						chance = 20;
-					}
-					if(!(main.random.nextInt(100) <= chance)){ //Avoids LOTS of cars spawning where there's LOTS of players
+					chance = (int) ((nearCount));
+					if(!(chance == 0 || main.random.nextInt(50) > chance)){ //Avoids LOTS of cars spawning where there's LOTS of players
 						continue;
 					}
 					
 					boolean closeCar = false;
-					int minSpacing = randomMinCarSpacing();
+					int minSpacing = randomMinCarSpacingSquared();
 					final List<Entity> ents = new ArrayList<Entity>();
 					try {
 						ents.addAll(randomNodeLoc.getWorld().getEntities());
 					} catch (Exception e1) {
-						continue;
+						e1.printStackTrace();
 					}
 					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
-						if(!e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc")){
+						if(!e.getType().equals(EntityType.MINECART) || !e.hasMetadata("trade.npc")){
 							continue;
 						}
 						Location l = e.getLocation();

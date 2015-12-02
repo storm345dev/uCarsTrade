@@ -83,7 +83,7 @@ public class Node implements Serializable {
 	private transient boolean carSafeToSpawn = false;
 	
 	public void spawnAICarIfLogicalToDoSo(){
-		if((System.currentTimeMillis() - lastSpawnTime) < 2500){ //2.5 second cooldown
+		if((System.currentTimeMillis() - lastSpawnTime) < 5000){ //5 second cooldown
 			return;
 		}
 		/*Block tracker = getLocation().getBlock();*/

@@ -129,13 +129,15 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					boolean closeCar = false;
+					/*boolean closeCar = false;
 					int minSpacing = randomMinCarSpacingSquared();
 					final List<Entity> ents = new ArrayList<Entity>();
 					try {
+						Bukkit.getS
 						ents.addAll(randomNodeLoc.getWorld().getEntities());
 					} catch (Exception e1) {
 						e1.printStackTrace();
+						continue;
 					}
 					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
 						if(!e.getType().equals(EntityType.MINECART) || !e.hasMetadata("trade.npc")){
@@ -149,7 +151,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					if(closeCar){
 						continue;
-					}
+					}*/
 					
 					randomNode.spawnAICarIfLogicalToDoSo();
 				}

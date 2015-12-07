@@ -2,7 +2,9 @@ package net.stormdev.ucars.trade.AIVehicles.spawning.nodes;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -10,6 +12,7 @@ import net.stormdev.ucars.trade.AIVehicles.spawning.AbstractAISpawnManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -19,9 +22,12 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private static NodesStore nodes = null;
 	private BukkitTask task = null;
+	private BukkitTask task2 = null;
 	private long spawnRate = 35l;
 	public static int minDistance = 30;
 	private int maxDistance = 70;
+	
+	public static Map<String, List<Entity>> entitiesInWorld = new HashMap<String, List<Entity>>();
 	
 	public AINodesSpawnManager(main plugin, boolean enabled, File nodesSaveFile) {
 		super(plugin, enabled);
@@ -51,6 +57,10 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 		if(task != null){
 			task.cancel();
 		}
+		if(task2 != null){
+			task2.cancel();
+			this.entitiesInWorld.clear();
+		}
 	}
 	
 	private boolean randomDoSpawn(){
@@ -68,6 +78,15 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 	public void initSpawnTask() {
 		final double minDistanceSquared = Math.pow(minDistance, 2);
 		final double maxDistanceSquared = Math.pow(maxDistance, 2);
+		task2 = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				for(World w:Bukkit.getWorlds()){
+					entitiesInWorld.put(w.getName(), new ArrayList<Entity>(w.getEntities()));
+				}
+				return;
+			}}, 20l, 20l);
 		task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 			@Override
@@ -129,12 +148,14 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					
-					/*boolean closeCar = false;
+					boolean closeCar = false;
 					int minSpacing = randomMinCarSpacingSquared();
 					final List<Entity> ents = new ArrayList<Entity>();
 					try {
-						Bukkit.getS
-						ents.addAll(randomNodeLoc.getWorld().getEntities());
+						List<Entity> inWorld = entitiesInWorld.get(randomNodeLoc.getWorld().getName());
+						if(inWorld != null){
+							ents.addAll(inWorld);
+						}
 					} catch (Exception e1) {
 						e1.printStackTrace();
 						continue;
@@ -151,7 +172,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 					}
 					if(closeCar){
 						continue;
-					}*/
+					}
 					
 					randomNode.spawnAICarIfLogicalToDoSo();
 				}

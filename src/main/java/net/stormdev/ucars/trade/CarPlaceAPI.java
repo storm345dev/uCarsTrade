@@ -56,8 +56,10 @@ public class CarPlaceAPI {
 				|| (!ne.isEmpty() && !ne.isLiquid())
 				|| (!nw.isEmpty() && !nw.isLiquid())
 				|| (!sw.isEmpty() && !sw.isLiquid())){
-			car.remove();
-			return null;
+			if(placer != null){
+				car.remove();
+				return null;
+			}
 		}
 		double health = carData.getHealth();
 		CarHealthData chd = ucars.listener.getCarHealthHandler(car);

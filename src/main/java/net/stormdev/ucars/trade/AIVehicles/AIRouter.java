@@ -221,7 +221,11 @@ public class AIRouter {
 		VelocityData data = new VelocityData(null, null, car.getLocation());
 		if(car.hasMetadata("trade.npc")){
 			List<MetadataValue> ms = car.getMetadata("trade.npc");
-			data = (VelocityData) ms.get(0).value();
+			try {
+				data = (VelocityData) ms.get(0).value();
+			} catch (Exception e) {
+				car.removeMetadata("trade.npc", main.plugin);
+			}
 		}
 		return data;
 	}

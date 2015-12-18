@@ -41,7 +41,12 @@ public class AITrackFollow {
 	
 	public static BlockRouteData carriagewayDirection(Block roadSpawnBlock){
 		if(AIRouter.isEncodedRouting()){
-			return RouteDecoder.getDirection(roadSpawnBlock.getType(), roadSpawnBlock.getData());
+			BlockRouteData brd = RouteDecoder.getDirection(roadSpawnBlock.getType(), roadSpawnBlock.getData());
+			if(brd == null || (brd.getType() == null && brd.getDirection() == null)){
+				Block under = roadSpawnBlock.getRelative(BlockFace.DOWN);
+				brd = RouteDecoder.getDirection(under.getType(), under.getData());
+			}
+			return brd;
 		}
 		
 		if(roadSpawnBlock.getType().equals(AIRouter.junction)){

@@ -45,6 +45,10 @@ public class AITrackFollow {
 			if(brd == null || (brd.getType() == null && brd.getDirection() == null)){
 				Block under = roadSpawnBlock.getRelative(BlockFace.DOWN);
 				brd = RouteDecoder.getDirection(under.getType(), under.getData());
+				if(brd == null || (brd.getType() == null && brd.getDirection() == null)){
+					under = under.getRelative(BlockFace.DOWN);
+					brd = RouteDecoder.getDirection(under.getType(), under.getData());
+				}
 			}
 			return brd;
 		}

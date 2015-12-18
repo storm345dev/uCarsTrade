@@ -52,7 +52,6 @@ public class CarSaver {
 							}
 							//No entity matched it!
 							inUse.remove(id);
-							main.logger.info("Unlinked vehicle data "+id+"! Removed from map!");
 						}
 						return;
 					}});

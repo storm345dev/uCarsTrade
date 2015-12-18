@@ -871,6 +871,12 @@ public class AIRouter {
 		return;
 	}
 	
+	public static void clearNPCMeta(Vehicle car){
+		car.removeMetadata("trade.npc", main.plugin);
+		car.removeMetadata("relocatingRoad", main.plugin);
+		car.removeMetadata("npc.turning", main.plugin);
+	}
+	
 	public static void despawnNPCCar(final Minecart car, final DrivenCar c){
 		//Remove me
 		Runnable run = new Runnable(){
@@ -881,6 +887,7 @@ public class AIRouter {
 				if(pass != null){
 					pass.remove();
 				}
+				clearNPCMeta(car);
 				car.remove();
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
@@ -903,6 +910,7 @@ public class AIRouter {
 	public static void despawnNPCCarNow(Minecart car, final DrivenCar c){
 		//Remove me
 		Entity pass = car.getPassenger();
+		clearNPCMeta(car);
 		car.remove();
 		if(pass != null){
 			pass.remove();

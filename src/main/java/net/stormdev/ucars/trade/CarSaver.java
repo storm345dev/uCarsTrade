@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,13 +24,40 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.useful.ucarsCommon.StatValue;
 
 public class CarSaver {
-	private static final String META = "car.drivenCarMeta";
-	private volatile Map<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>();
+	public static final String META = "car.drivenCarMeta";
+	private volatile Map<UUID, DrivenCar> inUse = new ConcurrentHashMap<UUID, DrivenCar>(200, 0.75f, 2);
 	/*private volatile Map<UUID, DrivenCar> cache = new ConcurrentHashMap<UUID, DrivenCar>();*/
 	
 	File newSaveFile = null;
 	public CarSaver(File newSaveFile){
 		this.newSaveFile = newSaveFile;
+		Bukkit.getScheduler().runTaskTimer(main.plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				//Remove removed entities from inUse
+				final List<Entity> entities = new ArrayList<Entity>();
+				for(World w:Bukkit.getWorlds()){
+					entities.addAll(w.getEntities());
+				}
+				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
+
+					@Override
+					public void run() {
+						mainLoop: for(UUID id:new ArrayList<UUID>(inUse.keySet())){
+							for(Entity e:entities){
+								if(e.getUniqueId().equals(id)){
+									continue mainLoop;
+								}
+							}
+							//No entity matched it!
+							inUse.remove(id);
+							main.logger.info("Unlinked vehicle data "+id+"! Removed from map!");
+						}
+						return;
+					}});
+				return;
+			}}, 180*20l, 180*20l);
 	}
 	
 	public boolean isAUCar(Vehicle v){

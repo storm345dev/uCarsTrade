@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.stormdev.ucars.stats.StatType;
+import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
@@ -126,6 +127,7 @@ public class UTradeListener implements Listener {
 			//Has an NPC riding it
 			vehicle.eject();
 			e.remove();
+			AIRouter.clearNPCMeta(vehicle);
 		}
 		if(setPassenger){
 			if(player.getVehicle() != null){
@@ -157,6 +159,10 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	void aiCarDie(VehicleDestroyEvent event){
+		if(!event.isCancelled() && event.getVehicle() instanceof Minecart){
+			main.plugin.carSaver.carNoLongerInUse(event.getVehicle().getUniqueId());
+			event.getVehicle().removeMetadata(CarSaver.META, main.plugin);
+		}
 		if(!event.getVehicle().hasMetadata("trade.npc") || event.isCancelled() || event.getVehicle().hasMetadata("car.destroyed")){
 			return;
 		}
@@ -178,6 +184,7 @@ public class UTradeListener implements Listener {
 		}
 		List<Entity> near = veh.getNearbyEntities(5, 5, 5);
 		
+		AIRouter.clearNPCMeta(veh);
 		veh.remove();
 		event.setCancelled(true);
 		

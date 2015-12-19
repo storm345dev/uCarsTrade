@@ -53,6 +53,7 @@ import com.useful.uCarsAPI.ItemCarCheck;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.Colors;
 import com.useful.ucars.ucars;
+import com.useful.ucars.util.UEntityMeta;
 
 public class main extends JavaPlugin {
 	public static YamlConfiguration lang = new YamlConfiguration();
@@ -481,7 +482,7 @@ public class main extends JavaPlugin {
 			for(World w:Bukkit.getWorlds()){
 				for(Entity e:new ArrayList<Entity>(w.getEntities())){
 					try {
-						if(e.getType().equals(EntityType.MINECART) && e.hasMetadata("trade.npc") && e instanceof Vehicle){
+						if(e.getType().equals(EntityType.MINECART) && UEntityMeta.hasMetadata(e, "trade.npc") && e instanceof Vehicle){
 							final DrivenCar c = plugin.carSaver.getCarInUse((Vehicle) e);
 							if(c == null
 									|| !c.isNPC()){

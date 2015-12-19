@@ -18,6 +18,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.useful.ucars.util.UEntityMeta;
+
 public class AINodesSpawnManager extends AbstractAISpawnManager {
 
 	private static NodesStore nodes = null;
@@ -161,7 +163,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
-						if(!e.getType().equals(EntityType.MINECART) || !e.hasMetadata("trade.npc")){
+						if(!e.getType().equals(EntityType.MINECART) || !UEntityMeta.hasMetadata(e, "trade.npc")){
 							continue;
 						}
 						Location l = e.getLocation();

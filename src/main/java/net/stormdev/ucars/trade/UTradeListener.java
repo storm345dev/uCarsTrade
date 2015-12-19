@@ -91,6 +91,7 @@ import com.useful.ucars.Lang;
 import com.useful.ucars.PlaceManager;
 import com.useful.ucars.ucarDeathEvent;
 import com.useful.ucars.ucars;
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class UTradeListener implements Listener {
@@ -106,7 +107,7 @@ public class UTradeListener implements Listener {
 	}
 	
 	void npcCarSteal(final Minecart vehicle, final Player player, final DrivenCar c, final boolean setPassenger){
-		if(!vehicle.hasMetadata("trade.npc") || !c.isNPC()){
+		if(!UEntityMeta.hasMetadata(vehicle, "trade.npc") || !c.isNPC()){
 			return; //Not an npc
 		}
 		if(!stealNPC){
@@ -138,7 +139,7 @@ public class UTradeListener implements Listener {
 
 			public void run() {
 				c.setNPC(false);
-				vehicle.removeMetadata("trade.npc", plugin);
+				UEntityMeta.removeMetadata(vehicle, "trade.npc");
 				final CarStealEvent evt = new CarStealEvent(vehicle, player, c);
 				Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
@@ -161,9 +162,9 @@ public class UTradeListener implements Listener {
 	void aiCarDie(VehicleDestroyEvent event){
 		if(!event.isCancelled() && event.getVehicle() instanceof Minecart){
 			main.plugin.carSaver.carNoLongerInUse(event.getVehicle().getUniqueId());
-			event.getVehicle().removeMetadata(CarSaver.META, main.plugin);
+			UEntityMeta.removeMetadata(event.getVehicle(), CarSaver.META);
 		}
-		if(!event.getVehicle().hasMetadata("trade.npc") || event.isCancelled() || event.getVehicle().hasMetadata("car.destroyed")){
+		if(!UEntityMeta.hasMetadata(event.getVehicle(), "trade.npc") || event.isCancelled() || event.getVehicle().hasMetadata("car.destroyed") || UEntityMeta.hasMetadata(event.getVehicle(), "car.destroyed")){
 			return;
 		}
 		
@@ -233,7 +234,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		
-		if(cart.hasMetadata("trade.npc")){
+		if(UEntityMeta.hasMetadata(cart, "trade.npc")){
 			
 			final DrivenCar c = plugin.carSaver.getCarInUse(cart);
 			if(c == null){
@@ -268,7 +269,7 @@ public class UTradeListener implements Listener {
 			if(driver == null || !(driver instanceof Villager)){
 				if(c.isNPC() && m.isValid() && !m.isDead()){
 					//No longer an NPC car
-					m.removeMetadata("trade.npc", main.plugin);
+					UEntityMeta.removeMetadata(m, "trade.npc");
 					c.setNPC(false);
 					plugin.carSaver.carNowInUse(m, c);
 				}				
@@ -289,7 +290,7 @@ public class UTradeListener implements Listener {
     		return; //Don't bother
     	}
     	Vehicle veh = event.getVehicle();
-    	if(veh.hasMetadata("safeExit.ignore")){
+    	if(veh.hasMetadata("safeExit.ignore") || UEntityMeta.hasMetadata(veh, "safeExit.ignore")){
     		return;
     	}
     	final Location loc = veh.getLocation();
@@ -401,7 +402,7 @@ public class UTradeListener implements Listener {
 			car.setVelocity(vel);
 			return;
 		}
-		else if(passenger instanceof Bat && car.hasMetadata("trade.hover")){
+		else if(passenger instanceof Bat && UEntityMeta.hasMetadata(car, "trade.hover")){
 			if(passenger.getPassenger() == null){
 				//No empty hovercars allowed to fly
 				return;
@@ -411,8 +412,8 @@ public class UTradeListener implements Listener {
 			Vector vel = car.getVelocity();
 			Block under = b.getRelative(BlockFace.DOWN);
 			Block under2 = b.getRelative(BlockFace.DOWN,2);
-			Boolean descending = car.hasMetadata("car.braking");
-			Boolean ascending = car.hasMetadata("car.action");
+			Boolean descending = UEntityMeta.hasMetadata(car, "car.braking");
+			Boolean ascending = UEntityMeta.hasMetadata(car, "car.action");
 			int count = 0;
 			if(!b.isEmpty()){
 				count++;
@@ -884,7 +885,7 @@ public class UTradeListener implements Listener {
 		if(v == null){
 			return;
 		}
-		if(v.hasMetadata("trade.npc") || v.hasMetadata("mta.copentity")){
+		if(UEntityMeta.hasMetadata(v, "trade.npc") || v.hasMetadata("mta.copentity") || UEntityMeta.hasMetadata(v, "mta.copentity")){
 			//Allow it to be hurt
 		}
 		/*else {
@@ -909,7 +910,7 @@ public class UTradeListener implements Listener {
 			//Part of a car stack
 			event.setDroppedExp(0);
 			event.getDrops().clear();
-			if(e instanceof Villager && v.hasMetadata("trade.npc")){ //Handle as if car is stolen
+			if(e instanceof Villager && UEntityMeta.hasMetadata(v, "trade.npc")){ //Handle as if car is stolen
 				final DrivenCar c = plugin.carSaver.getCarInUse(v);
 				if(c == null || !(v instanceof Minecart)){
 					return;
@@ -918,7 +919,7 @@ public class UTradeListener implements Listener {
 				
 				if(!(e.getLastDamageCause() instanceof EntityDamageByEntityEvent)){
 					c.setNPC(false);
-					m.removeMetadata("trade.npc", main.plugin);
+					UEntityMeta.removeMetadata(m, "trade.npc");
 					plugin.carSaver.carNowInUse(m, c);
 					return;
 				}
@@ -932,7 +933,7 @@ public class UTradeListener implements Listener {
 				}
 				if(!(damager instanceof Player)){
 					c.setNPC(false);
-					m.removeMetadata("trade.npc", main.plugin);
+					UEntityMeta.removeMetadata(m, "trade.npc");
 					plugin.carSaver.carNowInUse(m, c);
 					return;
 				}
@@ -1005,7 +1006,7 @@ public class UTradeListener implements Listener {
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
-		if((car.getPassenger() != null && car.getPassenger().getType().equals(EntityType.PLAYER)) || (car.hasMetadata("trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && car.getPassenger().hasMetadata("mta.copentity"))){
+		if((car.getPassenger() != null && car.getPassenger().getType().equals(EntityType.PLAYER)) || (UEntityMeta.hasMetadata(car, "trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && (UEntityMeta.hasMetadata(car.getPassenger(), "mta.copentity") || car.getPassenger().hasMetadata("mta.copentity")))){
 			return; //They punched the villager; don't take car health
 		}
 		CarHealthData health = ucars.listener.getCarHealthHandler(car);
@@ -1158,7 +1159,7 @@ public class UTradeListener implements Listener {
 		 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
 		 * car.setVelocity(new Vector(0,0,0));
 		 */
-		car.setMetadata("trade.car", new StatValue(true, plugin));
+		UEntityMeta.setMetadata(car, "trade.car", new StatValue(true, plugin));
 			ItemStack placed = event.getPlayer().getItemInHand();
 			placed.setAmount(0);
 			event.getPlayer().getInventory().setItemInHand(placed);
@@ -1180,7 +1181,7 @@ public class UTradeListener implements Listener {
 		}
 		
 		Minecart cart = event.getCar();
-		if(cart.hasMetadata("car.destroyed")){
+		if(UEntityMeta.hasMetadata(cart, "car.destroyed") || cart.hasMetadata("car.destroyed")){
 			return; //Don't damage the car
 		}
 		UUID id = cart.getUniqueId();
@@ -1208,7 +1209,7 @@ public class UTradeListener implements Listener {
 	void carRemoval(ucarDeathEvent event){
 		event.setCancelled(true);
 		Minecart cart = event.getCar();
-		if(cart.hasMetadata("car.destroyed")){
+		if(UEntityMeta.hasMetadata(cart, "car.destroyed") || cart.hasMetadata("car.destroyed")){
 			return; //Don't destroy the car
 		}
 		UUID id = cart.getUniqueId();
@@ -1222,10 +1223,10 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		*/
-		cart.setMetadata("car.destroyed", new StatValue(true, ucars.plugin));
+		UEntityMeta.setMetadata(cart, "car.destroyed", new StatValue(true, ucars.plugin));
 		event.setCancelled(true);
 		
-		if(cart.hasMetadata("trade.npc")){
+		if(UEntityMeta.hasMetadata(cart, "trade.npc")){
 			//Say it's no longer in use
 			main.plugin.aiSpawns.decrementSpawnedAICount();
 			if(event.didPlayerKill()){

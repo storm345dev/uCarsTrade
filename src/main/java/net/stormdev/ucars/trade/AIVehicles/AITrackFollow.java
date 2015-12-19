@@ -11,6 +11,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class AITrackFollow {
@@ -256,13 +257,13 @@ public class AITrackFollow {
 			Block check = ch.block;
 			if(check != null){
 				if(/*ch.junction*/routeData.isJunction() && main.random.nextBoolean()
-						&& (vehicle != null && !vehicle.hasMetadata("npc.turning"))){
+						&& (vehicle != null && !UEntityMeta.hasMetadata(vehicle, "npc.turning"))){
 					turn = true;
 					/*return new TrackingData(check, dir, true); //TODO Maybe don't handle junction turns before we even get there...
 */				}
 				else{
 					if(vehicle != null){
-						vehicle.removeMetadata("npc.turning", main.plugin); //TODO Not sure about
+						UEntityMeta.removeMetadata(vehicle, "npc.turning");
 					}
 					return new TrackingData(check, dir, ch.junction);
 				}
@@ -288,11 +289,11 @@ public class AITrackFollow {
 			if(crb != null) {
 				if(vehicle != null){
 					if(!crb.junction){
-						vehicle.removeMetadata("npc.turning", main.plugin);
+						UEntityMeta.removeMetadata(vehicle, "npc.turning");
 					}
 					else if(turn){
-						if(!vehicle.hasMetadata("npc.turning")){
-							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
+						if(!UEntityMeta.hasMetadata(vehicle, "npc.turning")){
+							UEntityMeta.setMetadata(vehicle, "npc.turning", new StatValue(null, main.plugin));
 						}
 					}
 				}
@@ -302,11 +303,11 @@ public class AITrackFollow {
 			else if(clb != null){
 				if(vehicle != null){
 					if(!clb.junction){
-						vehicle.removeMetadata("npc.turning", main.plugin);
+						UEntityMeta.removeMetadata(vehicle, "npc.turning");
 					}
 					else if(turn){
-						if(!vehicle.hasMetadata("npc.turning")){
-							vehicle.setMetadata("npc.turning", new StatValue(null, main.plugin));
+						if(!UEntityMeta.hasMetadata(vehicle, "npc.turning")){
+							UEntityMeta.setMetadata(vehicle, "npc.turning", new StatValue(null, main.plugin));
 						}
 					}
 				}

@@ -10,6 +10,7 @@ import org.bukkit.util.Vector;
 import com.useful.uCarsAPI.CarCheck;
 import com.useful.uCarsAPI.CarSpeedModifier;
 import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.util.UEntityMeta;
 
 public class CarCalculations {
 
@@ -57,7 +58,7 @@ public class CarCalculations {
 		if(main.plugin.carSaver.isAUCar(car)){
 			return true;
 		}
-		if(car.hasMetadata("kart.racing")){
+		if(car.hasMetadata("kart.racing") || UEntityMeta.hasMetadata(car, "kart.racing")){
 			return true;
 		}
 		return false;

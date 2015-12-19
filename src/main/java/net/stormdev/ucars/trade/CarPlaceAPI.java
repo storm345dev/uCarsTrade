@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ucars;
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class CarPlaceAPI {
@@ -71,7 +72,8 @@ public class CarPlaceAPI {
 		 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
 		 * car.setVelocity(new Vector(0,0,0));
 		 */
-		car.setMetadata("trade.car", new StatValue(true, main.plugin));
+		/*car.setMetadata("trade.car", new StatValue(true, main.plugin));*/
+		UEntityMeta.setMetadata(car, "trade.car", new StatValue(true, main.plugin));
 		carData.setId(car.getUniqueId());
 		main.plugin.carSaver.carNowInUse(car, carData);
 		String name = carData.getName();

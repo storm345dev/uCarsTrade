@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class CarSaver {
@@ -60,7 +61,7 @@ public class CarSaver {
 	}
 	
 	public boolean isAUCar(Vehicle v){
-		if(v.hasMetadata(META)){
+		if(UEntityMeta.hasMetadata(v, META)){
 			return true;
 		}
 		return inUse.containsKey(v.getUniqueId());
@@ -72,9 +73,9 @@ public class CarSaver {
 	
 	public DrivenCar getCarInUse(Entity cart){
 		try {
-			return (DrivenCar) cart.getMetadata(META).get(0).value();
+			return (DrivenCar) UEntityMeta.getMetadata(cart, META).get(0).value();
 		} catch (Exception e) {
-			cart.removeMetadata(META, main.plugin);
+			UEntityMeta.removeMetadata(cart, META);
 			return inUse.get(cart.getUniqueId());
 		}
 	}
@@ -124,8 +125,8 @@ public class CarSaver {
 
 			@Override
 			public void run() {
-				v.removeMetadata(META, main.plugin);
-				v.setMetadata(META, new StatValue(car, main.plugin));
+				UEntityMeta.removeMetadata(v, META);
+				UEntityMeta.setMetadata(v, META, new StatValue(car, main.plugin));
 				if(car == null || car.getId() == null){
 					throw new RuntimeException("DrivenCar is null!");
 				}

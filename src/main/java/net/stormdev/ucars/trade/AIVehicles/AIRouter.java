@@ -28,6 +28,7 @@ import org.bukkit.util.Vector;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ClosestFace;
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class AIRouter {
@@ -219,12 +220,12 @@ public class AIRouter {
 	
 	public VelocityData getVelocityData(Vehicle car){
 		VelocityData data = new VelocityData(null, null, car.getLocation());
-		if(car.hasMetadata("trade.npc")){
-			List<MetadataValue> ms = car.getMetadata("trade.npc");
+		if(UEntityMeta.hasMetadata(car, "trade.npc")){
+			List<MetadataValue> ms = UEntityMeta.getMetadata(car, "trade.npc");
 			try {
 				data = (VelocityData) ms.get(0).value();
 			} catch (Exception e) {
-				car.removeMetadata("trade.npc", main.plugin);
+				UEntityMeta.removeMetadata(car, "trade.npc");
 			}
 		}
 		return data;
@@ -306,17 +307,17 @@ public class AIRouter {
 		
 		VelocityData data = new VelocityData(null, null, car.getLocation());
 		try {
-			data = (VelocityData) car.getMetadata("trade.npc").get(0).value();
+			data = (VelocityData) UEntityMeta.getMetadata(car, "trade.npc").get(0).value();
 			if(data.getDir() != null){
 				direction = data.getDir();
 			}
 		} catch (Exception e1) {
-			car.removeMetadata("trade.npc", main.plugin);
-			car.setMetadata("trade.npc", new StatValue(data, main.plugin));
+			UEntityMeta.removeMetadata(car, "trade.npc");
+			UEntityMeta.setMetadata(car, "trade.npc", new StatValue(data, main.plugin));
 		}
 		
 		data.updateLocation(car.getLocation());
-		boolean supposedToBeStopped = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || api.atTrafficLight(car);
+		boolean supposedToBeStopped = data.isStoppedForOtherCar() || car.hasMetadata("car.frozen") || UEntityMeta.hasMetadata(car, "car.frozen") || api.atTrafficLight(car);
 		long stationaryRemoveTime = supposedToBeStopped ? 2000:200;
 		
 		if(data.getStationaryCount() > stationaryRemoveTime){ //Being stationary a while
@@ -355,7 +356,7 @@ public class AIRouter {
 					if(e.equals(car)){
 						continue;
 					}
-					if(!e.getType().equals(EntityType.MINECART) || !e.hasMetadata("trade.npc")){
+					if(!e.getType().equals(EntityType.MINECART) || !UEntityMeta.hasMetadata(e, "trade.npc")){
 						continue;
 					}
 					Vector diff = e.getLocation().toVector().clone().subtract(carLoc.clone());
@@ -417,9 +418,9 @@ public class AIRouter {
 			}
 		}
 		
-		boolean keepVel = !brm.isJunction() && !vd.isInProgressOfTurningAtJunction() && !car.hasMetadata("relocatingRoad");
+		boolean keepVel = !brm.isJunction() && !vd.isInProgressOfTurningAtJunction() && !UEntityMeta.hasMetadata(car, "relocatingRoad");
 		
-		if(!car.hasMetadata("trade.npc")){
+		if(!UEntityMeta.hasMetadata(car, "trade.npc")){
 			//Calculate direction from road
 			if(!brm.isJunction()){
 				BlockFace face = AITrackFollow.carriagewayDirection(under).getDirection();
@@ -588,7 +589,7 @@ public class AIRouter {
 			}*/
 			
 			vel = new Vector(x,y,z); //Go to block
-			car.removeMetadata("relocatingRoad", main.plugin);
+			UEntityMeta.removeMetadata(car, "relocatingRoad");
 			data.setMotion(vel);
 			car.setVelocity(vel);
 		}
@@ -755,14 +756,14 @@ public class AIRouter {
 		vd.setDir(null);
 		vd.setMotion(null);*/
 		Location prev = null;
-		if(car.hasMetadata("relocatingRoad")){
-			Object o = car.getMetadata("relocatingRoad").get(0).value();
+		if(UEntityMeta.hasMetadata(car, "relocatingRoad")){
+			Object o = UEntityMeta.getMetadata(car, "relocatingRoad").get(0).value();
 			if(o != null && o instanceof Location){
 				prev = (Location) o;
-				car.removeMetadata("relocatingRoad", main.plugin);
+				UEntityMeta.removeMetadata(car, "relocatingRoad");
 			}
 			else {
-				car.removeMetadata("relocatingRoad", main.plugin);
+				UEntityMeta.removeMetadata(car, "relocatingRoad");
 				return;
 			}
 		}
@@ -832,7 +833,7 @@ public class AIRouter {
 			return;
 		}
 		
-		car.setMetadata("relocatingRoad", new StatValue(toGo.getLocation(), main.plugin));
+		UEntityMeta.setMetadata(car, "relocatingRoad", new StatValue(toGo.getLocation(), main.plugin));
 		
 		if(dir != null && toGo != null){
 			vd.setDir(dir);
@@ -879,6 +880,9 @@ public class AIRouter {
 		car.removeMetadata("trade.npc", main.plugin);
 		car.removeMetadata("relocatingRoad", main.plugin);
 		car.removeMetadata("npc.turning", main.plugin);
+		UEntityMeta.removeMetadata(car, "trade.npc");
+		UEntityMeta.removeMetadata(car, "relocatingRoad");
+		UEntityMeta.removeMetadata(car, "npc.turning");
 	}
 	
 	public static void despawnNPCCar(final Minecart car, final DrivenCar c){

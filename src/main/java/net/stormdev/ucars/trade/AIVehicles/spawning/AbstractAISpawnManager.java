@@ -30,6 +30,7 @@ import org.bukkit.util.Vector;
 import com.useful.ucars.CarHealthData;
 import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ucars;
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public abstract class AbstractAISpawnManager implements AISpawnManager {
@@ -102,7 +103,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							continue;
 						}
 						Minecart cart = (Minecart) e;
-						if(!cart.hasMetadata("trade.npc")){
+						if(!UEntityMeta.hasMetadata(cart, "trade.npc")){
 							continue;
 						}
 						final DrivenCar c = main.plugin.carSaver.getCarInUse(cart);
@@ -290,7 +291,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						}
 						//It's valid
 						final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
-						v.setMetadata("trade.npcvillager", new StatValue(true, main.plugin));
+						UEntityMeta.setMetadata(v, "trade.npcvillager", new StatValue(true, main.plugin));
 						v.setAdult();
 						v.setBreed(false);
 						v.setAgeLock(true);
@@ -306,7 +307,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					
 						//Make it a car
 						c.setId(m.getUniqueId());
-						m.setMetadata("trade.npc", new StatValue(new VelocityData(carriagewayDir, null, m.getLocation()), plugin));
+						UEntityMeta.setMetadata(m, "trade.npc", new StatValue(new VelocityData(carriagewayDir, null, m.getLocation()), plugin));
 						
 						CartOrientationUtil.setYaw(m, ya);
 						/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();

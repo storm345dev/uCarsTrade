@@ -16,6 +16,7 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class Displays implements Serializable {
@@ -262,7 +263,8 @@ public class Displays implements Serializable {
 				private static final long serialVersionUID = 1L;
 				public void putInCar(Minecart car, Player player) {
 					DisplayType.putEntityInCar(car, EntityType.BAT);
-					car.setMetadata("trade.hover", new StatValue(true, main.plugin)); //A hover car
+					//car.setMetadata("trade.hover", new StatValue(true, main.plugin)); //A hover car
+					UEntityMeta.setMetadata(car, "trade.hover", new StatValue(true, main.plugin));
 					//car.setMetadata("car.braking", new StatValue(true, main.plugin)); //Landed ATM
 					return;
 					}}, false, 30, Material.FEATHER, Material.FEATHER, 64, new ArrayList<String>(

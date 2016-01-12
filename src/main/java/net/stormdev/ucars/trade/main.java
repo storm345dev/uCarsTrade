@@ -23,7 +23,8 @@ import net.stormdev.ucars.trade.AIVehicles.spawning.AISpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.AIWorldProbingSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
-import net.stormdev.ucars.utils.IconMenu;
+import net.stormdev.ucars.trade.guis.IconMenu;
+import net.stormdev.ucars.trade.guis.IconMenuListener;
 import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
@@ -462,6 +463,7 @@ public class main extends JavaPlugin {
 		}
 		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
 		
+		new IconMenuListener();
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

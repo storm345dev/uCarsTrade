@@ -14,12 +14,12 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import net.stormdev.ucars.stats.StatType;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
+import net.stormdev.ucars.trade.guis.IconMenu;
+import net.stormdev.ucars.trade.guis.InputMenu;
+import net.stormdev.ucars.trade.guis.InputMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.CarForSale;
 import net.stormdev.ucars.utils.CarGenerator;
 import net.stormdev.ucars.utils.CarValueCalculator;
-import net.stormdev.ucars.utils.IconMenu;
-import net.stormdev.ucars.utils.InputMenu;
-import net.stormdev.ucars.utils.InputMenu.OptionClickEvent;
 import net.stormdev.ucars.utils.InputMenuClickEvent;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
@@ -1939,23 +1939,19 @@ public class UTradeListener implements Listener {
             	InputMenuClickEvent evt = new InputMenuClickEvent(event, TradeBoothMenuType.SELL_CARS);
             	plugin.getServer().getPluginManager().callEvent(evt);
             }
-        }, plugin);
+
+			@Override
+			public void onClose(Player player, Inventory inv) {
+			}
+        }, plugin, true);
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
-		menu.addButtonSlot(0);
 		menu.setOption(8, new ItemStack(Material.EMERALD), main.colors.getTitle()+"Sell", main.colors.getError()+"Unavailable");
-		menu.addButtonSlot(8);
 		menu.setOption(1, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(1);
 		menu.setOption(2, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(2);
 		menu.setOption(3, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(3);
 		menu.setOption(5, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(5);
 		menu.setOption(6, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(6);
 		menu.setOption(7, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(7);
 		//4 is the input box
 		return menu;
 	}
@@ -1972,23 +1968,19 @@ public class UTradeListener implements Listener {
             	InputMenuClickEvent evt = new InputMenuClickEvent(event, TradeBoothMenuType.SELL_UPGRADES);
             	plugin.getServer().getPluginManager().callEvent(evt);
             }
-        }, plugin);
+
+			@Override
+			public void onClose(Player player, Inventory inv) {
+			}
+        }, plugin, true);
 		menu.setOption(0, new ItemStack(Material.BOOK), main.colors.getTitle()+"Back to menu", main.colors.getInfo()+"Return back to the selection menu");
-		menu.addButtonSlot(0);
 		menu.setOption(8, new ItemStack(Material.EMERALD), main.colors.getTitle()+"Sell", main.colors.getError()+"Unavailable");
-		menu.addButtonSlot(8);
 		menu.setOption(1, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(1);
 		menu.setOption(2, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(2);
 		menu.setOption(3, new ItemStack(Material.PAPER), main.colors.getTitle()+">", main.colors.getInfo()+">");
-		menu.addButtonSlot(3);
 		menu.setOption(5, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(5);
 		menu.setOption(6, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(6);
 		menu.setOption(7, new ItemStack(Material.PAPER), main.colors.getTitle()+"<", main.colors.getInfo()+"<");
-		menu.addButtonSlot(7);
 		//4 is the input box
 		return menu;
 	}

@@ -1107,6 +1107,28 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		
+		Vector v = loc.toVector().clone().setY(event.getPlayer().getLocation().getY()).subtract(event.getPlayer().getLocation().toVector());
+		v = v.normalize();
+		boolean loop = safeExit;
+		Location current = event.getPlayer().getLocation().clone();
+		double prevDist = Double.MAX_VALUE;
+		while (loop){
+			double dist = current.distanceSquared(loc);
+			if(dist > prevDist || dist < 1.5){
+				loop = false;
+			}
+			prevDist = dist;
+			
+			Block b = current.getBlock();
+			if(!(b.isEmpty() || b.isLiquid())){
+				event.getPlayer().sendMessage(ChatColor.RED+"You need a clear path between you and the vehicle to be placed!");
+				event.setCancelled(true);
+				return;
+			}
+			
+			current = current.add(v);
+		}
+		
 		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
 		Block in = loc.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){

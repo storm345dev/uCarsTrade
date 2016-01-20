@@ -11,3 +11,10 @@ commands:
         permission: ucarstrade.admin
         permission-message: You don't have access to this command
         default: op
+   grb:
+        description: This gets the road block for the dir. you are facing
+        aliases: [getroadblock]
+        usage: /<command>
+        permission: ucarstrade.admin
+        permission-message: You don't have access to this command
+        default: op

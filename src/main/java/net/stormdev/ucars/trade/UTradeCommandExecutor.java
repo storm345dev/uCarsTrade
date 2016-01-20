@@ -8,6 +8,8 @@ import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.routing.NetworkConversionScan;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteBlockType;
+import net.stormdev.ucars.trade.AIVehicles.routing.RouteDecoder;
 import net.stormdev.ucars.trade.AIVehicles.routing.RouteMethod;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.NetworkScan;
@@ -27,6 +29,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.useful.ucars.ClosestFace;
 
 public class UTradeCommandExecutor implements CommandExecutor {
 	main plugin = null;
@@ -310,6 +314,18 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				
 				return true;
 			}
+			return true;
+		}
+		else if(cmd.getName().equalsIgnoreCase("grb")){
+			if(player == null){
+				sender.sendMessage(ChatColor.RED+"Players only!");
+				return true;
+			}
+			float yaw = player.getLocation().getYaw();
+			BlockFace dir = ClosestFace.getClosestFace(yaw);
+			int data = RouteDecoder.getDataFromDir(RouteBlockType.DIRECTIONAL, dir);
+			player.setItemInHand(new ItemStack(Material.STAINED_GLASS, 1, (short) data));
+			sender.sendMessage(ChatColor.GREEN+"Put in hand!");
 			return true;
 		}
 		return false;

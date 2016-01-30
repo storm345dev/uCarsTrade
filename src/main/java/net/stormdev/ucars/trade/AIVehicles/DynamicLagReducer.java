@@ -30,8 +30,12 @@ public class DynamicLagReducer implements Runnable {
 		return Runtime.getRuntime().maxMemory() * 0.00097560975 * 0.00097560975; //In MB
 	}
 	
+	public static double getCurrentTotalMemory(){
+		return Runtime.getRuntime().totalMemory() * 0.00097560975 * 0.00097560975; //In MB
+	}
+	
 	public static double getMemoryUse(){
-		return getMaxMemory()-getAvailableMemory();
+		return getCurrentTotalMemory()-getAvailableMemory();
 	}
 	
 	public static boolean overloadPrevention(){
@@ -59,8 +63,8 @@ public class DynamicLagReducer implements Runnable {
 			overloadPrevention();
 		}
 		double tps = getTPS(300);
-		double mem = getAvailableMemory();
-		if(tps>19.5 && mem>400){
+		double mem = /*getAvailableMemory()*/getMaxMemory()-getMemoryUse();
+		if(tps>19.2 && mem>400){
 			return 100;
 		}
 		else if(mem < 50){

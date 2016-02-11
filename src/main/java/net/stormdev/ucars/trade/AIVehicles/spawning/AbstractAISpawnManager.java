@@ -298,6 +298,8 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						v.setCanPickupItems(false);
 						v.setCustomName(name);
 						v.setCustomNameVisible(true);
+						v.setMaxHealth(5);
+						v.setHealth(5);
 						try {
 							NoMobAI.noAI(v);
 						} catch (Exception e) {

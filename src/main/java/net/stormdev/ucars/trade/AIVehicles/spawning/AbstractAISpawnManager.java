@@ -10,6 +10,7 @@ import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.TrackingData;
 import net.stormdev.ucars.trade.AIVehicles.VelocityData;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.NPCOrientationUtil;
 import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
@@ -290,7 +291,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							}
 						}
 						//It's valid
-						final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+						Location sl = spawnLoc.clone();
+						sl.setYaw(sl.getYaw()-90);
+						final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(sl, EntityType.VILLAGER);
 						UEntityMeta.setMetadata(v, "trade.npcvillager", new StatValue(true, main.plugin));
 						v.setAdult();
 						v.setBreed(false);
@@ -301,11 +304,13 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						v.setMaxHealth(5);
 						v.setHealth(5);
 						try {
-							NoMobAI.noAI(v);
+							NoMobAI.clearAI(v);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
+						NPCOrientationUtil.setYaw(v, sl.getYaw());
 						m.setPassenger(v);
+						NPCOrientationUtil.setYaw(v, sl.getYaw());
 					
 						//Make it a car
 						c.setId(m.getUniqueId());

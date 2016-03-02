@@ -9,9 +9,12 @@ import java.util.regex.Pattern;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.routing.BlockRouteData;
 import net.stormdev.ucars.trade.AIVehicles.routing.RouteMethod;
+import net.stormdev.ucars.utils.NPCOrientationUtil;
+import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
+import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -22,6 +25,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.Villager;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -608,6 +612,14 @@ public class AIRouter {
 				yaw = yaw - 360;
 			}
 			CartOrientationUtil.setYaw(car, yaw);
+			Entity pass = car.getPassenger();
+			if(pass != null && pass instanceof Villager){
+				NoMobAI.clearAI(pass);
+				NPCOrientationUtil.setYaw((Villager) pass, yaw-90);
+				NoMobAI.clearAI(pass);
+			/*	Bukkit.broadcastMessage((yaw-180)+"");
+				NPCOrientationUtil.setYaw((Villager) pass, yaw-180);*/
+			}
 			/*Entity pass = car.getPassenger();
 			WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 			p.setEntityID(car.getEntityId());

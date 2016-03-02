@@ -15,6 +15,8 @@ import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.NetworkScan;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.Node;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.NPCOrientationUtil;
+import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
@@ -26,8 +28,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 
 import com.useful.ucars.ClosestFace;
@@ -145,7 +149,7 @@ public class UTradeCommandExecutor implements CommandExecutor {
 				sender.sendMessage(ChatColor.GREEN+"Current spawn cap: "+cap);
 				return true;
 			}
-			else if(command.equalsIgnoreCase("aispawn")){
+			else if(command.equalsIgnoreCase("aispawn")){				
 				if(!AIRouter.isAIEnabled()){
 					sender.sendMessage(ChatColor.RED+"AI Cars aren't enabled!");
 					return true;

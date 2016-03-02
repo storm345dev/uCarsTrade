@@ -203,7 +203,7 @@ public class UTradeListener implements Listener {
 		}
 		
 		loc.getWorld().playEffect(loc, Effect.EXPLOSION_HUGE, 20);
-		loc.getWorld().playSound(loc, Sound.EXPLODE, 5f, 1f);
+		loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 5f, 1f);
 	}
 	
 	@EventHandler

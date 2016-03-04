@@ -14,7 +14,6 @@ import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 
 import org.bukkit.Bukkit;
-import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -400,9 +399,11 @@ public class AIRouter {
 				
 		if(/*stop ||*/supposedToBeStopped){
 			vd.notStationary();
+			UEntityMeta.setMetadata(car, "currentlyStopped", new StatValue(true, main.plugin));
 			car.setVelocity(new Vector(0,0,0)); //Stop (or trafficlights)
 			return;
 		}
+		UEntityMeta.removeMetadata(car, "currentlyStopped");
 
 		BlockRouteData brm = AITrackFollow.carriagewayDirection(under);
 		

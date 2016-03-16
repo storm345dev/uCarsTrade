@@ -1129,7 +1129,7 @@ public class UTradeListener implements Listener {
 			current = current.add(v);
 		}
 		
-		loc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
+		loc.setYaw(event.getPlayer().getLocation().getYaw() + 90);
 		Block in = loc.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){
 			return;

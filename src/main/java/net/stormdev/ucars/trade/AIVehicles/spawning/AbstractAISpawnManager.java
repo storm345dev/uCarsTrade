@@ -10,6 +10,7 @@ import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.TrackingData;
 import net.stormdev.ucars.trade.AIVehicles.VelocityData;
 import net.stormdev.ucars.utils.CarGenerator;
+import net.stormdev.ucars.utils.EntityAttachUtil;
 import net.stormdev.ucars.utils.NPCOrientationUtil;
 import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
@@ -309,7 +310,6 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							e.printStackTrace();
 						}
 						NPCOrientationUtil.setYaw(v, sl.getYaw());
-						m.setPassenger(v);
 						NPCOrientationUtil.setYaw(v, sl.getYaw());
 					
 						//Make it a car
@@ -317,6 +317,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						UEntityMeta.setMetadata(m, "trade.npc", new StatValue(new VelocityData(carriagewayDir, null, m.getLocation()), plugin));
 						
 						CartOrientationUtil.setYaw(m, ya);
+						
 						/*WrapperPlayServerEntityLook p = new WrapperPlayServerEntityLook();
 						p.setEntityID(m.getEntityId());
 						p.setYaw(yaw);
@@ -333,6 +334,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						else if(c.getBaseDisplayBlock() != null){
 							m.setDisplayBlock(c.getBaseDisplayBlock());
 						}
+						
+						m.setPassenger(v);
+						EntityAttachUtil.enforceAttached(v, m, Bukkit.getViewDistance()*16+1);
 						
 						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned

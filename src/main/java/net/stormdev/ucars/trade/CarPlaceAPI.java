@@ -22,7 +22,7 @@ import com.useful.ucarsCommon.StatValue;
 public class CarPlaceAPI {
 	public static Minecart placeCar(DrivenCar carData, Location placeLoc, Player placer, float direction){
 		Location loc = placeLoc.clone().add(0, 1.6, 0);
-		loc.setYaw(direction + 270);
+		loc.setYaw(direction + 90);
 		Block in = loc.getBlock();
 		final Minecart car = (Minecart) placeLoc.getWorld().spawnEntity(loc, EntityType.MINECART);
 		float yaw = direction;

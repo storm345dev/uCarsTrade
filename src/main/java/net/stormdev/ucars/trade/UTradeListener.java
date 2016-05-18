@@ -1213,7 +1213,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		
-		if(main.random.nextInt(20) < 1){ // 1/20 chance
+		if(main.random.nextInt(10) < 1){ // 1/10 chance
 			car.setHandlingDamaged(true);
 			plugin.carSaver.asyncSave();
 			

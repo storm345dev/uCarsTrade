@@ -44,7 +44,7 @@ public class DrivenCar implements Serializable {
 		if(!name.toLowerCase().contains("cop")){
 			return null;
 		}
-		return new ItemStack(Material.COMMAND).getData();
+		return new ItemStack(Material.EMERALD_ORE).getData();
 	}
 	
 	public DrivenCar(DrivenCar other){

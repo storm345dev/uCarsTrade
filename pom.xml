@@ -61,13 +61,12 @@
     </build>
     <repositories>
         <repository>
-            <id>comphenix-rep</id>
- 	       <name>Comphenix Repository</name>
+            <id>dmulloy2-repo</id>
             <url>http://repo.dmulloy2.net/content/groups/public/</url>
-  	   </repository>
+        </repository>
         <repository>
 	       <id>vault-repo</id>
-	       <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
         <id>spigot-repo</id>
@@ -75,31 +74,33 @@
     	</repository>
         <repository>
 	       <id>stormdev-repo</id>
-	       <url>http://stormdev.org/jenkins/plugin/repository/everything</url>
+	       <url>https://stormdev.org/jenkins/plugin/repository/everything/</url>
         </repository>
     </repositories>
     <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 	   <dependency>
-            <groupId>net.milkbowl.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.30</version>
+           <groupId>com.github.MilkBowl</groupId>
+           <artifactId>VaultAPI</artifactId>
+           <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>3.6.5</version>
+            <version>4.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.useful</groupId>
             <artifactId>uCars</artifactId>
-            <version>19</version>
+            <version>21</version>
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot</artifactId>
-           <version>1.9-R0.1-SNAPSHOT</version>
-           <scope>provided</scope>
-    </dependency>
+
     <!--Bukkit API-->
     </dependencies>
     <distributionManagement>
@@ -111,5 +112,5 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <version>8</version>
+    <version>9</version>
 </project>

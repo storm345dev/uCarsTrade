@@ -1,17 +1,16 @@
 package net.stormdev.ucars.utils;
 
+import net.minecraft.server.v1_12_R1.EntityInsentient;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
+import org.bukkit.entity.Entity;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import net.minecraft.server.v1_9_R1.EntityInsentient;
-
-import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
-import org.bukkit.entity.Entity;
-
 public class NoMobAI {
 	public static void clearAI(Entity e){
-		net.minecraft.server.v1_9_R1.Entity nmsEntity = ((CraftEntity)e).getHandle();
+		net.minecraft.server.v1_12_R1.Entity nmsEntity = ((CraftEntity)e).getHandle();
 		if(!(nmsEntity instanceof EntityInsentient)){
 			return;
 		}
@@ -33,7 +32,7 @@ public class NoMobAI {
 	}
 	
 	public static void setAI(Entity bukkitEntity, boolean ai) {
-		net.minecraft.server.v1_9_R1.Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+		net.minecraft.server.v1_12_R1.Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
 		if(nmsEntity instanceof EntityInsentient){
 			((EntityInsentient)nmsEntity).m(!ai);
 		}

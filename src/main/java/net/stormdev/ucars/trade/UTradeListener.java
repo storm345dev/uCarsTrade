@@ -694,7 +694,6 @@ public class UTradeListener implements Listener {
 		Vehicle v = event.getVehicle();
 		if(v instanceof Vehicle){
 			if(!uCarsAPI.getAPI().checkIfCar((Vehicle)v)){
-				v.remove();
 				return; //Stop poking our nose in
 			}
 			//Read up the stack and remove all

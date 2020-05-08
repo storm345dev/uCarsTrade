@@ -1,10 +1,10 @@
 package net.stormdev.ucars.utils;
 
-import java.io.Serializable;
-
-import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.io.Serializable;
+
 public interface CarFiller extends Serializable {
-	public void putInCar(Minecart car, Player owner);
+	public void putInCar(Entity car, Player owner);
 }

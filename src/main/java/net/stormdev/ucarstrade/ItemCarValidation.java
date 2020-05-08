@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemCarValidation {
 	public static DrivenCar getCar(ItemStack item){
-		if(item == null || !item.getType().equals(Material.MINECART)){
+		if(item == null /*|| !item.getType().equals(Material.MINECART)*/){
 			return null;
 		}
 		

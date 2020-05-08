@@ -1,29 +1,27 @@
 package net.stormdev.ucarstrade.displays;
 
-import java.io.Serializable;
-import java.util.List;
-
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.CarFiller;
-
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.Serializable;
+import java.util.List;
+
 public class DisplayType implements Serializable {
 	private static final long serialVersionUID = 4323952036275549097L;
 
-	public static void putEntityInCar(Minecart car, Entity entity){
+	public static void putEntityInCar(Entity car, Entity entity){
 		car.setPassenger(entity);
 		return;
 	}
 	
-	public static void putEntityInCar(Minecart car, EntityType type){
+	public static void putEntityInCar(Entity car, EntityType type){
 		Chunk c = car.getLocation().getChunk();
 		if(!c.isLoaded()){
 			c.load(true);
@@ -32,7 +30,7 @@ public class DisplayType implements Serializable {
 		putEntityInCar(car, e);
 		return;
 	}
-	public static Entity spawnEntityAtCar(Minecart car, EntityType type){
+	public static Entity spawnEntityAtCar(Entity car, EntityType type){
 		Chunk c = car.getLocation().getChunk();
 		if(!c.isLoaded()){
 			c.load(true);
@@ -86,7 +84,7 @@ public class DisplayType implements Serializable {
 	public CarFiller getFiller(){
 		return filler;
 	}
-	public void fill(Minecart car, Player owner){
+	public void fill(Entity car, Player owner){
 		getFiller().putInCar(car, owner);
 		return;
 	}

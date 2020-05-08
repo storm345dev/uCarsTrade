@@ -22,11 +22,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.util.Vector;
 
 import com.useful.ucars.CarHealthData;
@@ -101,10 +97,10 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 				int aiCars = 0;
 				for(World world:new ArrayList<World>(Bukkit.getWorlds())){
 					for(Entity e:new ArrayList<Entity>(world.getEntities())){
-						if(!(e instanceof Minecart)){
+						if(!(e instanceof Vehicle)){
 							continue;
 						}
-						Minecart cart = (Minecart) e;
+						Vehicle cart = (Vehicle) e;
 						if(!UEntityMeta.hasMetadata(cart, "trade.npc")){
 							continue;
 						}
@@ -253,7 +249,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 					for(Entity e:all){
 						Vector pLoc = e.getLocation().toVector();
 						double dist = pLoc.distanceSquared(loc);
-						if(dist < 2 && e instanceof Minecart){
+						if(dist < 2 && e instanceof Vehicle){
 							nearby.add(e);
 						}
 						if(dist < AIRouter.PLAYER_RADIUS_SQ && e instanceof Player){
@@ -278,7 +274,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							}
 							List<Entity> nearby = new ArrayList<Entity>(m.getNearbyEntities(AIRouter.PLAYER_RADIUS, 50, AIRouter.PLAYER_RADIUS));
 							for(Entity e:new ArrayList<Entity>(nearby)){
-								if(e.getType() != EntityType.MINECART){
+								if(!(e instanceof Vehicle)){
 									nearby.remove(e);
 								}
 								else if(e instanceof Player){

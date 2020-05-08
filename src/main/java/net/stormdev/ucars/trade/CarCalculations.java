@@ -1,16 +1,14 @@
 package net.stormdev.ucars.trade;
 
-import java.util.UUID;
-
-import net.stormdev.ucarstrade.cars.DrivenCar;
-
-import org.bukkit.entity.Minecart;
-import org.bukkit.util.Vector;
-
 import com.useful.uCarsAPI.CarCheck;
 import com.useful.uCarsAPI.CarSpeedModifier;
 import com.useful.uCarsAPI.uCarsAPI;
 import com.useful.ucars.util.UEntityMeta;
+import net.stormdev.ucarstrade.cars.DrivenCar;
+import org.bukkit.entity.Entity;
+import org.bukkit.util.Vector;
+
+import java.util.UUID;
 
 public class CarCalculations {
 
@@ -24,19 +22,19 @@ public class CarCalculations {
 			api.hookPlugin(main.plugin);
 		}
 		CarCheck isACar = new CarCheck(){
-			public Boolean isACar(Minecart car) {
+			public Boolean isACar(Entity car) {
 				return isAuCar(car);
 			}};
 		api.registerCarCheck(main.plugin, isACar);
 		CarSpeedModifier mod = new CarSpeedModifier(){
-			public Vector getModifiedSpeed(Minecart car, Vector travelVector, double currentMult) {
+			public Vector getModifiedSpeed(Entity car, Vector travelVector, double currentMult) {
 				Vector v = getVelocity(car, travelVector, currentMult);
 				return v;
 			}};
 		api.registerSpeedMod(main.plugin, mod);
 		return;
 	}
-	public Vector getVelocity(Minecart cart, Vector current, double currentMult){
+	public Vector getVelocity(Entity cart, Vector current, double currentMult){
 		UUID id = cart.getUniqueId();
 		DrivenCar car = main.plugin.carSaver.getCarInUse(cart);
 		if(car == null){
@@ -54,7 +52,7 @@ public class CarCalculations {
 		}
 		return current;
 	}
-	public Boolean isAuCar(Minecart car){
+	public Boolean isAuCar(Entity car){
 		if(main.plugin.carSaver.isAUCar(car)){
 			return true;
 		}

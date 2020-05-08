@@ -9,6 +9,7 @@ import net.stormdev.ucarstrade.displays.DisplayManager;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 
 public class CarPlaceAPI {
-	public static Minecart placeCar(DrivenCar carData, Location placeLoc, Player placer, float direction){
+	public static Entity placeCar(DrivenCar carData, Location placeLoc, Player placer, float direction){
 		Location loc = placeLoc.clone().add(0, 1.6, 0);
 		loc.setYaw(direction + 90);
 		Block in = loc.getBlock();

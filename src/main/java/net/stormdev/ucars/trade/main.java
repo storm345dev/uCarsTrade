@@ -1,20 +1,10 @@
 package net.stormdev.ucars.trade;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.logging.Level;
-
+import com.useful.uCarsAPI.ItemCarCheck;
+import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.Colors;
+import com.useful.ucars.ucars;
+import com.useful.ucars.util.UEntityMeta;
 import net.milkbowl.vault.economy.Economy;
 import net.stormdev.ucars.shops.CarShop;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -31,7 +21,6 @@ import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
 import net.stormdev.ucarstrade.cars.CarPresets;
 import net.stormdev.ucarstrade.cars.DrivenCar;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,8 +28,6 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -50,11 +37,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.useful.uCarsAPI.ItemCarCheck;
-import com.useful.uCarsAPI.uCarsAPI;
-import com.useful.ucars.Colors;
-import com.useful.ucars.ucars;
-import com.useful.ucars.util.UEntityMeta;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Level;
 
 public class main extends JavaPlugin {
 	public static YamlConfiguration lang = new YamlConfiguration();
@@ -484,13 +469,13 @@ public class main extends JavaPlugin {
 			for(World w:Bukkit.getWorlds()){
 				for(Entity e:new ArrayList<Entity>(w.getEntities())){
 					try {
-						if(e.getType().equals(EntityType.MINECART) && UEntityMeta.hasMetadata(e, "trade.npc") && e instanceof Vehicle){
+						if(UEntityMeta.hasMetadata(e, "trade.npc") && e instanceof Vehicle){
 							final DrivenCar c = plugin.carSaver.getCarInUse((Vehicle) e);
 							if(c == null
 									|| !c.isNPC()){
 								continue; //Not a car or not an npc car
 							}
-							AIRouter.despawnNPCCarNow(((Minecart)e), c);
+							AIRouter.despawnNPCCarNow(((Vehicle)e), c);
 							e.remove();
 						}
 					} catch (Exception e1) {
@@ -558,11 +543,11 @@ public class main extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
-	
+	/*
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void putBlockInCar(Minecart car, int id, int data){
 		car.setDisplayBlock(new ItemStack(id, 1, (byte) data).getData());
-		/*Boolean useFallingBlock = false;
+		*//*Boolean useFallingBlock = false;
 		// net.minecraft.server.v1_7_R1.EntityMinecartAbstract;
 		// org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 		String NMSversion = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage()
@@ -594,8 +579,8 @@ public class main extends JavaPlugin {
 			main.logger.info("[ALERT] uCarsTrade was unable to place a wool block in a car,"
 					+ " please check for an update.");
 		}
-		return;*/
-	}
+		return;*//*
+	}*/
 	
 	public void initNodeAISpawnManager(){
 		this.aiSpawns = new AINodesSpawnManager(this, 

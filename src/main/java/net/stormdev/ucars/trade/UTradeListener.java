@@ -1,15 +1,12 @@
 package net.stormdev.ucars.trade;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.useful.uCarsAPI.uCarCrashEvent;
+import com.useful.uCarsAPI.uCarRespawnEvent;
+import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.*;
+import com.useful.ucars.Lang;
+import com.useful.ucars.util.UEntityMeta;
+import com.useful.ucarsCommon.StatValue;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.stormdev.ucars.stats.StatType;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
@@ -17,13 +14,7 @@ import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
 import net.stormdev.ucars.trade.guis.IconMenu;
 import net.stormdev.ucars.trade.guis.InputMenu;
 import net.stormdev.ucars.trade.guis.InputMenu.OptionClickEvent;
-import net.stormdev.ucars.utils.CarForSale;
-import net.stormdev.ucars.utils.CarGenerator;
-import net.stormdev.ucars.utils.CarValueCalculator;
-import net.stormdev.ucars.utils.InputMenuClickEvent;
-import net.stormdev.ucars.utils.TradeBoothClickEvent;
-import net.stormdev.ucars.utils.TradeBoothMenuType;
-import net.stormdev.ucars.utils.UpgradeForSale;
+import net.stormdev.ucars.utils.*;
 import net.stormdev.ucarstrade.ItemCarValidation;
 import net.stormdev.ucarstrade.cars.CarPresets;
 import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
@@ -31,28 +22,9 @@ import net.stormdev.ucarstrade.cars.DrivenCar;
 import net.stormdev.ucarstrade.displays.DisplayManager;
 import net.stormdev.ucarstrade.displays.DisplayType;
 import net.stormdev.ucarstrade.displays.Displays;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.block.Sign;
-import org.bukkit.entity.Bat;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Villager;
+import org.bukkit.*;
+import org.bukkit.block.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -81,18 +53,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
-import com.useful.uCarsAPI.uCarCrashEvent;
-import com.useful.uCarsAPI.uCarRespawnEvent;
-import com.useful.uCarsAPI.uCarsAPI;
-import com.useful.ucars.CarHealthData;
-import com.useful.ucars.CartOrientationUtil;
-import com.useful.ucars.ClosestFace;
-import com.useful.ucars.Lang;
-import com.useful.ucars.PlaceManager;
-import com.useful.ucars.ucarDeathEvent;
-import com.useful.ucars.ucars;
-import com.useful.ucars.util.UEntityMeta;
-import com.useful.ucarsCommon.StatValue;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UTradeListener implements Listener {
 	main plugin = null;
@@ -106,7 +71,7 @@ public class UTradeListener implements Listener {
 		safeExit = main.config.getBoolean("general.car.safeExit");
 	}
 	
-	void npcCarSteal(final Minecart vehicle, final Player player, final DrivenCar c, final boolean setPassenger){
+	void npcCarSteal(final Entity vehicle, final Player player, final DrivenCar c, final boolean setPassenger){
 		if(!UEntityMeta.hasMetadata(vehicle, "trade.npc") || !c.isNPC()){
 			return; //Not an npc
 		}
@@ -160,7 +125,7 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.HIGHEST)
 	void aiCarDie(VehicleDestroyEvent event){
-		if(!event.isCancelled() && event.getVehicle() instanceof Minecart){
+		if(!event.isCancelled() && event.getVehicle() instanceof Vehicle){
 			main.plugin.carSaver.carNoLongerInUse(event.getVehicle().getUniqueId());
 			UEntityMeta.removeMetadata(event.getVehicle(), CarSaver.META);
 		}
@@ -194,7 +159,7 @@ public class UTradeListener implements Listener {
 					|| e.getType().equals(EntityType.DROPPED_ITEM)){
 				e.remove();
 			}
-			else if(e instanceof Minecart){
+			else if(uCarsAPI.getAPI().checkIfCar(e)){
 				//Nothing
 			}
 			else if(e instanceof Damageable){
@@ -227,10 +192,10 @@ public class UTradeListener implements Listener {
 		final Player player = event.getPlayer();
 		Entity i = event.getRightClicked();
 		Entity cart = i;
-		if(!(cart instanceof Minecart)){
+		if(!(cart instanceof Vehicle)){
 			cart = this.isEntityInCar(cart);
 		}
-		if(cart == null || !(cart instanceof Minecart)){
+		if(cart == null || !(cart instanceof Vehicle)){
 			return;
 		}
 		
@@ -241,7 +206,7 @@ public class UTradeListener implements Listener {
 				return;
 			}
 			event.setCancelled(true);
-			final Minecart m = (Minecart) cart;
+			final Entity m = (Entity) cart;
 			plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable(){
 
 				public void run() {
@@ -256,10 +221,10 @@ public class UTradeListener implements Listener {
 	void NpcController(VehicleUpdateEvent event){
 		try {
 			Vehicle v = event.getVehicle();
-			if(!(v instanceof Minecart)){
+			if(!(v instanceof Vehicle)){
 				return;
 			}
-			final Minecart m = (Minecart) v;
+			final Vehicle m = (Vehicle) v;
 			final DrivenCar c = plugin.carSaver.getCarInUse(m);
 			if(c == null
 					|| !c.isNPC()){
@@ -296,10 +261,10 @@ public class UTradeListener implements Listener {
     	final Location loc = veh.getLocation();
         Block b = loc.getBlock();
         final Entity exited = event.getExited();
-        if(!(exited instanceof Player) || !(veh instanceof Minecart)){
+        if(!(exited instanceof Player)){
         	return;
         }
-        if(!uCarsAPI.getAPI().checkIfCar((Minecart)veh)){
+        if(!uCarsAPI.getAPI().checkIfCar((Entity) veh)){
         	return;
         }
         Player player = (Player) exited;
@@ -365,10 +330,10 @@ public class UTradeListener implements Listener {
 	@EventHandler
 	void displayUpgrades(VehicleUpdateEvent event){
 		Vehicle veh = event.getVehicle();
-		if(!(veh instanceof Minecart)){
+		if(!(veh instanceof Vehicle)){
 			return;
 		}
-		Minecart car = (Minecart) veh;
+		Vehicle car = (Vehicle) veh;
 		Location loc = car.getLocation();
 		Entity passenger = car.getPassenger();
 		if(passenger == null){
@@ -477,7 +442,7 @@ public class UTradeListener implements Listener {
 	void carUpgradeAnvil(final InventoryClickEvent event){
 		if(event.getAction()==InventoryAction.CLONE_STACK){
 			ItemStack cloned = event.getCursor();
-			if(cloned.getType() == Material.MINECART){
+			if(uCarsAPI.getAPI().runCarChecks(cloned)){
 				event.setCancelled(true);
 				return;
 			}
@@ -538,7 +503,7 @@ public class UTradeListener implements Listener {
 			}
 			return;
 		}
-		if(!(carItem.getType() == Material.MINECART) || 
+		if(/*!(carItem.getType() == Material.MINECART) || */
 				carItem.getItemMeta().getLore().size() < 2){
 			return; //Not a car
 		}
@@ -727,13 +692,13 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		Vehicle v = event.getVehicle();
-		if(v instanceof Minecart){
-			if(!uCarsAPI.getAPI().checkIfCar((Minecart)v)){
+		if(v instanceof Vehicle){
+			if(!uCarsAPI.getAPI().checkIfCar((Vehicle)v)){
 				v.remove();
 				return; //Stop poking our nose in
 			}
 			//Read up the stack and remove all
-			Minecart car = (Minecart)v;
+			Vehicle car = (Vehicle) v;
 			Entity top = car;
 			Location loc = car.getLocation();
 			while(top.getPassenger() != null){
@@ -745,7 +710,13 @@ public class UTradeListener implements Listener {
 				top = veh;
 			}
 			top.remove();
-			loc.getWorld().dropItemNaturally(loc, new ItemStack(Material.MINECART));
+			DrivenCar dc = main.plugin.carSaver.getCarInUse(car);
+			if(dc != null){
+				loc.getWorld().dropItemNaturally(loc, dc.toItemStack());
+			}
+			else {
+				loc.getWorld().dropItemNaturally(loc, new ItemStack(Material.MINECART));
+			}
 			main.plugin.carSaver.carNoLongerInUse(v.getUniqueId());
 		}
 		return;
@@ -758,8 +729,8 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		Entity clicked = event.getRightClicked();
-		if(!(clicked instanceof Minecart)){
-			Minecart m = isEntityInCar(clicked);
+		if(!(clicked instanceof Vehicle)){
+			Entity m = isEntityInCar(clicked);
 			if(m != null){
 				clicked = m;
 			}
@@ -767,7 +738,7 @@ public class UTradeListener implements Listener {
 				return;
 			}
 		}
-		Minecart car = (Minecart) clicked;
+		Entity car = (Entity) clicked;
 		if(car.getPassenger() == null
 				|| car.getPassenger() instanceof Player){
 			return;
@@ -912,10 +883,10 @@ public class UTradeListener implements Listener {
 			event.getDrops().clear();
 			if(e instanceof Villager && UEntityMeta.hasMetadata(v, "trade.npc")){ //Handle as if car is stolen
 				final DrivenCar c = plugin.carSaver.getCarInUse(v);
-				if(c == null || !(v instanceof Minecart)){
+				if(c == null || !(v instanceof Vehicle)){
 					return;
 				}
-				final Minecart m = (Minecart) v;
+				final Vehicle m = (Vehicle) v;
 				
 				if(!(e.getLastDamageCause() instanceof EntityDamageByEntityEvent)){
 					c.setNPC(false);
@@ -954,10 +925,10 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	void carDestroy(VehicleDestroyEvent event){
-		if(event.getVehicle() instanceof Minecart){
+		if(uCarsAPI.getAPI().checkIfCar(event.getVehicle())){
 			return; //uCars can handle it
 		}
-		final Minecart car = isEntityInCar(event.getVehicle());
+		final Entity car = isEntityInCar(event.getVehicle());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
@@ -967,7 +938,7 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	void boatDestroy(EntityDamageByBlockEvent event){
-		final Minecart car = isEntityInCar(event.getEntity());
+		final Entity car = isEntityInCar(event.getEntity());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
@@ -981,10 +952,10 @@ public class UTradeListener implements Listener {
 		if(event.isCancelled()){
 			return;
 		}
-		if(event.getVehicle() instanceof Minecart){
+		if(uCarsAPI.getAPI().checkIfCar(event.getVehicle())){
 			return; //uCars can handle it
 		}
-		final Minecart car = isEntityInCar(event.getVehicle());
+		final Entity car = isEntityInCar(event.getVehicle());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
@@ -995,14 +966,14 @@ public class UTradeListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOW) //Call second
 	void carDestroy(EntityDamageByEntityEvent event){
-		if(event.getEntity() instanceof Minecart){
+		if(uCarsAPI.getAPI().checkIfCar(event.getEntity())){
 			return; //uCars can handle it, or they're not a player
 		}
 		if(event.isCancelled() || event.getDamage() <= 0){
 			return;
 		}
 		final Player player = event.getDamager() instanceof Player ? (Player) event.getDamager() : null;
-		final Minecart car = isEntityInCar(event.getEntity());
+		final Entity car = isEntityInCar(event.getEntity());
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
@@ -1064,7 +1035,8 @@ public class UTradeListener implements Listener {
 		if(inHand == null ||
 				inHand.getItemMeta() == null ||
 				inHand.getItemMeta().getLore() == null ||
-				inHand.getItemMeta().getLore().size() < 2 || inHand.getType() != Material.MINECART){ //Not a car
+				inHand.getItemMeta().getLore().size() < 2 || !uCarsAPI.getAPI().runCarChecks(inHand)/*|| inHand.getType() != Material.MINECART*/){ //Not a car
+
 			return;
 		}
 		// Its a minecart!
@@ -1202,7 +1174,7 @@ public class UTradeListener implements Listener {
 			return;
 		}
 		
-		Minecart cart = event.getCar();
+		Entity cart = event.getCar();
 		if(UEntityMeta.hasMetadata(cart, "car.destroyed") || cart.hasMetadata("car.destroyed")){
 			return; //Don't damage the car
 		}
@@ -1230,7 +1202,7 @@ public class UTradeListener implements Listener {
 	@EventHandler (priority=EventPriority.HIGHEST)
 	void carRemoval(ucarDeathEvent event){
 		event.setCancelled(true);
-		Minecart cart = event.getCar();
+		Entity cart = event.getCar();
 		if(UEntityMeta.hasMetadata(cart, "car.destroyed") || cart.hasMetadata("car.destroyed")){
 			return; //Don't destroy the car
 		}
@@ -1667,8 +1639,8 @@ public class UTradeListener implements Listener {
 					return;
 				}
 				ItemStack carItem = i.getItem(4);
-				if(carItem.getType() != Material.MINECART
-						|| carItem.getItemMeta() == null
+				if(/*carItem.getType() != Material.MINECART*/
+						 carItem.getItemMeta() == null
 						|| carItem.getItemMeta().getLore() == null
 						|| carItem.getItemMeta().getLore().size() < 2){
 					player.sendMessage(main.colors.getError()+"Invalid item to sell!");
@@ -1710,8 +1682,8 @@ public class UTradeListener implements Listener {
 							return;
 						}
 						ItemStack carItem = i.getItem(4);
-						if(carItem.getType() != Material.MINECART 
-								|| carItem.getItemMeta() == null
+						if(/*carItem.getType() != Material.MINECART
+								|| */carItem.getItemMeta() == null
 								|| carItem.getItemMeta().getLore() == null
 								|| carItem.getItemMeta().getLore().size() < 2){
 							player.sendMessage(main.colors.getError()+"Invalid item to sell!");
@@ -2017,18 +1989,18 @@ public class UTradeListener implements Listener {
 		return;
 	}
 	
-	public Minecart isEntityInCar(Entity e){
+	public Vehicle isEntityInCar(Entity e){
 		if(e.getVehicle() == null){
 			return null;
 		}
 		Entity v = e.getVehicle();
-		while(v!=null && v.getVehicle() != null && !(v instanceof Minecart)){
+		while(v!=null && v.getVehicle() != null && !(v instanceof Vehicle)){
 			v = v.getVehicle();
 		}
-		if(v == null || !(v instanceof Minecart)){
+		if(v == null || !uCarsAPI.getAPI().runCarChecks(v) || !(v instanceof  Vehicle)){
 			return null;
 		}
-		return (Minecart) v;
+		return (Vehicle) v;
 	}
 
 }

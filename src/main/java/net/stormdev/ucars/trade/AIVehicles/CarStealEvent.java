@@ -1,23 +1,22 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
 import net.stormdev.ucarstrade.cars.DrivenCar;
-
-import org.bukkit.entity.Minecart;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 public class CarStealEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private Minecart vehicle;
+    private Entity vehicle;
     private Player stealer;
     private DrivenCar car;
-	public CarStealEvent(Minecart vehicle, Player stealer, DrivenCar car) {
+	public CarStealEvent(Entity vehicle, Player stealer, DrivenCar car) {
 		this.vehicle = vehicle;
 		this.stealer = stealer;
 		this.car = car;
 	}
-	public Minecart getVehicle(){
+	public Entity getVehicle(){
 		return vehicle;
 	}
 	public Player getStealer(){

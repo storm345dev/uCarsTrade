@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 public class CarShop {
 	private double value;
@@ -226,8 +227,11 @@ public class CarShop {
 						}
 					}
 					lore.add(ChatColor.WHITE+"Price: "+currency+CarValueCalculator.getCarValueForPurchase(new DrivenCar(cp.getName(), cp.getSpeed(), cp.getHealth(), cp.getAcceleration(), cp.getTurnAmountPerTick(), false, cp.getModifications())));
-					
-					page.setOption(pos, new ItemStack(Material.MINECART), ChatColor.BLUE+cp.getName(), 
+
+					MaterialData md = cp.toItemStack().getData();
+					ItemStack is = new ItemStack(md.getItemType());
+					is.setData(md);
+					page.setOption(pos, is, ChatColor.BLUE+cp.getName(),
 							lore);
 				}
 				page.setOption(52, new ItemStack(Material.PAPER), main.colors.getTitle()+"Previous Page", main.colors.getInfo()+"Go to previous page");

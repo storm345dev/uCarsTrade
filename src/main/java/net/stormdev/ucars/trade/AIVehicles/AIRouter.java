@@ -1,18 +1,16 @@
 package net.stormdev.ucars.trade.AIVehicles;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import net.stormdev.ucars.trade.main;
+import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.CartOrientationUtil;
+import com.useful.ucars.ClosestFace;
+import com.useful.ucars.util.UEntityMeta;
+import com.useful.ucarsCommon.StatValue;
 import net.stormdev.ucars.trade.AIVehicles.routing.BlockRouteData;
 import net.stormdev.ucars.trade.AIVehicles.routing.RouteMethod;
+import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.utils.NPCOrientationUtil;
 import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.DrivenCar;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,19 +18,17 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.Villager;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
-import com.useful.uCarsAPI.uCarsAPI;
-import com.useful.ucars.CartOrientationUtil;
-import com.useful.ucars.ClosestFace;
-import com.useful.ucars.util.UEntityMeta;
-import com.useful.ucarsCommon.StatValue;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class AIRouter {
 	public static int PLAYER_RADIUS = 70;
@@ -234,7 +230,7 @@ public class AIRouter {
 		return data;
 	}
 	
-	public void route(final Minecart car, final DrivenCar c) throws Exception{
+	public void route(final Entity car, final DrivenCar c) throws Exception{
 		if(!enabled){
 			return;
 		}
@@ -359,7 +355,7 @@ public class AIRouter {
 					if(e.equals(car)){
 						continue;
 					}
-					if(!e.getType().equals(EntityType.MINECART) || !UEntityMeta.hasMetadata(e, "trade.npc")){
+					if(/*!e.getType().equals(EntityType.MINECART) || */!UEntityMeta.hasMetadata(e, "trade.npc")){
 						continue;
 					}
 					Vector diff = e.getLocation().toVector().clone().subtract(carLoc.clone());
@@ -645,7 +641,7 @@ public class AIRouter {
 		return;
 	}
 	
-	public void findRoad(final Minecart car, DrivenCar c, double speed, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
+	public void findRoad(final Entity car, DrivenCar c, double speed, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
 		vd.resetUpdatesSinceTurn();
 		
 		if(vd.getTargetBlockLoc() == null){
@@ -734,7 +730,7 @@ public class AIRouter {
 		car.setVelocity(vel);
 	}
 	
-	public void relocateRoad(Minecart car, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
+	public void relocateRoad(Entity car, Block under, Location currentLoc, boolean atJunction, VelocityData vd){
 		vd.resetUpdatesSinceTurn();
 		/*BlockRouteData found = null;
 		Block foundBlock = null;
@@ -889,7 +885,7 @@ public class AIRouter {
 		return;
 	}
 	
-	public static void clearNPCMeta(Vehicle car){
+	public static void clearNPCMeta(Entity car){
 		car.removeMetadata("trade.npc", main.plugin);
 		car.removeMetadata("relocatingRoad", main.plugin);
 		car.removeMetadata("npc.turning", main.plugin);
@@ -898,7 +894,7 @@ public class AIRouter {
 		UEntityMeta.removeMetadata(car, "npc.turning");
 	}
 	
-	public static void despawnNPCCar(final Minecart car, final DrivenCar c){
+	public static void despawnNPCCar(final Entity car, final DrivenCar c){
 		//Remove me
 		Runnable run = new Runnable(){
 
@@ -928,7 +924,7 @@ public class AIRouter {
 		}
 	}
 	
-	public static void despawnNPCCarNow(Minecart car, final DrivenCar c){
+	public static void despawnNPCCarNow(Entity car, final DrivenCar c){
 		//Remove me
 		Entity pass = car.getPassenger();
 		clearNPCMeta(car);

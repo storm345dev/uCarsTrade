@@ -29,7 +29,11 @@ public class DrivenCar implements Serializable {
 	private boolean isNPC = false;
 	private double accelMod = 1;
 	private double turnAmountPerTick = 5;
-	
+
+	public DrivenCar(CarPreset cp){
+		this(cp.getName(),cp.getSpeed(),cp.getHealth(),cp.getAcceleration(),cp.getTurnAmountPerTick(),false,cp.getModifications());
+	}
+
 	public DrivenCar(String name, double speed, double health, double acceleration, double turnAmountPerTick, boolean isHandlingDamaged, List<String> modifiers){
 		this.setName(name);
 		this.setSpeed(speed);

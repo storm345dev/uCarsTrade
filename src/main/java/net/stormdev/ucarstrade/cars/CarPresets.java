@@ -173,6 +173,8 @@ public class CarPresets {
 		public void setDisplayBlockOffset(int displayBlockOffset) {
 			this.displayBlockOffset = displayBlockOffset;
 		}
-		
+		public ItemStack toItemStack(){
+			return new DrivenCar(this).toItemStack();
+		}
 	}
 }

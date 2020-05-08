@@ -60,7 +60,7 @@ public class CarSaver {
 			}}, 180*20l, 180*20l);
 	}
 	
-	public boolean isAUCar(Vehicle v){
+	public boolean isAUCar(Entity v){
 		if(UEntityMeta.hasMetadata(v, META)){
 			return true;
 		}
@@ -120,7 +120,7 @@ public class CarSaver {
 		}
 	}
 	
-	public void carNowInUse(final Vehicle v, final DrivenCar car){
+	public void carNowInUse(final Entity v, final DrivenCar car){
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override

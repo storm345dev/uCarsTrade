@@ -163,7 +163,7 @@ public class AINodesSpawnManager extends AbstractAISpawnManager {
 						continue;
 					}
 					for(Entity e:ents){ //PLEASE don't get caught by AsyncCatcher...
-						if(!e.getType().equals(EntityType.MINECART) || !UEntityMeta.hasMetadata(e, "trade.npc")){
+						if(!UEntityMeta.hasMetadata(e, "trade.npc")){
 							continue;
 						}
 						Location l = e.getLocation();

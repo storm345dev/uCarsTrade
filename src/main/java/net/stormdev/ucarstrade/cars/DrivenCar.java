@@ -64,7 +64,15 @@ public class DrivenCar implements Serializable {
 	}
 	
 	public ItemStack toItemStack(){
-		ItemStack stack = new ItemStack(Material.MINECART);
+	    ItemStack stack;
+	    MaterialData md = hasPreset() ? getPreset().getDisplayBlock() : null;
+	    if(main.config.getBoolean("general.car.displayInInvAsDisplayBlockWhenExist") && md != null){
+            stack = new ItemStack(md.getItemType());
+            stack.setData(md);
+        }
+        else {
+            stack = new ItemStack(Material.MINECART);
+        }
 		List<String> lore = new ArrayList<String>();
 		ItemMeta meta = stack.getItemMeta();
 		lore.add(ChatColor.GRAY+"car");

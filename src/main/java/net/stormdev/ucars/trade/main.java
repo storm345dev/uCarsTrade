@@ -212,6 +212,9 @@ public class main extends JavaPlugin {
         	if (!config.contains("general.car.cache")) {
 				config.set("general.car.cache", 100);
 			}
+			if(!config.contains("general.car.displayInInvAsDisplayBlockWhenExist")){
+        		config.set("general.car.displayInInvAsDisplayBlockWhenExist",true);
+			}
         	if (!config.contains("general.carTrading.enable")) {
 				config.set("general.carTrading.enable", true);
 			}

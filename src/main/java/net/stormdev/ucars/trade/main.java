@@ -19,6 +19,7 @@ import net.stormdev.ucars.utils.ItemRename;
 import net.stormdev.ucars.utils.SalesManager;
 import net.stormdev.ucars.utils.TradeBoothClickEvent;
 import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucarstrade.ItemCarValidation;
 import net.stormdev.ucarstrade.cars.CarPresets;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 import org.bukkit.Bukkit;
@@ -410,8 +411,8 @@ public class main extends JavaPlugin {
         uCarsAPI.getAPI().registerItemCarCheck(this, new ItemCarCheck(){
 
 			@Override
-			public Boolean isACar(ItemStack arg0) {
-				return false; //Let us handle it
+			public Boolean isACar(ItemStack item) {
+				return ItemCarValidation.getCar(item) != null; //Let us handle it
 			}});
         
         File carsMarketSaveFile = new File(getDataFolder().getAbsolutePath() + File.separator + "carsMarket.marketData");

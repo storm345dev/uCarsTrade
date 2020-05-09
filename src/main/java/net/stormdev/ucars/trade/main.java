@@ -114,7 +114,7 @@ public class main extends JavaPlugin {
 		try {
 			lang.load(langFile);
 			if(!lang.contains("general.place.msg")){
-				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse!");
+				lang.set("general.place.msg", "Placed car %name%, cars can be driven with similar controls to a horse! Change driving mode with jump!");
 			}
 			if(!lang.contains("general.noExit.msg")){
 				lang.set("general.noExit.msg", "You may only exit in a clear area!");
@@ -345,6 +345,7 @@ public class main extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 		}
 		ucars.hookPlugin(this);
+		uCarsAPI.getAPI().setuCarsHandlesPlacingCars(false); //We handle this instead
 		com.useful.ucars.ucars.plugin.ucarsTrade = true;
 		logger.info("uCars found and hooked!");
 		PluginDescriptionFile pldesc = plugin.getDescription();

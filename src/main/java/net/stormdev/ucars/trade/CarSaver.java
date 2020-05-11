@@ -1,28 +1,16 @@
 package net.stormdev.ucars.trade;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.useful.ucars.util.UEntityMeta;
+import com.useful.ucarsCommon.StatValue;
 import net.stormdev.ucarstrade.cars.DrivenCar;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Vehicle;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.useful.ucars.util.UEntityMeta;
-import com.useful.ucarsCommon.StatValue;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CarSaver {
 	public static final String META = "car.drivenCarMeta";
@@ -45,7 +33,7 @@ public class CarSaver {
 
 					@Override
 					public void run() {
-						mainLoop: for(UUID id:new ArrayList<UUID>(inUse.keySet())){
+						mainLoop: for(UUID id:inUse.keySet()){
 							for(Entity e:entities){
 								if(e.getUniqueId().equals(id)){
 									continue mainLoop;

@@ -686,7 +686,7 @@ public class UTradeListener implements Listener {
 			return;
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	/*@EventHandler(priority = EventPriority.HIGHEST)
 	void carStackRemoval(VehicleDestroyEvent event){
 		if(event.isCancelled()){
 			return;
@@ -705,10 +705,14 @@ public class UTradeListener implements Listener {
 			}
 			while(top.getVehicle() != null){
 				Entity veh = top.getVehicle();
-				top.remove();
+				if(!top.equals(v)) {
+					top.remove();
+				}
 				top = veh;
 			}
-			top.remove();
+			if(!top.equals(v)) {
+				top.remove();
+			}
 			DrivenCar dc = main.plugin.carSaver.getCarInUse(car);
 			if(dc != null){
 				loc.getWorld().dropItemNaturally(loc, dc.toItemStack());
@@ -719,7 +723,7 @@ public class UTradeListener implements Listener {
 			main.plugin.carSaver.carNoLongerInUse(v.getUniqueId());
 		}
 		return;
-	}
+	}*/
 	
 	@EventHandler (priority = EventPriority.HIGH)
 	void enterCar(PlayerInteractEntityEvent event){
@@ -1100,70 +1104,17 @@ public class UTradeListener implements Listener {
 			current = current.add(v);
 		}
 		
-		loc.setYaw(event.getPlayer().getLocation().getYaw() + 90);
+		loc.setYaw(event.getPlayer().getLocation().getYaw());
 		Block in = loc.getBlock();
 		if(!in.isEmpty() && !in.isLiquid()){
 			return;
 		}
-		final Minecart car = (Minecart) event.getPlayer().getWorld().spawnEntity(loc, EntityType.MINECART);
-		float yaw = event.getPlayer().getLocation().getYaw()+90;
-		if(yaw < 0){
-			yaw = 360 + yaw;
-		}
-		else if(yaw >= 360){
-			yaw = yaw - 360;
-		}
-		CartOrientationUtil.setYaw(car, yaw);
-		
-		//Display blocks
-		CarPreset cp = c.getPreset();
-		if(cp != null && cp.hasDisplayBlock()){
-			car.setDisplayBlock(cp.getDisplayBlock());
-			car.setDisplayBlockOffset(cp.getDisplayBlockOffset());
-		}
-		else if(c.getBaseDisplayBlock() != null){
-			car.setDisplayBlock(c.getBaseDisplayBlock());
-			car.setDisplayBlockOffset(0);
-		}
-		
-		in = car.getLocation().getBlock();
-		Block n = in.getRelative(BlockFace.NORTH);   // The directions minecraft aligns the cart to
-		Block w = in.getRelative(BlockFace.WEST);
-		Block nw = in.getRelative(BlockFace.NORTH_WEST);
-		Block ne = in.getRelative(BlockFace.NORTH_EAST);
-		Block sw = in.getRelative(BlockFace.SOUTH_WEST);
-		if((!in.isEmpty() && !in.isLiquid())
-				|| (!n.isEmpty() && !n.isLiquid())
-				|| (!w.isEmpty() && !w.isLiquid())
-				|| (!ne.isEmpty() && !ne.isLiquid())
-				|| (!nw.isEmpty() && !nw.isLiquid())
-				|| (!sw.isEmpty() && !sw.isLiquid())){
-			car.remove();
-			event.setUseItemInHand(Result.DENY);
-			return;
-		}
-		double health = c.getHealth();
-		CarHealthData chd = ucars.listener.getCarHealthHandler(car);
-		chd.setHealth(health);
-		ucars.listener.updateCarHealthHandler(car, chd);
-		/*
-		 * Location carloc = car.getLocation();
-		 * carloc.setYaw(event.getPlayer().getLocation().getYaw() + 270);
-		 * car.setVelocity(new Vector(0,0,0)); car.teleport(carloc);
-		 * car.setVelocity(new Vector(0,0,0));
-		 */
-		UEntityMeta.setMetadata(car, "trade.car", new StatValue(true, plugin));
+		Entity car = CarPlaceAPI.placeCar(c,loc.clone().subtract(0,1.5,0),event.getPlayer(),event.getPlayer().getLocation().getYaw());
+
 			ItemStack placed = event.getPlayer().getItemInHand();
 			placed.setAmount(0);
 			event.getPlayer().getInventory().setItemInHand(placed);
 		event.setCancelled(true);
-		c.setId(car.getUniqueId());
-		plugin.carSaver.carNowInUse(car, c);
-		String name = c.getName();
-		String placeMsg = net.stormdev.ucars.trade.Lang.get("general.place.msg");
-		placeMsg = main.colors.getInfo() + placeMsg.replaceAll(Pattern.quote("%name%"), "'"+name+"'");
-		event.getPlayer().sendMessage(placeMsg);
-		DisplayManager.fillCar(car, c, event.getPlayer());
 		return;
 	}
 	 

@@ -89,15 +89,32 @@ public class CarPresets {
 			double accelMod = carSect.contains("acceleration") ? carSect.getDouble("acceleration") / 10.0d : 1;
 			double turnAmountPerTick = carSect.contains("handling") ? carSect.getDouble("handling") / 10.0d : 5;
 			MaterialData displayBlock = null;
-			int offset = 0;
+			double offset = 0;
 			if(carSect.contains("display")){
 				ItemStack is = ItemStackFromId.get(carSect.getString("display"));
 				displayBlock = is.getData();
 			}
 			if(carSect.contains("displayOffset")){
-				offset = carSect.getInt("displayOffset");
+				offset = carSect.getDouble("displayOffset");
 			}
-			addCarPreset(new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers, displayBlock, offset));
+			if(!carSect.contains("passengers.max")) {
+				carSect.set("passengers.max",1);
+			}
+			if(!carSect.contains("passengers.boatOrientationOffsetDeg")) {
+				carSect.set("passengers.boatOrientationOffsetDeg",0.0d);
+			}
+			if(!carSect.contains("hitbox.x")){
+				carSect.set("hitbox.x",-1.0d);
+			}
+			if(!carSect.contains("hitbox.z")){
+				carSect.set("hitbox.z",-1.0d);
+			}
+			CarPreset cp = new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers, displayBlock, offset);
+			cp.setMaxPassengers(carSect.getInt("passengers.max"));
+			cp.setBoatOrientationOffsetDeg(carSect.getDouble("boatOrientationOffsetDeg"));
+			cp.setHitboxX((float) carSect.getDouble("hitbox.x"));
+			cp.setHitboxZ((float) carSect.getDouble("hitbox.z"));
+			addCarPreset(cp);
 		}
 		
 		main.logger.info("Loaded "+getPresets().size() + " car presets!");
@@ -110,9 +127,14 @@ public class CarPresets {
 		private double acceleration;
 		private double turnAmountPerTick;
 		private MaterialData displayBlock;
-		private int displayBlockOffset = 0;
+		private double displayBlockOffset = 0;
 		private List<String> modifiers = new ArrayList<String>();
-		public CarPreset(String name, double speed, double health, double accelMod, double turnAmountPerTick, List<String> modifiers, MaterialData displayBlock, int displayBlockOffset){
+		private int maxPassengers = 1;
+		private double boatOrientationOffsetDeg = 0;
+		private float hitboxX = -1;
+		private float hitboxZ = -1;
+
+		public CarPreset(String name, double speed, double health, double accelMod, double turnAmountPerTick, List<String> modifiers, MaterialData displayBlock, double displayBlockOffset){
 			this.name = name;
 			this.speed = speed;
 			this.health = health;
@@ -122,6 +144,23 @@ public class CarPresets {
 			this.setDisplayBlock(displayBlock);
 			this.setDisplayBlockOffset(displayBlockOffset);
 		}
+
+		public int getMaxPassengers() {
+			return maxPassengers;
+		}
+
+		public void setMaxPassengers(int maxPassengers) {
+			this.maxPassengers = maxPassengers;
+		}
+
+		public double getBoatOrientationOffsetDeg() {
+			return boatOrientationOffsetDeg;
+		}
+
+		public void setBoatOrientationOffsetDeg(double boatOrientationOffsetDeg) {
+			this.boatOrientationOffsetDeg = boatOrientationOffsetDeg;
+		}
+
 		public String getName() {
 			return name;
 		}
@@ -167,14 +206,30 @@ public class CarPresets {
 		public boolean hasDisplayBlock(){
 			return this.displayBlock != null;
 		}
-		public int getDisplayBlockOffset() {
+		public double getDisplayBlockOffset() {
 			return displayBlockOffset;
 		}
-		public void setDisplayBlockOffset(int displayBlockOffset) {
+		public void setDisplayBlockOffset(double displayBlockOffset) {
 			this.displayBlockOffset = displayBlockOffset;
 		}
 		public ItemStack toItemStack(){
 			return new DrivenCar(this).toItemStack();
+		}
+
+		public float getHitboxX() {
+			return hitboxX;
+		}
+
+		public void setHitboxX(float hitboxX) {
+			this.hitboxX = hitboxX;
+		}
+
+		public void setHitboxZ(float hitboxZ) {
+			this.hitboxZ = hitboxZ;
+		}
+
+		public float getHitboxZ() {
+			return this.hitboxZ;
 		}
 	}
 }

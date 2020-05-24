@@ -16,7 +16,7 @@ import java.util.List;
 
 public class EntityAttachUtil {
 	public static void enforceAttached(final Entity passenger, final Entity vehicle,final double radius){
-		final List<Player> online = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+		/*final List<Player> online = new ArrayList<Player>(Bukkit.getOnlinePlayers());
 		Bukkit.getScheduler().runTaskAsynchronously(main.plugin, new Runnable(){
 
 			@Override
@@ -32,11 +32,14 @@ public class EntityAttachUtil {
 					sendAttached(passenger, vehicle, res.toArray(new Player[res.size()]));
 				}
 				return;
-			}});
+			}});*/
 	}
 	
 	public static void sendAttached(Entity passenger, Entity vehicle, Player... players){
-		int entID = ((CraftEntity)passenger).getHandle().getId();
+		if(true){
+			return;
+		}
+		/*int entID = ((CraftEntity)passenger).getHandle().getId();
 		int vehId = ((CraftEntity)vehicle).getHandle().getId();
 		
 		ProtocolManager pm = ProtocolLibrary.getProtocolManager();
@@ -48,6 +51,6 @@ public class EntityAttachUtil {
 			} catch (InvocationTargetException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 }

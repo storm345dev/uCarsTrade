@@ -3,6 +3,8 @@ package net.stormdev.ucars.trade.AIVehicles.spawning;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.stormdev.ucars.entity.Car;
+import net.stormdev.ucars.entity.CarMinecraftEntity;
 import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
@@ -23,6 +25,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import com.useful.ucars.CarHealthData;
@@ -217,7 +220,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 		Location dirLoc = new Location(spawn.getWorld(), 0, 0, 0); //Make sure car always faces the RIGHT "forwards"
 		dirLoc.setDirection(new Vector(carriagewayDir.getModX(), 0, carriagewayDir.getModZ()).normalize());
 		
-		float yaw = dirLoc.getYaw() + 90;
+		float yaw = dirLoc.getYaw();
 		while(yaw < 0){
 			yaw = 360 + yaw;
 		}
@@ -266,8 +269,21 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						if(!spawnLoc.getChunk().isLoaded()){
 							return;
 						}
-						final Minecart m = (Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
-						
+						CarMinecraftEntity hce = new CarMinecraftEntity(spawnLoc.clone());
+						hce.setHitBoxX(c.getHitboxX());
+						hce.setHitBoxZ(c.getHitboxZ());
+						hce.setMaxPassengers(c.getMaxPassengers());
+						hce.setBoatOffsetDeg(c.getBoatOrientationOffsetDeg());
+						final Car m = hce.spawn();//(Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);
+						float yaw = spawnLoc.getYaw()+90;
+						if(yaw < 0){
+							yaw = 360 + yaw;
+						}
+						else if(yaw >= 360){
+							yaw = yaw - 360;
+						}
+						CartOrientationUtil.setYaw(m, yaw);
+
 						if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
 							if(nearby.size() > 1){
 								m.remove();
@@ -323,16 +339,16 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						}*/
 						
 						CarPreset cp = c.getPreset();
+						//Display blocks
 						if(cp != null && cp.hasDisplayBlock()){
-							m.setDisplayBlock(cp.getDisplayBlock());
-							m.setDisplayBlockOffset(cp.getDisplayBlockOffset());
+							m.setDisplay(new ItemStack(cp.getDisplayBlock().getItemType(), 1, cp.getDisplayBlock().getData()), cp.getDisplayBlockOffset());
 						}
 						else if(c.getBaseDisplayBlock() != null){
-							m.setDisplayBlock(c.getBaseDisplayBlock());
+							m.setDisplay(new ItemStack(c.getBaseDisplayBlock().getItemType(), 1, c.getBaseDisplayBlock().getData()), 0);
 						}
 						
 						m.setPassenger(v);
-						EntityAttachUtil.enforceAttached(v, m, Bukkit.getViewDistance()*16+1);
+						//EntityAttachUtil.enforceAttached(v, m, Bukkit.getViewDistance()*16+1);
 						
 						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));
 						if(!m.isDead() && m.isValid() && v.isValid() && !v.isDead()){ //Cart hasn't despawned

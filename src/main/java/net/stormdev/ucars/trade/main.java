@@ -1,7 +1,9 @@
 package net.stormdev.ucars.trade;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.useful.uCarsAPI.ItemCarCheck;
 import com.useful.uCarsAPI.uCarsAPI;
+import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.Colors;
 import com.useful.ucars.ucars;
 import com.useful.ucars.util.UEntityMeta;
@@ -15,13 +17,11 @@ import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
 import net.stormdev.ucars.trade.AIVehicles.spawning.nodes.AINodesSpawnManager;
 import net.stormdev.ucars.trade.guis.IconMenu;
 import net.stormdev.ucars.trade.guis.IconMenuListener;
-import net.stormdev.ucars.utils.ItemRename;
-import net.stormdev.ucars.utils.SalesManager;
-import net.stormdev.ucars.utils.TradeBoothClickEvent;
-import net.stormdev.ucars.utils.TradeBoothMenuType;
+import net.stormdev.ucars.utils.*;
 import net.stormdev.ucarstrade.ItemCarValidation;
 import net.stormdev.ucarstrade.cars.CarPresets;
 import net.stormdev.ucarstrade.cars.DrivenCar;
+import net.stormdev.ucarstrade.protocolMagic.ProtocolManipulator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -70,6 +70,7 @@ public class main extends JavaPlugin {
 	public SpawnMethod aiSpawnMethod = SpawnMethod.WORLD_PROBE;
 	public RouteMethod aiRouteMethod = RouteMethod.ORE;
 	public boolean checkSpawnSafety = false;
+	public ProtocolManipulator protocolManipulator;
 	
 	public boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer()
@@ -338,6 +339,7 @@ public class main extends JavaPlugin {
 			if(p.getName().equals("uCars")){
 			installed = true;
 			ucars = (com.useful.ucars.ucars) p;
+				CartOrientationUtil.setCartOrientationUtilOverride(new OverridenCartOrientationUtil());
 			}
 		}
 		if(!installed){
@@ -454,6 +456,9 @@ public class main extends JavaPlugin {
 		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
 		
 		new IconMenuListener();
+
+		this.protocolManipulator = new ProtocolManipulator(ProtocolLibrary.getProtocolManager());
+		this.protocolManipulator.registerManipulations();
         logger.info("uCarsTrade v"+plugin.getDescription().getVersion()+" has been enabled!");
 	}
 	

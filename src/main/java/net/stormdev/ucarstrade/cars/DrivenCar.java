@@ -29,6 +29,10 @@ public class DrivenCar implements Serializable {
 	private boolean isNPC = false;
 	private double accelMod = 1;
 	private double turnAmountPerTick = 5;
+	private int maxPassengers = -1;
+	private double boatOrientationOffsetDeg = 0;
+	private float hitboxX = -1;
+	private float hitboxZ = -1;
 
 	public DrivenCar(CarPreset cp){
 		this(cp.getName(),cp.getSpeed(),cp.getHealth(),cp.getAcceleration(),cp.getTurnAmountPerTick(),false,cp.getModifications());
@@ -43,7 +47,29 @@ public class DrivenCar implements Serializable {
 		this.setAccelMod(acceleration);
 		this.setTurnAmountPerTick(turnAmountPerTick);
 	}
-	
+
+	public int getMaxPassengers() {
+		if(this.maxPassengers < 0 && getPreset() != null){
+			return getPreset().getMaxPassengers();
+		}
+		return maxPassengers < 0 ? 1:maxPassengers;
+	}
+
+	public void setMaxPassengers(int maxPassengers) {
+		this.maxPassengers = maxPassengers;
+	}
+
+	public double getBoatOrientationOffsetDeg() {
+		if(this.maxPassengers < 0 && getPreset() != null){
+			return getPreset().getBoatOrientationOffsetDeg();
+		}
+		return boatOrientationOffsetDeg;
+	}
+
+	public void setBoatOrientationOffsetDeg(double boatOrientationOffsetDeg) {
+		this.boatOrientationOffsetDeg = boatOrientationOffsetDeg;
+	}
+
 	public MaterialData getBaseDisplayBlock(){
 		if(!name.toLowerCase().contains("cop")){
 			return null;
@@ -195,6 +221,27 @@ public class DrivenCar implements Serializable {
 	public void setAccelMod(double accelMod) {
 		this.accelMod = accelMod;
 	}
-	
-	
+
+
+	public float getHitboxX() {
+		if(this.hitboxX < 0 && this.getPreset() != null){
+			return this.getPreset().getHitboxX();
+		}
+		return this.hitboxX;
+	}
+
+	public void setHitboxX(float hitboxX) {
+		this.hitboxX = hitboxX;
+	}
+
+	public float getHitboxZ() {
+		if(this.hitboxZ < 0 && this.getPreset() != null){
+			return this.getPreset().getHitboxZ();
+		}
+		return hitboxZ;
+	}
+
+	public void setHitboxZ(float hitboxZ) {
+		this.hitboxZ = hitboxZ;
+	}
 }

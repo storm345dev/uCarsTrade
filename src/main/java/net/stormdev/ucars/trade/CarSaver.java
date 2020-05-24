@@ -33,7 +33,7 @@ public class CarSaver {
 
 					@Override
 					public void run() {
-						mainLoop: for(UUID id:inUse.keySet()){
+						mainLoop: for(UUID id:new ArrayList<UUID>(inUse.keySet())){
 							for(Entity e:entities){
 								if(e.getUniqueId().equals(id)){
 									continue mainLoop;

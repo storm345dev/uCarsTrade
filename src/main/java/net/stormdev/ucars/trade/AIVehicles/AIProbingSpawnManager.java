@@ -404,7 +404,7 @@ public class AIProbingSpawnManager {
 				int x = br.getX();
 				int z = br.getZ();
 				
-				return new SpawnData[]{new SpawnData(b, br, w, x, y, z)};
+				return new SpawnData[]{new (b, br, w, x, y, z)};
 			}}).executeOnce();
 		SpawnData data;
 		try {

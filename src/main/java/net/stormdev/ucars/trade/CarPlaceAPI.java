@@ -2,6 +2,8 @@ package net.stormdev.ucars.trade;
 
 import java.util.regex.Pattern;
 
+import net.stormdev.ucars.entity.Car;
+import net.stormdev.ucars.entity.CarMinecraftEntity;
 import net.stormdev.ucarstrade.cars.CarPresets.CarPreset;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 import net.stormdev.ucarstrade.displays.DisplayManager;
@@ -19,13 +21,20 @@ import com.useful.ucars.CartOrientationUtil;
 import com.useful.ucars.ucars;
 import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
+import org.bukkit.inventory.ItemStack;
 
 public class CarPlaceAPI {
 	public static Entity placeCar(DrivenCar carData, Location placeLoc, Player placer, float direction){
 		Location loc = placeLoc.clone().add(0, 1.6, 0);
-		loc.setYaw(direction + 90);
+		loc.setYaw(direction+90);
 		Block in = loc.getBlock();
-		final Minecart car = (Minecart) placeLoc.getWorld().spawnEntity(loc, EntityType.MINECART);
+		CarMinecraftEntity hce = new CarMinecraftEntity(loc.clone().add(0, 0.0, 0));
+		hce.setHitBoxX(carData.getHitboxX());
+		hce.setHitBoxZ(carData.getHitboxZ());
+		hce.setMaxPassengers(carData.getMaxPassengers());
+		hce.setBoatOffsetDeg(carData.getBoatOrientationOffsetDeg());
+		final Car car = hce.spawn();
+		//final Minecart car = (Minecart) placeLoc.getWorld().spawnEntity(loc, EntityType.MINECART);
 		float yaw = direction;
 		if(yaw < 0){
 			yaw = 360 + yaw;
@@ -33,17 +42,16 @@ public class CarPlaceAPI {
 		else if(yaw >= 360){
 			yaw = yaw - 360;
 		}
-		CartOrientationUtil.setYaw(car, yaw);
+		CartOrientationUtil.setYaw(car, yaw+90);
 		
 		//Display blocks
 		CarPreset cp = carData.getPreset();
 		if(cp != null && cp.hasDisplayBlock()){
-			car.setDisplayBlock(cp.getDisplayBlock());
-			car.setDisplayBlockOffset(cp.getDisplayBlockOffset());
+			car.setDisplay(new ItemStack(cp.getDisplayBlock().getItemType(), 1, cp.getDisplayBlock().getData()), cp.getDisplayBlockOffset());
 		}
 		else if(carData.getBaseDisplayBlock() != null){
-			car.setDisplayBlock(carData.getBaseDisplayBlock());
-			car.setDisplayBlockOffset(0);
+
+			car.setDisplay(new ItemStack(carData.getBaseDisplayBlock().getItemType(), 1, carData.getBaseDisplayBlock().getData()), 0);
 		}
 		
 		in = car.getLocation().getBlock();

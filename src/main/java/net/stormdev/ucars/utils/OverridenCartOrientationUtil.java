@@ -41,6 +41,7 @@ public class OverridenCartOrientationUtil implements CartOrientationUtilOverride
             Car hc = CarMinecraftEntity.getCart(cart);
             if(hc != null){
                 hc.setYaw(yaw);
+                main.plugin.protocolManipulator.updateBoatRotationAngle(hc);
             }
             return;
         }

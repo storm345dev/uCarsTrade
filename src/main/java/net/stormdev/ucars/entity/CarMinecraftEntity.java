@@ -161,6 +161,10 @@ public class CarMinecraftEntity extends EntityArmorStand {
         return hc;
     }
 
+    public float getBukkitYaw() {
+        return super.yaw;
+    }
+
     public boolean hasFakeBoat() {
         return this.fakeBoat != null;
     }

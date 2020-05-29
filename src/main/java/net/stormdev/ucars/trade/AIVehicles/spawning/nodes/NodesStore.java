@@ -9,10 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -35,6 +32,14 @@ public class NodesStore {
 	public NodesStore(File saveFile){
 		this.saveFile = saveFile;
 		load();
+	}
+
+	public List<Node> getAllNodes(){
+		List<Node> results = new ArrayList<>();
+		for(List<Node> nodes:nodesByActiveChunks.values()){
+			results.addAll(nodes);
+		}
+		return Collections.unmodifiableList(results);
 	}
 	
 	public int getNodeCount(){

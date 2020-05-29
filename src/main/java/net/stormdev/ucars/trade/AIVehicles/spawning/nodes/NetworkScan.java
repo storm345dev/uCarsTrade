@@ -1,18 +1,11 @@
 package net.stormdev.ucars.trade.AIVehicles.spawning.nodes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
 import net.md_5.bungee.api.ChatColor;
-import net.stormdev.ucars.trade.main;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.AITrackFollow;
 import net.stormdev.ucars.trade.AIVehicles.DynamicLagReducer;
 import net.stormdev.ucars.trade.AIVehicles.spawning.SpawnMethod;
-
+import net.stormdev.ucars.trade.main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -20,6 +13,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class NetworkScan { 
 	private static int SCAN_BRANCH_LIMIT = 1000;
@@ -405,7 +404,6 @@ public class NetworkScan {
 		blockScan(origin.getBlock());
 		
 		roadScanOutput();
-		
 		logger.log("Road network indexed!");
 	}
 	
@@ -478,26 +476,72 @@ public class NetworkScan {
 	private synchronized void decrementScansRunning(){
 		scansRunning--;
 	}
-	
+
+	/*@ThreadSafe
+	protected static class ScanBranchData {
+		private final Block branchedBlock;
+		@GuardedBy("this")
+		private int length =0;
+		private final Vector directionStarted;
+		private final boolean isSourceNode; //Would car drive from this node in direction of branch or opposite
+
+		public ScanBranchData(Block branchedBlock, Vector directionStarted, boolean isSourceNode) {
+			this.branchedBlock = branchedBlock;
+			this.directionStarted = directionStarted;
+			this.isSourceNode = isSourceNode;
+		}
+
+		public Vector getDirectionStarted() {
+			return directionStarted;
+		}
+
+		public boolean isSourceNode() {
+			return isSourceNode;
+		}
+
+		public Block getBranchedBlock(){
+			return this.branchedBlock;
+		}
+
+		public synchronized void incremLength(){
+			this.length++;
+		}
+
+		public synchronized int getLength(){
+			return this.length;
+		}
+	}*/
+
+	private boolean isOppositeDirection(int modX, int modZ, BlockFace dir){
+		return dir.getModX() == -modX && dir.getModZ() == -modZ;
+	}
+
+	private boolean isSameDirection(int modX, int modZ, BlockFace dir){
+		return dir.getModX() == modX && dir.getModZ() == modZ;
+	}
+
 	private void blockScan(final Block block){
 		lastStartTime = System.currentTimeMillis();
 		if(block == null){
 			decrementScansRunning();
 			return;
 		}
-		if(roadNetworkBlocks.contains(block.getLocation().toVector())){
-			decrementScansRunning();
-			return;
-		}
-		if(scansRunning > NetworkScan.SCAN_BRANCH_LIMIT){
-			queuedBranches.add(block);
-			decrementScansRunning();
-			return;
-		}
-		try {
-			sleep(); //Give the main thread a rest occasionally so the server hopefully doesn't crash
+		synchronized (roadNetworkBlocks) {
+			if (roadNetworkBlocks.contains(block.getLocation().toVector())) { //Reached a bit of the network we already found
+				decrementScansRunning();
+				return;
+			}
+			if (scansRunning > NetworkScan.SCAN_BRANCH_LIMIT) {
+				queuedBranches.add(block);
+				decrementScansRunning();
+				return;
+			}
 			roughSize++;
 			roadNetworkBlocks.add(block.getLocation().toVector());
+		}
+
+		try {
+			sleep(); //Give the main thread a rest occasionally so the server hopefully doesn't crash
 			//Now check for nearby tracker blocks
 			Future<Boolean> moreStarted = Bukkit.getScheduler().callSyncMethod(main.plugin, new Callable<Boolean>(){
 

@@ -454,7 +454,6 @@ public class main extends JavaPlugin {
 			initNodeAISpawnManager();
 		}
 		this.aiController = new AIRouter(config.getBoolean("general.ai.enable"));
-		
 		new IconMenuListener();
 
 		this.protocolManipulator = new ProtocolManipulator(ProtocolLibrary.getProtocolManager());

@@ -30,7 +30,7 @@ public class DrivenCar implements Serializable {
 	private double accelMod = 1;
 	private double turnAmountPerTick = 5;
 	private int maxPassengers = -1;
-	private double boatOrientationOffsetDeg = 0;
+	private double[] boatsOrientationOffsetDeg = new double[]{};
 	private float hitboxX = -1;
 	private float hitboxZ = -1;
 
@@ -59,15 +59,15 @@ public class DrivenCar implements Serializable {
 		this.maxPassengers = maxPassengers;
 	}
 
-	public double getBoatOrientationOffsetDeg() {
+	public double[] getBoatOrientationOffsetDeg() {
 		if(this.maxPassengers < 0 && getPreset() != null){
 			return getPreset().getBoatOrientationOffsetDeg();
 		}
-		return boatOrientationOffsetDeg;
+		return boatsOrientationOffsetDeg;
 	}
 
-	public void setBoatOrientationOffsetDeg(double boatOrientationOffsetDeg) {
-		this.boatOrientationOffsetDeg = boatOrientationOffsetDeg;
+	public void setBoatOrientationOffsetDeg(double[] boatOrientationOffsetDeg) {
+		this.boatsOrientationOffsetDeg = boatOrientationOffsetDeg;
 	}
 
 	public MaterialData getBaseDisplayBlock(){

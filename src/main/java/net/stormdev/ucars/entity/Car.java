@@ -21,5 +21,5 @@ public interface Car extends ArmorStand,Vehicle {
 	public void setRoll(float roll);
 	public void setYawPitch(float yaw, float pitch);
 	public double getMaxPassengers();
-	public double getBoatRotationOffsetDegrees();
+	public double[] getBoatRotationOffsetDegrees();
 }

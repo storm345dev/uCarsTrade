@@ -141,7 +141,7 @@ public class CraftCar extends CraftArmorStand implements Car {
 	}
 
 	@Override
-	public double getBoatRotationOffsetDegrees() {
+	public double[] getBoatRotationOffsetDegrees() {
 		return getHandle().getBoatOffsetDeg();
 	}
 

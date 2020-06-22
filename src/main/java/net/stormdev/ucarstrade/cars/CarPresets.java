@@ -1,10 +1,12 @@
 package net.stormdev.ucarstrade.cars;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.stormdev.ucars.trade.main;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -101,7 +103,7 @@ public class CarPresets {
 				carSect.set("passengers.max",1);
 			}
 			if(!carSect.contains("passengers.boatOrientationOffsetDeg")) {
-				carSect.set("passengers.boatOrientationOffsetDeg",0.0d);
+				carSect.set("passengers.boatOrientationOffsetDeg", Arrays.asList(new double[]{0}));
 			}
 			if(!carSect.contains("hitbox.x")){
 				carSect.set("hitbox.x",-1.0d);
@@ -111,7 +113,7 @@ public class CarPresets {
 			}
 			CarPreset cp = new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers, displayBlock, offset);
 			cp.setMaxPassengers(carSect.getInt("passengers.max"));
-			cp.setBoatOrientationOffsetDeg(carSect.getDouble("boatOrientationOffsetDeg"));
+			cp.setBoatOrientationOffsetDeg(ArrayUtils.toPrimitive(carSect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
 			cp.setHitboxX((float) carSect.getDouble("hitbox.x"));
 			cp.setHitboxZ((float) carSect.getDouble("hitbox.z"));
 			addCarPreset(cp);
@@ -130,7 +132,7 @@ public class CarPresets {
 		private double displayBlockOffset = 0;
 		private List<String> modifiers = new ArrayList<String>();
 		private int maxPassengers = 1;
-		private double boatOrientationOffsetDeg = 0;
+		private double[] boatsOrientationOffsetDeg = new double[]{};
 		private float hitboxX = -1;
 		private float hitboxZ = -1;
 
@@ -153,12 +155,12 @@ public class CarPresets {
 			this.maxPassengers = maxPassengers;
 		}
 
-		public double getBoatOrientationOffsetDeg() {
-			return boatOrientationOffsetDeg;
+		public double[] getBoatOrientationOffsetDeg() {
+			return boatsOrientationOffsetDeg;
 		}
 
-		public void setBoatOrientationOffsetDeg(double boatOrientationOffsetDeg) {
-			this.boatOrientationOffsetDeg = boatOrientationOffsetDeg;
+		public void setBoatOrientationOffsetDeg(double[] boatOrientationOffsetDeg) {
+			this.boatsOrientationOffsetDeg = boatOrientationOffsetDeg;
 		}
 
 		public String getName() {

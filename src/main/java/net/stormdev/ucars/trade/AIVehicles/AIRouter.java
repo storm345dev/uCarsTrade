@@ -534,7 +534,7 @@ public class AIRouter {
 		else{
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
-			double ty = toDrive.getY()+0.025;
+			double ty = toDrive.getY()+0.0;
 			if(rName.contains("step") && !rName.contains("double") 
 					&& ((int)road.getData())<8 //Makes sure it's a bottom slab
 					){
@@ -548,6 +548,10 @@ public class AIRouter {
 			double x = tx - cx /*+ 0.5*/;
 			double y = ty - cy;
 			double z = tz - cz /*+ 0.5*/;
+
+			if(y < 0.2){
+				y = -0.1;
+			}
 			
 			/*if(y > 0.2){ //Going up
 				y+=0.2; //Help climb smoother
@@ -673,7 +677,8 @@ public class AIRouter {
 		
 		//Calculate vector to get there...
 		double tx = toDrive.getX() + 0.5;
-		double ty = toDrive.getY() + 0.025;
+		double ty = toDrive.getY() + 0.0;
+
 		if(rName.contains("step") && !rName.contains("double") 
 				&& ((int)rb.getData())<8 //Makes sure it's a bottom slab
 				){
@@ -687,7 +692,11 @@ public class AIRouter {
 		double x = tx - cx /*+ 0.5*/;
 		double y = ty - cy;
 		double z = tz - cz /*+ 0.5*/;
-		
+
+		if(y < 0.2){
+			y = -0.1;
+		}
+
 		/*if(y > 0.2){ //Going up
 			y+=0.2; //Help climb smoother
 		}*/
@@ -867,6 +876,9 @@ public class AIRouter {
 		double y = ty - cy;
 		double z = tz - (cz);
 
+		if(y < 0.2){
+			y = -0.1;
+		}
 		vel = new Vector(x,y,z); //Go to block
 		
 		car.setVelocity(vel);

@@ -41,7 +41,7 @@ public class CarMinecraftEntity extends EntityArmorStand {
 
     private CraftCar ce;
     private Location loc;
-    private double heightOffset = 0;
+    private volatile double heightOffset = 0;
     private float hitBoxX = -1;
     private float hitBoxZ = -1;
     private double[] boatsOffsetDeg = new double[]{0};

@@ -271,7 +271,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						}
 						CarMinecraftEntity hce = new CarMinecraftEntity(spawnLoc.clone());
 						//Don't apply larger hitboxes for NPC cars as will stop them navigating correctly (hit into walls)
-						hce.setHitBoxX(-1); //TODO
+						hce.setHitBoxX(-1);
 						hce.setHitBoxZ(-1);
 						hce.setMaxPassengers(c.getMaxPassengers());
 						hce.setBoatOffsetDeg(c.getBoatOrientationOffsetDeg());
@@ -283,6 +283,16 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						else if(yaw >= 360){
 							yaw = yaw - 360;
 						}
+
+						CarPreset cp = c.getPreset();
+						//Display blocks
+						if(cp != null && cp.hasDisplayBlock()){
+							m.setDisplay(new ItemStack(cp.getDisplayBlock().getItemType(), 1, cp.getDisplayBlock().getData()), cp.getDisplayBlockOffset());
+						}
+						else if(c.getBaseDisplayBlock() != null){
+							m.setDisplay(new ItemStack(c.getBaseDisplayBlock().getItemType(), 1, c.getBaseDisplayBlock().getData()), 0);
+						}
+
 						CartOrientationUtil.setYaw(m, yaw);
 
 						if(main.plugin.aiSpawnMethod.equals(SpawnMethod.WORLD_PROBE)){
@@ -338,15 +348,6 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						for(Player player:nearbyPlayersList){
 							p.sendPacket(player);
 						}*/
-						
-						CarPreset cp = c.getPreset();
-						//Display blocks
-						if(cp != null && cp.hasDisplayBlock()){
-							m.setDisplay(new ItemStack(cp.getDisplayBlock().getItemType(), 1, cp.getDisplayBlock().getData()), cp.getDisplayBlockOffset());
-						}
-						else if(c.getBaseDisplayBlock() != null){
-							m.setDisplay(new ItemStack(c.getBaseDisplayBlock().getItemType(), 1, c.getBaseDisplayBlock().getData()), 0);
-						}
 						
 						m.addPassenger(v);
 						Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {

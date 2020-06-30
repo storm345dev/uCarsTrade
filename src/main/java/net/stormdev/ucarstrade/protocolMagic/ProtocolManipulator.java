@@ -29,7 +29,7 @@ import java.util.List;
 
 public class ProtocolManipulator implements Listener {
     private ProtocolManager protocolManager;
-    public static double OFFSET_FIX = -1.25;
+    public static double OFFSET_FIX = -1.05;
 
     public ProtocolManipulator(ProtocolManager manager){
         this.protocolManager = manager;

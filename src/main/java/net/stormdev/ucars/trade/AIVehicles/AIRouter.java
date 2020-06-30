@@ -534,7 +534,7 @@ public class AIRouter {
 		else{
 			//Calculate vector to get there...
 			double tx = toDrive.getX()+0.5;
-			double ty = toDrive.getY()+0.1;
+			double ty = toDrive.getY()+0.025;
 			if(rName.contains("step") && !rName.contains("double") 
 					&& ((int)road.getData())<8 //Makes sure it's a bottom slab
 					){
@@ -673,7 +673,7 @@ public class AIRouter {
 		
 		//Calculate vector to get there...
 		double tx = toDrive.getX() + 0.5;
-		double ty = toDrive.getY() + 0.1;
+		double ty = toDrive.getY() + 0.025;
 		if(rName.contains("step") && !rName.contains("double") 
 				&& ((int)rb.getData())<8 //Makes sure it's a bottom slab
 				){

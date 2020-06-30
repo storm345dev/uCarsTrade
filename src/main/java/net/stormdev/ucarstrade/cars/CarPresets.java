@@ -113,7 +113,7 @@ public class CarPresets {
 			}
 			CarPreset cp = new CarPreset(name, speed, health, accelMod, turnAmountPerTick, modifiers, displayBlock, offset);
 			cp.setMaxPassengers(carSect.getInt("passengers.max"));
-			cp.setBoatOrientationOffsetDeg(ArrayUtils.toPrimitive(carSect.getDoubleList("passengers.boatRotationOffsetDeg").toArray(new Double[]{})));
+			cp.setBoatOrientationOffsetDeg(ArrayUtils.toPrimitive(carSect.getDoubleList("passengers.boatOrientationOffsetDeg").toArray(new Double[]{})));
 			cp.setHitboxX((float) carSect.getDouble("hitbox.x"));
 			cp.setHitboxZ((float) carSect.getDouble("hitbox.z"));
 			addCarPreset(cp);

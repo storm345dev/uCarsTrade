@@ -731,7 +731,7 @@ public class UTradeListener implements Listener {
 		return;
 	}*/
 	
-	@EventHandler (priority = EventPriority.HIGH)
+	/*@EventHandler (priority = EventPriority.HIGH)
 	void enterCar(PlayerInteractEntityEvent event){
 		//Enter things such as pigucarts
 		if(event.isCancelled()){
@@ -760,7 +760,7 @@ public class UTradeListener implements Listener {
 		top.setPassenger(event.getPlayer());
 		event.setCancelled(true);
 		return;
-	}
+	}*/
 	/*
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)

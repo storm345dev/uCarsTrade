@@ -270,8 +270,9 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							return;
 						}
 						CarMinecraftEntity hce = new CarMinecraftEntity(spawnLoc.clone());
-						hce.setHitBoxX(c.getHitboxX());
-						hce.setHitBoxZ(c.getHitboxZ());
+						//Don't apply larger hitboxes for NPC cars as will stop them navigating correctly (hit into walls)
+						hce.setHitBoxX(-1); //TODO
+						hce.setHitBoxZ(-1);
 						hce.setMaxPassengers(c.getMaxPassengers());
 						hce.setBoatOffsetDeg(c.getBoatOrientationOffsetDeg());
 						final Car m = hce.spawn();//(Minecart) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.MINECART);

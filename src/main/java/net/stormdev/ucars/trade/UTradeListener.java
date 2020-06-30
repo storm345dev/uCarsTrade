@@ -8,6 +8,7 @@ import com.useful.ucars.Lang;
 import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 import net.milkbowl.vault.economy.EconomyResponse;
+import net.stormdev.ucars.entity.CarMinecraftEntity;
 import net.stormdev.ucars.stats.StatType;
 import net.stormdev.ucars.trade.AIVehicles.AIRouter;
 import net.stormdev.ucars.trade.AIVehicles.CarStealEvent;
@@ -116,6 +117,11 @@ public class UTradeListener implements Listener {
 				plugin.carSaver.carNowInUse(vehicle, c); //Update changes to car, aka it's not an npc
 				if(setPassenger){
 					vehicle.setPassenger(player);
+				}
+				if(vehicle instanceof CarMinecraftEntity){
+					//Now no longer AI controlled, set the proper hitboxes
+					((CarMinecraftEntity)vehicle).setHitBoxX(c.getHitboxX());
+					((CarMinecraftEntity)vehicle).setHitBoxZ(c.getHitboxZ());
 				}
 				player.sendMessage(main.colors.getInfo()+net.stormdev.ucars.trade.Lang.get("general.steal.taken"));
 				return;

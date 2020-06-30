@@ -11,7 +11,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.vehicle.*;
+import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -257,6 +259,10 @@ public class CarMinecraftEntity extends EntityArmorStand {
 
     private List<String> playersKnowAboutFakeEntities = new ArrayList<String>();
 
+    public List<String> getPlayersKnowAboutFakeEntities(){
+        return new ArrayList<>(playersKnowAboutFakeEntities);
+    }
+
     public boolean doesKnowAboutFakeEntities(Player p){
         return playersKnowAboutFakeEntities.contains(p.getName());
     }
@@ -274,8 +280,17 @@ public class CarMinecraftEntity extends EntityArmorStand {
     @Override
     public EnumInteractionResult a(EntityHuman entityhuman, Vec3D vec3d, EnumHand hand)
     {
+        if(entityhuman.getBukkitEntity() instanceof Player) {
+            EquipmentSlot handUsed = hand.equals(EnumHand.MAIN_HAND) ? EquipmentSlot.HAND : EquipmentSlot.OFF_HAND;
+            PlayerInteractEntityEvent piee = new PlayerInteractEntityEvent((Player) entityhuman.getBukkitEntity(),getBukkitEntity(),handUsed);
+            Bukkit.getPluginManager().callEvent(piee);
+            if(piee.isCancelled()){
+                return EnumInteractionResult.FAIL;
+            }
+        }
         if(ce.getPassengers().size() < ce.getMaxPassengers()) {
             ce.addPassenger(entityhuman.getBukkitEntity());
+            return EnumInteractionResult.SUCCESS;
         }
         return EnumInteractionResult.FAIL;
     }

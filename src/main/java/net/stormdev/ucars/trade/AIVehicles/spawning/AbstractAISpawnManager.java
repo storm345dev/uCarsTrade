@@ -348,7 +348,13 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							m.setDisplay(new ItemStack(c.getBaseDisplayBlock().getItemType(), 1, c.getBaseDisplayBlock().getData()), 0);
 						}
 						
-						m.setPassenger(v);
+						m.addPassenger(v);
+						Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
+							@Override
+							public void run() {
+								main.plugin.protocolManipulator.ensurePassengersAttached(m);
+							}
+						},40L);
 						//EntityAttachUtil.enforceAttached(v, m, Bukkit.getViewDistance()*16+1);
 						
 						ucars.listener.updateCarHealthHandler(m, new CarHealthData(c.getHealth(), plugin));

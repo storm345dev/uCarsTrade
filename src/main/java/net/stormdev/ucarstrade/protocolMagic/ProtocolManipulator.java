@@ -24,6 +24,7 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ProtocolManipulator implements Listener {
@@ -128,7 +129,7 @@ public class ProtocolManipulator implements Listener {
         }
     }
 
-    protected void sendFakeBoatAndArrowSpawns(CarMinecraftEntity hce, Car hc, Player player){
+    protected void sendFakeBoatAndArrowSpawns(CarMinecraftEntity hce, Car hc, Player player,boolean sendFirstBoat){
         if(!hce.hasFakeBoat()){
             return;
         }
@@ -141,7 +142,6 @@ public class ProtocolManipulator implements Listener {
             sendFakeEntitySpawn(player, hce.getFakeBoat(), hc.getLocation(), yawRad, pitchRad, 1); //Type 1 is BOAT, 78 is armor stand, 60 is arrow
             sendFakeEntitySpawn(player, hce.getFakeArrow(), hc.getLocation(), yawRad, pitchRad, 60); //60 is arrow, 71 is item frame
             sendFakeEntitySpawn(player, hce.getFakeArrow2(), hc.getLocation(), yawRad, pitchRad, 60);sendFakeEntityPassengers(player,hce,hce.getFakeBoat().getId());
-            sendFakeEntityPassengers(player,hce,hce.getFakeBoat().getId());
             if(hce.hasExtraFakeBoats()){
                 double yawRad2 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(1))*(Math.PI/180);
                 double yawRad3 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(2))*(Math.PI/180);
@@ -149,6 +149,12 @@ public class ProtocolManipulator implements Listener {
                 sendFakeEntitySpawn(player, hce.getFakeBoat3(), hc.getLocation(), yawRad3, pitchRad, 1);
                 sendFakeEntitySpawn(player, hce.getFakeArrow3(), hc.getLocation(), yawRad2, pitchRad, 60);
                 sendFakeEntitySpawn(player, hce.getFakeArrow4(), hc.getLocation(), yawRad3, pitchRad, 60);
+            }
+            hce.setKnowAboutFakeEntities(player,true);
+            if(sendFirstBoat) {
+                sendFakeEntityPassengers(player, hce, hce.getFakeBoat().getId());
+            }
+            if(hce.hasExtraFakeBoats()){
                 sendFakeEntityPassengers(player,hce.getFakeBoat(),hce.getFakeBoat2().getId(),hce.getFakeBoat3().getId());
                 sendFakeEntityPassengers(player,hce.getFakeBoat2(),hce.getFakeArrow().getId(),hce.getFakeArrow3().getId());
                 sendFakeEntityPassengers(player,hce.getFakeBoat3(),hce.getFakeArrow2().getId(),hce.getFakeArrow4().getId());
@@ -156,7 +162,6 @@ public class ProtocolManipulator implements Listener {
             else {
                 sendFakeEntityPassengers(player,hce.getFakeBoat(),hce.getFakeArrow().getId(),hce.getFakeArrow2().getId());
             }
-            hce.setKnowAboutFakeEntities(player,true);
         }
     }
 
@@ -195,6 +200,80 @@ public class ProtocolManipulator implements Listener {
         }
     }
 
+    public void ensurePassengersAttached(Car car){
+        if(!(car instanceof CraftCar)){
+            return;
+        }
+        CraftCar craftCar = (CraftCar) car;
+        CarMinecraftEntity nmsEntity = craftCar.getHandle();
+        for(String pName:nmsEntity.getPlayersKnowAboutFakeEntities()){
+            Player pl = Bukkit.getServer().getPlayerExact(pName);
+            if(pl != null){
+                sendPassengersToPlayer(pl,car,nmsEntity);
+            }
+        }
+    }
+
+    public void sendPassengersToPlayer(Player player, Car hce, CarMinecraftEntity nmsEntity){
+        if(hce == null){
+            return;
+        }
+        if(!nmsEntity.hasFakeBoat()){
+            return;
+        }
+        List<org.bukkit.entity.Entity> correctPassengers = hce.getPassengers();
+        int[] passengers = new int[correctPassengers.size()];
+        for (int i=0;i<correctPassengers.size();i++){
+            passengers[i] = ((org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity)correctPassengers.get(i)).getHandle().getId();
+        }
+
+        final int[] passenger1 = passengers.length > 0 ? new int[]{passengers[0]} : new int[0];
+        final int[] passenger2;
+        if(!nmsEntity.hasExtraFakeBoats()) {
+            passenger2 = passengers.length > 1 ? org.apache.commons.lang3.ArrayUtils.subarray(passengers, 1, passengers.length) : new int[0];
+        }
+        else {
+            passenger2 = passengers.length > 1 ? new int[]{passengers[1]} : new int[0];
+        }
+        final int[] passenger3;
+        final int[] passenger4;
+        if(nmsEntity.hasExtraFakeBoats()) {
+            if(hce.getMaxPassengers() == 3) {
+                passenger3 = passengers.length > 1 ? org.apache.commons.lang3.ArrayUtils.subarray(passengers, 1, passengers.length) : new int[0];
+            }
+            else {
+                passenger3 = passengers.length > 2 ? new int[]{passengers[2]} : new int[0];
+            }
+        }else{
+            passenger3 = new int[0];
+        }
+        if(nmsEntity.hasExtraFakeBoats() && hce.getMaxPassengers() > 3) {
+            passenger4 = passengers.length > 3 ? ArrayUtils.subarray(passengers, 3, passengers.length) : new int[0];
+        }else{
+            passenger4 = new int[0];
+        }
+
+        final CarMinecraftEntity nm = nmsEntity;
+        //Bukkit.broadcastMessage("Sending mounted passengers to "+event.getPlayer().getName());
+        //sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow(),passenger1);
+        if(nmsEntity.hasExtraFakeBoats()){
+            sendFakeEntityPassengers(player,nm.getFakeArrow3(),passenger3);
+            sendFakeEntityPassengers(player,nm.getFakeArrow4(),passenger4);
+        }
+        sendFakeEntityPassengers(player,nm.getFakeArrow2(),passenger2);
+        Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
+            @Override
+            public void run() {
+                if(!nm.isAlive()){
+                    return;
+                }
+                //Bukkit.broadcastMessage("Sending mounted passengers to "+event.getPlayer().getName());
+                sendFakeEntityPassengers(player,nm.getFakeArrow(),passenger1);
+                //sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow2(),passenger2);
+            }
+        },2L);
+    }
+
     public void registerManipulations(){
         try { //These 2 translate our custom entity for rendering display blocks to look in the right place!
             ((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(main.plugin, PacketType.Play.Server.ENTITY_TELEPORT){
@@ -224,7 +303,7 @@ public class ProtocolManipulator implements Listener {
                     /*Block b = hce.getLocation().getBlock();*/
                     y+= hce.getDisplayOffset()+OFFSET_FIX;
                     event.getPacket().getDoubles().write(1, y);
-                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
+                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer(),true);
                 }
 
             });
@@ -283,61 +362,27 @@ public class ProtocolManipulator implements Listener {
                     if(!nmsEntity.hasFakeBoat()){
                         return;
                     }
+
                     int[] passengers = event.getPacket().getIntegerArrays().read(0);
                     //Needs passenger list correcting
                     int[] fixedPassengers = new int[]{nmsEntity.getFakeBoat().getId()};
                     event.getPacket().getIntegerArrays().write(0,fixedPassengers);
-                    List<org.bukkit.entity.Entity> correctPassengers = hce.getPassengers();
-                    passengers = new int[correctPassengers.size()];
-                    for (int i=0;i<correctPassengers.size();i++){
-                        passengers[i] = ((org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity)correctPassengers.get(i)).getHandle().getId();
-                    }
-
-                    final int[] passenger1 = passengers.length > 0 ? new int[]{passengers[0]} : new int[0];
-                    final int[] passenger2;
-                    if(!nmsEntity.hasExtraFakeBoats()) {
-                        passenger2 = passengers.length > 1 ? org.apache.commons.lang3.ArrayUtils.subarray(passengers, 1, passengers.length) : new int[0];
+                    if(!Arrays.equals(passengers,fixedPassengers)){ //Not us sending the packet
+                        if(!nmsEntity.doesKnowAboutFakeEntities(event.getPlayer())){
+                            sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer(),false);
+                        }
+                        sendPassengersToPlayer(event.getPlayer(), hce, nmsEntity);
                     }
                     else {
-                        passenger2 = passengers.length > 1 ? new int[]{passengers[1]} : new int[0];
-                    }
-                    final int[] passenger3;
-                    final int[] passenger4;
-                    if(nmsEntity.hasExtraFakeBoats()) {
-                        if(hce.getMaxPassengers() == 3) {
-                            passenger3 = passengers.length > 1 ? org.apache.commons.lang3.ArrayUtils.subarray(passengers, 1, passengers.length) : new int[0];
-                        }
-                        else {
-                            passenger3 = passengers.length > 2 ? new int[]{passengers[2]} : new int[0];
-                        }
-                    }else{
-                        passenger3 = new int[0];
-                    }
-                    if(nmsEntity.hasExtraFakeBoats() && hce.getMaxPassengers() > 3) {
-                        passenger4 = passengers.length > 3 ? ArrayUtils.subarray(passengers, 3, passengers.length) : new int[0];
-                    }else{
-                        passenger4 = new int[0];
-                    }
-
-                    final CarMinecraftEntity nm = nmsEntity;
-                    //Bukkit.broadcastMessage("Sending mounted passengers to "+event.getPlayer().getName());
-                    //sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow(),passenger1);
-                    if(nmsEntity.hasExtraFakeBoats()){
-                        sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow3(),passenger3);
-                        sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow4(),passenger4);
-                    }
-                    sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow2(),passenger2);
-                   Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
-                        @Override
-                        public void run() {
-                            if(!nm.isAlive()){
-                                return;
+                        final Car c = hce;
+                        final CarMinecraftEntity cme = nmsEntity;
+                        Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
+                            @Override
+                            public void run() {
+                                sendPassengersToPlayer(event.getPlayer(), c, cme);
                             }
-                            //Bukkit.broadcastMessage("Sending mounted passengers to "+event.getPlayer().getName());
-                            sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow(),passenger1);
-                            //sendFakeEntityPassengers(event.getPlayer(),nm.getFakeArrow2(),passenger2);
-                        }
-                    },1L);
+                        },2L);
+                    }
                 }
             });
             /*((ProtocolManager) this.protocolManager).addPacketListener(new PacketAdapter(main.plugin, PacketType.Play.Server.ENTITY){
@@ -414,7 +459,7 @@ public class ProtocolManipulator implements Listener {
                     event.getPacket().getDoubles().write(1, /*(int) (*/y/* * 32)*/);
                     /*double yawRad = nmsEntity.getBukkitYaw()*(Math.PI/180);
                     event.getPacket().getIntegers().write(5,getCompressedAngle(yawRad)); //Pitch*/
-                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
+                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer(),true);
                     /*System.out.println("Packet integers:");
                     for(Integer i : event.getPacket().getIntegers().getValues()){
                         System.out.println(i);
@@ -460,7 +505,7 @@ public class ProtocolManipulator implements Listener {
                     event.getPacket().getDoubles().write(1, /*(int) (*/y/* * 32)*/);
                     /*double yawRad = nmsEntity.getBukkitYaw()*(Math.PI/180);
                     event.getPacket().getIntegers().write(5,getCompressedAngle(yawRad)); //Pitch*/
-                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer());
+                    sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer(),true);
                     /*System.out.println("Packet integers:");
                     for(Integer i : event.getPacket().getIntegers().getValues()){
                         System.out.println(i);

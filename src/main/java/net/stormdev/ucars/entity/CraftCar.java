@@ -39,7 +39,6 @@ public class CraftCar extends CraftArmorStand implements Car {
 	
 	@Override
 	public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
-		Bukkit.broadcastMessage("Calling to teleport code");
 		location.checkFinite();
 		if (/*!this.entity.isVehicle() &&*/ !this.entity.dead) {
 			this.entity.stopRiding();

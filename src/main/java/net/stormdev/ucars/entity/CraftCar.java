@@ -1,5 +1,6 @@
 package net.stormdev.ucars.entity;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
@@ -37,21 +38,39 @@ public class CraftCar extends CraftArmorStand implements Car {
 	}
 	
 	@Override
-	 public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
-		    if ((this.entity.passengers.size() > 0) || (this.entity.dead)) {
+	public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
+		Bukkit.broadcastMessage("Calling to teleport code");
+		location.checkFinite();
+		if (/*!this.entity.isVehicle() &&*/ !this.entity.dead) {
+			this.entity.stopRiding();
+			if (!location.getWorld().equals(this.getWorld())) {
+				if(this.entity.isVehicle()){
+					return false;
+				}
+				this.entity.teleportTo(location, cause.equals(PlayerTeleportEvent.TeleportCause.NETHER_PORTAL));
+				return true;
+			} else {
+				this.entity.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+				this.entity.setHeadRotation(location.getYaw());
+				this.entity.world.entityJoinedWorld(this.entity, false);
+				return true;
+			}
+		} else {
+			return false;
+		}
+		/*if (*//*(this.entity.passengers.size() > 0) ||*//* (this.entity.dead)) {
 		      return false;
 		    }
 
-		    /*this.entity.mount(null);*/
+		    *//*this.entity.mount(null);*//*
 
 		    if (!location.getWorld().equals(getWorld())) {
 		      this.entity.teleportTo(location, cause.equals(PlayerTeleportEvent.TeleportCause.NETHER_PORTAL));
 		      return true;
 		    }
 
-		    getHandle().updatePosition(location);
-		    return true;
-		  }
+		    getHandle().updatePosition(location);*/
+	}
 
 	@Override
 	public void setDisplay(ItemStack stack, double offset) {

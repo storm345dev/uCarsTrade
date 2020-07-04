@@ -271,7 +271,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						}
 						CarMinecraftEntity hce = new CarMinecraftEntity(spawnLoc.clone());
 						//Don't apply larger hitboxes for NPC cars as will stop them navigating correctly (hit into walls)
-						hce.setHitBoxX(-1);
+						hce.setHitBoxX(0.6f);
 						hce.setHitBoxZ(-1);
 						hce.setMaxPassengers(c.getMaxPassengers());
 						hce.setBoatOffsetDeg(c.getBoatOrientationOffsetDeg());

@@ -504,6 +504,22 @@ public class AIRouter {
 		
 		Block next = nextTrack.nextBlock;
 		Block road = next/*.getRelative(BlockFace.UP)*/;
+		int p = 0;
+		while(!isTrackBlock(road.getType()) && p < 4){
+			p++;
+			next = next.getRelative(BlockFace.DOWN);
+			road = road.getRelative(BlockFace.DOWN);
+		}
+		if(!isTrackBlock(road.getType())){
+			road = road.getRelative(BlockFace.UP,4);
+			next = next.getRelative(BlockFace.UP,4);
+		}
+		p = 0;
+		while(!isTrackBlock(road.getType()) && p < 4){
+			p++;
+			next = next.getRelative(BlockFace.DOWN);
+			road = road.getRelative(BlockFace.DOWN);
+		}
 		while(isTrackBlock(road.getType())){
 			road = road.getRelative(BlockFace.UP);
 		}
@@ -549,8 +565,8 @@ public class AIRouter {
 			double y = ty - cy;
 			double z = tz - cz /*+ 0.5*/;
 
-			if(y < 0.2){
-				y = -0.1;
+			if(y < 0.2 && y > 0){
+				y = -0.3;
 			}
 			
 			/*if(y > 0.2){ //Going up
@@ -665,7 +681,11 @@ public class AIRouter {
 		Location toDriveLoc = road.add(0, 2, 0);
 		Block toDrive = toDriveLoc.getBlock();
 		if(!toDrive.isEmpty()){
-			despawnNPCCar(car, c);
+			toDriveLoc = toDriveLoc.add(0,1,0);
+			toDrive = toDriveLoc.getBlock();
+			if(!toDrive.isEmpty()) {
+				despawnNPCCar(car, c);
+			}
 			return;
 		}
 		
@@ -693,8 +713,8 @@ public class AIRouter {
 		double y = ty - cy;
 		double z = tz - cz /*+ 0.5*/;
 
-		if(y < 0.2){
-			y = -0.1;
+		if(y < 0.2 && y > 0){
+			y = -0.3;
 		}
 
 		/*if(y > 0.2){ //Going up
@@ -876,8 +896,8 @@ public class AIRouter {
 		double y = ty - cy;
 		double z = tz - (cz);
 
-		if(y < 0.2){
-			y = -0.1;
+		if(y < 0.2 && y > 0){
+			y = -0.3;
 		}
 		vel = new Vector(x,y,z); //Go to block
 		

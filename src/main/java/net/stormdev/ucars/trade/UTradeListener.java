@@ -867,6 +867,10 @@ public class UTradeListener implements Listener {
 		}
 		if(UEntityMeta.hasMetadata(v, "trade.npc") || v.hasMetadata("mta.copentity") || UEntityMeta.hasMetadata(v, "mta.copentity")){
 			//Allow it to be hurt
+			if(event.getCause().equals(EntityDamageEvent.DamageCause.FALL) ||
+				event.getCause().equals(EntityDamageEvent.DamageCause.SUFFOCATION)){
+				event.setCancelled(true);
+			}
 		}
 		/*else {
 			//Part of a car stack

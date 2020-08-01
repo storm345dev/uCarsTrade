@@ -149,7 +149,7 @@ public class CarMinecraftEntity extends EntityArmorStand {
 
         Car hc= getHoverCartEntity();
 
-        if(hc.getMaxPassengers() == 2){
+        if(hc.getMaxPassengers() > 1){
             //Allocate entity IDs to fake entities to show only to the client
             this.fakeBoat = new EntityBoat(w.getHandle());
             this.fakeArrow = new EntityArrow(w.getHandle()) {
@@ -164,6 +164,22 @@ public class CarMinecraftEntity extends EntityArmorStand {
                     return null;
                 }
             };
+            if(hc.getMaxPassengers() > 2){
+                this.fakeBoat2 = new EntityBoat(w.getHandle());
+                this.fakeBoat3 = new EntityBoat(w.getHandle());
+                this.fakeArrow3 = new EntityArrow(w.getHandle()) {
+                    @Override
+                    protected ItemStack j() {
+                        return null;
+                    }
+                };
+                this.fakeArrow4 = new EntityArrow(w.getHandle()) {
+                    @Override
+                    protected ItemStack j() {
+                        return null;
+                    }
+                };
+            }
         }
 
         return hc;

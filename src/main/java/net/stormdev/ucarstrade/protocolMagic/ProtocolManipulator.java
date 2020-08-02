@@ -116,6 +116,12 @@ public class ProtocolManipulator implements Listener {
             sendFakeEntityRemove(pl,hce.getFakeBoat3().getId());
             sendFakeEntityRemove(pl,hce.getFakeArrow3().getId());
             sendFakeEntityRemove(pl,hce.getFakeArrow4().getId());
+            if(hce.hasExtraExtraFakeBoats()){
+                sendFakeEntityRemove(pl,hce.getFakeBoat4().getId());
+                sendFakeEntityRemove(pl,hce.getFakeBoat5().getId());
+                sendFakeEntityRemove(pl,hce.getFakeArrow4().getId());
+                sendFakeEntityRemove(pl,hce.getFakeArrow5().getId());
+            }
         }
     }
 
@@ -141,7 +147,8 @@ public class ProtocolManipulator implements Listener {
         if(!hce.doesKnowAboutFakeEntities(player)) {
             sendFakeEntitySpawn(player, hce.getFakeBoat(), hc.getLocation(), yawRad, pitchRad, 1); //Type 1 is BOAT, 78 is armor stand, 60 is arrow
             sendFakeEntitySpawn(player, hce.getFakeArrow(), hc.getLocation(), yawRad, pitchRad, 60); //60 is arrow, 71 is item frame
-            sendFakeEntitySpawn(player, hce.getFakeArrow2(), hc.getLocation(), yawRad, pitchRad, 60);sendFakeEntityPassengers(player,hce,hce.getFakeBoat().getId());
+            sendFakeEntitySpawn(player, hce.getFakeArrow2(), hc.getLocation(), yawRad, pitchRad, 60);
+            sendFakeEntityPassengers(player,hce,hce.getFakeBoat().getId());
             if(hce.hasExtraFakeBoats()){
                 double yawRad2 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(1))*(Math.PI/180);
                 double yawRad3 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(2))*(Math.PI/180);
@@ -149,6 +156,14 @@ public class ProtocolManipulator implements Listener {
                 sendFakeEntitySpawn(player, hce.getFakeBoat3(), hc.getLocation(), yawRad3, pitchRad, 1);
                 sendFakeEntitySpawn(player, hce.getFakeArrow3(), hc.getLocation(), yawRad2, pitchRad, 60);
                 sendFakeEntitySpawn(player, hce.getFakeArrow4(), hc.getLocation(), yawRad3, pitchRad, 60);
+                if(hce.hasExtraExtraFakeBoats()){
+                    double yawRad4 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(3))*(Math.PI/180);
+                    double yawRad5 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(4))*(Math.PI/180);
+                    sendFakeEntitySpawn(player, hce.getFakeBoat4(), hc.getLocation(), yawRad4, pitchRad, 1);
+                    sendFakeEntitySpawn(player, hce.getFakeBoat5(), hc.getLocation(), yawRad5, pitchRad, 1);
+                    sendFakeEntitySpawn(player, hce.getFakeArrow4(), hc.getLocation(), yawRad4, pitchRad, 1);
+                    sendFakeEntitySpawn(player, hce.getFakeArrow5(), hc.getLocation(), yawRad5, pitchRad, 1);
+                }
             }
             hce.setKnowAboutFakeEntities(player,true);
             if(sendFirstBoat) {
@@ -156,8 +171,16 @@ public class ProtocolManipulator implements Listener {
             }
             if(hce.hasExtraFakeBoats()){
                 sendFakeEntityPassengers(player,hce.getFakeBoat(),hce.getFakeBoat2().getId(),hce.getFakeBoat3().getId());
-                sendFakeEntityPassengers(player,hce.getFakeBoat2(),hce.getFakeArrow().getId(),hce.getFakeArrow3().getId());
-                sendFakeEntityPassengers(player,hce.getFakeBoat3(),hce.getFakeArrow2().getId(),hce.getFakeArrow4().getId());
+                if(!hce.hasExtraExtraFakeBoats()) {
+                    sendFakeEntityPassengers(player, hce.getFakeBoat2(), hce.getFakeArrow().getId(), hce.getFakeArrow3().getId());
+                    sendFakeEntityPassengers(player, hce.getFakeBoat3(), hce.getFakeArrow2().getId(), hce.getFakeArrow4().getId());
+                }
+                else {
+                    sendFakeEntityPassengers(player, hce.getFakeBoat2(), hce.getFakeArrow().getId(), hce.getFakeBoat4().getId());
+                    sendFakeEntityPassengers(player, hce.getFakeBoat3(), hce.getFakeArrow2().getId(), hce.getFakeBoat5().getId());
+                    sendFakeEntityPassengers(player, hce.getFakeBoat4(), hce.getFakeArrow5().getId(), hce.getFakeArrow3().getId());
+                    sendFakeEntityPassengers(player, hce.getFakeBoat5(), hce.getFakeArrow6().getId(), hce.getFakeArrow4().getId());
+                }
             }
             else {
                 sendFakeEntityPassengers(player,hce.getFakeBoat(),hce.getFakeArrow().getId(),hce.getFakeArrow2().getId());
@@ -371,7 +394,15 @@ public class ProtocolManipulator implements Listener {
                         if(!nmsEntity.doesKnowAboutFakeEntities(event.getPlayer())){
                             sendFakeBoatAndArrowSpawns(nmsEntity,hce,event.getPlayer(),false);
                         }
-                        sendPassengersToPlayer(event.getPlayer(), hce, nmsEntity);
+                        final Car c = hce;
+                        final CarMinecraftEntity cme = nmsEntity;
+                        Bukkit.getScheduler().runTaskLater(main.plugin, new Runnable() {
+                            @Override
+                            public void run() {
+                                sendPassengersToPlayer(event.getPlayer(), c, cme);
+                            }
+                        },2L);
+//                        sendPassengersToPlayer(event.getPlayer(), hce, nmsEntity);
                     }
                     else {
                         final Car c = hce;

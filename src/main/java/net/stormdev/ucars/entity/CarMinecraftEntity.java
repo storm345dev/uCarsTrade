@@ -69,10 +69,14 @@ public class CarMinecraftEntity extends EntityArmorStand {
     private EntityBoat fakeBoat;
     private EntityBoat fakeBoat2;
     private EntityBoat fakeBoat3;
+    private EntityBoat fakeBoat4;
+    private EntityBoat fakeBoat5;
     private EntityArrow fakeArrow;
     private EntityArrow fakeArrow2;
     private EntityArrow fakeArrow3;
     private EntityArrow fakeArrow4;
+    private EntityArrow fakeArrow5;
+    private EntityArrow fakeArrow6;
 
     public static Car getCart(org.bukkit.entity.Entity e){
         if(((CraftEntity)e).getHandle() instanceof CarMinecraftEntity){
@@ -179,10 +183,30 @@ public class CarMinecraftEntity extends EntityArmorStand {
                         return null;
                     }
                 };
+                if(hasExtraExtraFakeBoats()){
+                    this.fakeBoat4 = new EntityBoat(w.getHandle());
+                    this.fakeBoat5 = new EntityBoat(w.getHandle());
+                    this.fakeArrow5 = new EntityArrow(w.getHandle()) {
+                        @Override
+                        protected ItemStack j() {
+                            return null;
+                        }
+                    };
+                    this.fakeArrow6 = new EntityArrow(w.getHandle()) {
+                        @Override
+                        protected ItemStack j() {
+                            return null;
+                        }
+                    };
+                }
             }
         }
 
         return hc;
+    }
+
+    public boolean hasExtraExtraFakeBoats(){
+        return getBoatOffsetDeg().length > 3;
     }
 
     public float getBukkitYaw() {
@@ -196,8 +220,14 @@ public class CarMinecraftEntity extends EntityArmorStand {
         else if(i == 1){
             return getSecondFakeBoatRotationOffsetDeg();
         }
-        else {
+        else if(i == 2){
             return getThirdFakeBoatRotationOffsetDeg();
+        }
+        else if(i == 3){
+            return getFourthFakeBoatRotationOffsetDeg();
+        }
+        else {
+            return getFifthFakeBoatRotationOffsetDeg();
         }
     }
 
@@ -222,6 +252,20 @@ public class CarMinecraftEntity extends EntityArmorStand {
         return getSecondFakeBoatRotationOffsetDeg();
     }
 
+    public double getFourthFakeBoatRotationOffsetDeg(){
+        if(this.boatsOffsetDeg.length > 3){
+            return this.boatsOffsetDeg[3];
+        }
+        return getThirdFakeBoatRotationOffsetDeg();
+    }
+
+    public double getFifthFakeBoatRotationOffsetDeg(){
+        if(this.boatsOffsetDeg.length > 4){
+            return this.boatsOffsetDeg[4];
+        }
+        return getFourthFakeBoatRotationOffsetDeg();
+    }
+
     public double getNumFakeBoats(){
         if(!hasFakeBoat()){
             return 0;
@@ -229,7 +273,7 @@ public class CarMinecraftEntity extends EntityArmorStand {
         if(!hasExtraFakeBoats()){
             return 1;
         }
-        return 3;
+        return hasExtraExtraFakeBoats()?5:3;
     }
 
     public boolean hasExtraFakeBoats(){
@@ -247,8 +291,14 @@ public class CarMinecraftEntity extends EntityArmorStand {
         else if(i == 1){
             return getFakeBoat2();
         }
-        else {
+        else if(i == 2){
             return getFakeBoat3();
+        }
+        else if(i == 3){
+            return getFakeBoat4();
+        }
+        else {
+            return getFakeBoat5();
         }
     }
 
@@ -260,6 +310,12 @@ public class CarMinecraftEntity extends EntityArmorStand {
     }
     public EntityBoat getFakeBoat3() {
         return fakeBoat3;
+    }
+    public EntityBoat getFakeBoat4() {
+        return fakeBoat4;
+    }
+    public EntityBoat getFakeBoat5() {
+        return fakeBoat5;
     }
 
     public EntityArrow getFakeArrow() {
@@ -273,6 +329,12 @@ public class CarMinecraftEntity extends EntityArmorStand {
     }
     public EntityArrow getFakeArrow4() {
         return fakeArrow4;
+    }
+    public EntityArrow getFakeArrow5() {
+        return fakeArrow5;
+    }
+    public EntityArrow getFakeArrow6() {
+        return fakeArrow6;
     }
 
     private List<String> playersKnowAboutFakeEntities = new ArrayList<String>();

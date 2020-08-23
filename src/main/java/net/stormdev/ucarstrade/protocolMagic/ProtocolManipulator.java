@@ -161,8 +161,8 @@ public class ProtocolManipulator implements Listener {
                     double yawRad5 = (hce.getBukkitYaw()+hce.getFakeBoatRotationOffsetDeg(4))*(Math.PI/180);
                     sendFakeEntitySpawn(player, hce.getFakeBoat4(), hc.getLocation(), yawRad4, pitchRad, 1);
                     sendFakeEntitySpawn(player, hce.getFakeBoat5(), hc.getLocation(), yawRad5, pitchRad, 1);
-                    sendFakeEntitySpawn(player, hce.getFakeArrow4(), hc.getLocation(), yawRad4, pitchRad, 60);
-                    sendFakeEntitySpawn(player, hce.getFakeArrow5(), hc.getLocation(), yawRad5, pitchRad, 60);
+                    sendFakeEntitySpawn(player, hce.getFakeArrow5(), hc.getLocation(), yawRad4, pitchRad, 60);
+                    sendFakeEntitySpawn(player, hce.getFakeArrow6(), hc.getLocation(), yawRad5, pitchRad, 60);
                 }
             }
             hce.setKnowAboutFakeEntities(player,true);

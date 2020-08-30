@@ -3,6 +3,7 @@ package net.stormdev.ucars.trade.AIVehicles.spawning;
 import com.useful.ucars.util.UEntityMeta;
 import com.useful.ucarsCommon.StatValue;
 import net.stormdev.ucars.trade.main;
+import net.stormdev.ucars.utils.NPCOrientationUtil;
 import net.stormdev.ucars.utils.NoMobAI;
 import net.stormdev.ucarstrade.cars.DrivenCar;
 import org.bukkit.Location;
@@ -30,5 +31,10 @@ public class VillagerAICarPassengerProvider implements AICarPassengerProvider{
             e.printStackTrace();
         }
         return v;
+    }
+
+    @Override
+    public void setPassengerYaw(LivingEntity passenger, float yaw) {
+        NPCOrientationUtil.setYaw(passenger, yaw);
     }
 }

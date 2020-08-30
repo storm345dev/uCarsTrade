@@ -6,4 +6,5 @@ import org.bukkit.entity.LivingEntity;
 
 public interface AICarPassengerProvider {
     public LivingEntity spawnNewPassenger(Location spawnLoc, DrivenCar carTheyWillBeDriving, String entityName);
+    public void setPassengerYaw(LivingEntity passenger, float yaw);
 }

@@ -629,7 +629,7 @@ public class AIRouter {
 			Entity pass = car.getPassenger();
 			if(pass != null && pass instanceof LivingEntity && UEntityMeta.hasMetadata(pass,"trade.npcvillager")){
 				NoMobAI.clearAI(pass);
-				NPCOrientationUtil.setYaw((LivingEntity) pass, yaw-90);
+				main.plugin.aiSpawns.getCarPassengerProvider().setPassengerYaw((LivingEntity) pass, yaw-90);
 				NoMobAI.clearAI(pass);
 			/*	Bukkit.broadcastMessage((yaw-180)+"");
 				NPCOrientationUtil.setYaw((Villager) pass, yaw-180);*/

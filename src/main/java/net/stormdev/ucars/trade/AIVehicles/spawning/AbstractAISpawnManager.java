@@ -330,8 +330,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 						UEntityMeta.setMetadata(v, "trade.npcvillager", new StatValue(true, main.plugin));
 						Location sl = spawnLoc.clone();
 						sl.setYaw(sl.getYaw()-90);
-						NPCOrientationUtil.setYaw(v, sl.getYaw());
-						NPCOrientationUtil.setYaw(v, sl.getYaw());
+						getCarPassengerProvider().setPassengerYaw(v, sl.getYaw()-90);
 					
 						//Make it a car
 						c.setId(m.getUniqueId());

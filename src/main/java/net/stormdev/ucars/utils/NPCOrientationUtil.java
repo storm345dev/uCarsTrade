@@ -1,9 +1,9 @@
 package net.stormdev.ucars.utils;
 
 import net.minecraft.server.v1_12_R1.Entity;
-import net.minecraft.server.v1_12_R1.EntityVillager;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftVillager;
-import org.bukkit.entity.Villager;
+import net.minecraft.server.v1_12_R1.EntityLiving;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
+import org.bukkit.entity.LivingEntity;
 
 import java.lang.reflect.Method;
 
@@ -22,8 +22,8 @@ public class NPCOrientationUtil {
 		}
 	}*/
 	
-	public static void setYaw(Villager v, float yaw){
-		EntityVillager ve = ((CraftVillager)v).getHandle();
+	public static void setYaw(LivingEntity v, float yaw){
+		EntityLiving ve = ((CraftLivingEntity)v).getHandle();
 		
 		Class<?> c = Entity.class;
 		try {

@@ -45,6 +45,7 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 	protected static int cap = 30;
 	protected static volatile int liveCap = 5;
 	protected static volatile int spawnedCount = 0;
+	private AICarPassengerProvider carPassengerProvider = new VillagerAICarPassengerProvider();
 	
 	public AbstractAISpawnManager(main plugin, boolean enabled){
 		this.plugin = plugin;
@@ -135,7 +136,17 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 			initSpawnTask();
 		}
 	}
-	
+
+	@Override
+	public AICarPassengerProvider getCarPassengerProvider(){
+		return this.carPassengerProvider;
+	}
+
+	@Override
+	public void setCarPassengerProvider(AICarPassengerProvider provider){
+		this.carPassengerProvider = provider;
+	}
+
 	@Override
 	public void setEnabled(boolean enabled){
 		this.enabled = enabled;
@@ -315,23 +326,10 @@ public abstract class AbstractAISpawnManager implements AISpawnManager {
 							}
 						}
 						//It's valid
+						final LivingEntity v = getCarPassengerProvider().spawnNewPassenger(spawnLoc.clone(),c,name);
+						UEntityMeta.setMetadata(v, "trade.npcvillager", new StatValue(true, main.plugin));
 						Location sl = spawnLoc.clone();
 						sl.setYaw(sl.getYaw()-90);
-						final Villager v = (Villager) spawnLoc.getWorld().spawnEntity(sl, EntityType.VILLAGER);
-						UEntityMeta.setMetadata(v, "trade.npcvillager", new StatValue(true, main.plugin));
-						v.setAdult();
-						v.setBreed(false);
-						v.setAgeLock(true);
-						v.setCanPickupItems(false);
-						v.setCustomName(name);
-						v.setCustomNameVisible(true);
-						v.setMaxHealth(5);
-						v.setHealth(5);
-						try {
-							NoMobAI.clearAI(v);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
 						NPCOrientationUtil.setYaw(v, sl.getYaw());
 						NPCOrientationUtil.setYaw(v, sl.getYaw());
 					

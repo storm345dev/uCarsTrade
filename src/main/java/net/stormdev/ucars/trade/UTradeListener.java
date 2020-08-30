@@ -161,7 +161,7 @@ public class UTradeListener implements Listener {
 		event.setCancelled(true);
 		
 		for(Entity e:near){
-			if(e.getType().equals(EntityType.VILLAGER) 
+			if(UEntityMeta.hasMetadata(e, "trade.npcvillager")
 					|| e.getType().equals(EntityType.DROPPED_ITEM)){
 				e.remove();
 			}
@@ -237,7 +237,7 @@ public class UTradeListener implements Listener {
 				return; //Not a car or not an npc car
 			}
 			Entity driver = ucars.listener.getDrivingPassengerOfCar(m);
-			if(driver == null || !(driver instanceof Villager)){
+			if(driver == null || !(UEntityMeta.hasMetadata(driver, "trade.npcvillager"))){
 				if(c.isNPC() && m.isValid() && !m.isDead()){
 					//No longer an NPC car
 					UEntityMeta.removeMetadata(m, "trade.npc");
@@ -894,7 +894,7 @@ public class UTradeListener implements Listener {
 			//Part of a car stack
 			event.setDroppedExp(0);
 			event.getDrops().clear();
-			if(e instanceof Villager && UEntityMeta.hasMetadata(v, "trade.npc")){ //Handle as if car is stolen
+			if(UEntityMeta.hasMetadata(e,"trade.npcvillager") && UEntityMeta.hasMetadata(v, "trade.npc")){ //Handle as if car is stolen
 				final DrivenCar c = plugin.carSaver.getCarInUse(v);
 				if(c == null || !(v instanceof Vehicle)){
 					return;
@@ -990,7 +990,7 @@ public class UTradeListener implements Listener {
 		if(car == null || !uCarsAPI.getAPI().checkIfCar(car)){
 			return;
 		}
-		if((car.getPassenger() != null && car.getPassenger().getType().equals(EntityType.PLAYER)) || (UEntityMeta.hasMetadata(car, "trade.npc") && event.getEntity().getType().equals(EntityType.VILLAGER)) || (car.getPassenger() != null && (UEntityMeta.hasMetadata(car.getPassenger(), "mta.copentity") || car.getPassenger().hasMetadata("mta.copentity")))){
+		if((car.getPassenger() != null && car.getPassenger().getType().equals(EntityType.PLAYER)) || (UEntityMeta.hasMetadata(car, "trade.npc") && UEntityMeta.hasMetadata(event.getEntity(), "trade.npcvillager")) || (car.getPassenger() != null && (UEntityMeta.hasMetadata(car.getPassenger(), "mta.copentity") || car.getPassenger().hasMetadata("mta.copentity")))){
 			return; //They punched the villager; don't take car health
 		}
 		CarHealthData health = ucars.listener.getCarHealthHandler(car);

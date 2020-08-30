@@ -17,10 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vehicle;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
@@ -630,9 +627,9 @@ public class AIRouter {
 			}
 			CartOrientationUtil.setYaw(car, yaw);
 			Entity pass = car.getPassenger();
-			if(pass != null && pass instanceof Villager){
+			if(pass != null && pass instanceof LivingEntity && UEntityMeta.hasMetadata(pass,"trade.npcvillager")){
 				NoMobAI.clearAI(pass);
-				NPCOrientationUtil.setYaw((Villager) pass, yaw-90);
+				NPCOrientationUtil.setYaw((LivingEntity) pass, yaw-90);
 				NoMobAI.clearAI(pass);
 			/*	Bukkit.broadcastMessage((yaw-180)+"");
 				NPCOrientationUtil.setYaw((Villager) pass, yaw-180);*/

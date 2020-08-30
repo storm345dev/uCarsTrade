@@ -18,4 +18,6 @@ public interface AISpawnManager {
 	public void shutdown();
 	public void spawnNPCCar(Location carSpawnLoc, BlockFace carriagewayDir);
 	public void followRoadAndSpawnCarFromTrackerBlock(Location trackerBlockLoc, BlockFace followDir);
+	public AICarPassengerProvider getCarPassengerProvider();
+	public void setCarPassengerProvider(AICarPassengerProvider provider);
 }
